@@ -222,6 +222,26 @@
     }
     .check-row.erledigt .check-label { color: var(--gruen); }
 
+    /* ── Warnung: zuständige Person abwesend ── */
+    .check-row.warnung { background: #fefce8; }
+
+    .check-toggle.warnung {
+      background: #ca8a04;   /* Bernstein-Gelb */
+      font-size: 1.7rem;
+    }
+    .check-toggle.warnung:hover { filter: brightness(1.12); }
+
+    .check-warnung {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #92400e;
+      margin-top: 3px;
+      line-height: 1.2;
+    }
+
     /* ── Footer ── */
     footer {
       text-align: center; padding: 10px;
@@ -477,16 +497,47 @@ function renderCheckliste() {
     const a        = AUFGABEN[id];
     const erledigt = STATE.erledigt.includes(id);
 
+    /* Zuständige Person herausfinden (nur checkliste-Typ) */
+    const zust   = GRUPPE.zustaendigkeiten.find(z => z.aufgabeId === id && z.typ === 'checkliste');
+    const person = zust ? MITARBEITENDE.find(p => p.id === zust.personId) : null;
+    const abw    = !erledigt && person && STATE.abwesend.includes(person.id);
+
+    /* Zustand bestimmen: erledigt → grün | abwesend → gelb | normal → rot */
+    let rowKlasse, toggleKlasse, symbol, tipp;
+    if (erledigt) {
+      rowKlasse    = 'erledigt';
+      toggleKlasse = '';
+      symbol       = '✓';
+      tipp         = 'Rückgängig machen';
+    } else if (abw) {
+      rowKlasse    = 'warnung';
+      toggleKlasse = 'warnung';
+      symbol       = '⚠';
+      tipp         = `${person.name} ist heute abwesend! Trotzdem erledigt?`;
+    } else {
+      rowKlasse    = '';
+      toggleKlasse = '';
+      symbol       = '✗';
+      tipp         = 'Als erledigt markieren';
+    }
+
+    const warnHinweis = abw
+      ? `<div class="check-warnung">⚠ ${person.name} abwesend</div>`
+      : '';
+
     return `
-      <div class="check-row ${erledigt ? 'erledigt' : ''}" id="cr-${id}">
-        <button class="check-toggle"
+      <div class="check-row ${rowKlasse}" id="cr-${id}">
+        <button class="check-toggle ${toggleKlasse}"
                 onclick="toggleErledigt('${id}')"
-                title="${erledigt ? 'Rückgängig' : 'Als erledigt markieren'}"
-                aria-label="${a.label} ${erledigt ? 'erledigt' : 'noch offen'}">
-          ${erledigt ? '✓' : '✗'}
+                title="${tipp}"
+                aria-label="${a.label}: ${tipp}">
+          ${symbol}
         </button>
         <img src="${a.foto}" alt="${a.label}" class="check-symbol">
-        <div class="check-label">${a.label}</div>
+        <div class="check-label">
+          ${a.label}
+          ${warnHinweis}
+        </div>
       </div>`;
   }).join('');
 }
