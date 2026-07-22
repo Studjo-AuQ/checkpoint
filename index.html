@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gruppen·Checkpoint – Studjo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --rot:    #b61f29;
-      --gruen:  #15803d;
-      --bg:     #f0f2f5;
-      --weiss:  #ffffff;
-      --text:   #0f2f37;
-      --grau:   #64748b;
-      --hell:   #e2e8f0;
+      --rot:   #b61f29;
+      --gruen: #16a34a;
+      --bg:    #f0f2f5;
+      --text:  #0f2f37;
+      --grau:  #64748b;
+      --hell:  #e2e8f0;
+      --ROW:   80px;   /* ← Zeilenhöhe überall */
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,415 +28,260 @@
     }
 
     /* ── Header ── */
-    header {
-      background: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,.08);
-      flex-shrink: 0;
-    }
-    header img { width: 100%; height: auto; display: block; max-height: 80px; object-fit: cover; object-position: left; }
+    header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    header img { width: 100%; max-height: 80px; object-fit: cover; object-position: left; display: block; }
 
     /* ── Wochen-Banner ── */
-    .wochen-banner {
-      background: var(--rot);
-      color: white;
-      padding: 8px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+    .banner {
+      background: var(--rot); color: white;
+      padding: 8px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
     }
-    .wochen-banner h1 { font-size: 1rem; font-weight: 800; }
-    .wochen-kw { font-size: 0.85rem; opacity: .85; }
+    .banner h1 { font-size: 1rem; font-weight: 800; }
+    .banner-kw { font-size: 0.8rem; opacity: .85; }
     .btn-reset {
-      background: rgba(255,255,255,.2);
-      border: 2px solid white;
-      color: white;
-      border-radius: 999px;
-      padding: 5px 16px;
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .2s;
+      background: rgba(255,255,255,.2); border: 2px solid white; color: white;
+      border-radius: 999px; padding: 5px 14px;
+      font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
     }
     .btn-reset:hover { background: rgba(255,255,255,.35); }
 
     /* ── 3-Spalten-Layout ── */
-    .checkpoint-grid {
+    .grid {
       display: grid;
-      grid-template-columns: 2fr 1.3fr 1.7fr;
-      gap: 12px;
-      padding: 12px;
-      flex: 1;
-      min-height: 0;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      padding: 10px;
+      align-items: start;
     }
 
     .spalte-titel {
-      font-size: 0.65rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--rot);
-      margin-bottom: 8px;
-      padding-bottom: 5px;
-      border-bottom: 2px solid var(--rot);
+      font-size: 0.62rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--rot); border-bottom: 2px solid var(--rot);
+      padding-bottom: 5px; margin-bottom: 6px;
     }
 
-    /* ════════════════════════════════════
+    /* ════════════════════════════════════════════════
        LINKE SPALTE – Namen & Zuständigkeiten
-       ════════════════════════════════════ */
-    .namen-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-    }
-
-    .person-karte {
+       ════════════════════════════════════════════════ */
+    .namen-tabelle {
       background: white;
       border-radius: 12px;
-      padding: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+
+    .namen-row {
+      display: flex;
+      align-items: center;
+      height: var(--ROW);
+      border-bottom: 1px solid var(--hell);
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.07);
-      border: 2px solid transparent;
-      transition: all .2s;
-      user-select: none;
+      transition: background .15s;
       -webkit-tap-highlight-color: transparent;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
     }
-    .person-karte:hover { border-color: var(--rot); }
-    .person-karte.abwesend {
-      opacity: .45;
-      background: #f8fafc;
-      border-color: var(--hell);
+    .namen-row:last-child { border-bottom: none; }
+    .namen-row:hover { background: #fef2f2; }
+    .namen-row.abwesend { background: #f8fafc; opacity: .5; }
+
+    /* Portrait */
+    .person-portrait {
+      width: var(--ROW); height: var(--ROW);
+      object-fit: cover; flex-shrink: 0;
+      border-right: 1px solid var(--hell);
     }
 
-    .person-kopf {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .person-foto {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
-      border: 2px solid var(--hell);
-      background: var(--bg);
-    }
-
-    .person-initials {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 900;
-      color: white;
-      flex-shrink: 0;
-    }
-
+    /* Name */
     .person-name {
-      font-size: 0.9rem;
-      font-weight: 800;
-      line-height: 1.2;
-      flex: 1;
+      width: 148px; min-width: 148px;
+      height: var(--ROW);
+      display: flex; align-items: center;
+      padding: 0 12px;
+      font-size: 0.95rem; font-weight: 800;
+      border-right: 1px solid var(--hell);
+      overflow: hidden; white-space: nowrap;
     }
-    .person-karte.abwesend .person-name {
+    .namen-row.abwesend .person-name {
       text-decoration: line-through;
       color: var(--grau);
     }
 
-    .abwesend-label {
-      display: none;
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: var(--grau);
-      text-transform: uppercase;
-    }
-    .person-karte.abwesend .abwesend-label { display: block; }
-
-    /* Zuständigkeits-Badges */
-    .zust-badges {
+    /* Aufgaben-Icons */
+    .aufgaben-icons {
       display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .zust-badge {
-      display: inline-flex;
       align-items: center;
-      gap: 3px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: white;
-      white-space: nowrap;
+      height: var(--ROW);
     }
-    .zust-badge.checkliste { border: 1.5px solid transparent; }
-    .zust-badge.allgemein  { border: 1.5px dashed rgba(255,255,255,.6); }
+    .aufg-icon {
+      width: var(--ROW); height: var(--ROW);
+      object-fit: contain;
+      flex-shrink: 0;
+      border-right: 1px solid var(--hell);
+      background: #fafafa;
+      padding: 4px;
+    }
+    .aufg-icon:last-child { border-right: none; }
 
-    /* ════════════════════════════════════
+    /* ════════════════════════════════════════════════
        MITTLERE SPALTE – Info
-       ════════════════════════════════════ */
-    .mitte-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+       ════════════════════════════════════════════════ */
+    .mitte { display: flex; flex-direction: column; gap: 10px; }
 
     .info-box {
-      background: white;
-      border-radius: 12px;
+      background: white; border-radius: 12px;
       padding: 12px 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,.07);
     }
-    .info-box-titel {
-      font-size: 0.65rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      color: var(--grau);
-      margin-bottom: 8px;
+    .info-titel {
+      font-size: 0.6rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--grau); margin-bottom: 8px;
     }
 
     /* Gruppenleitung */
-    .gl-person {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .gl-person { display: flex; align-items: center; gap: 10px; }
     .gl-foto {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--rot);
-      background: var(--bg);
-    }
-    .gl-initials {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      font-weight: 900;
-      color: white;
-      border: 3px solid var(--rot);
+      width: 52px; height: 52px; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--rot);
+      flex-shrink: 0; background: var(--bg);
     }
     .gl-name { font-size: 1rem; font-weight: 800; }
-    .gl-role { font-size: 0.72rem; color: var(--rot); font-weight: 700; }
-    .gl-hinweis { font-size: 0.72rem; color: var(--grau); margin-top: 2px; }
+    .gl-rolle { font-size: 0.72rem; color: var(--rot); font-weight: 700; }
+    .gl-hinweis { font-size: 0.7rem; color: var(--grau); margin-top: 2px; }
 
     /* Termine */
-    .termin-liste { display: flex; flex-direction: column; gap: 5px; }
-    .termin-zeile {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 0.78rem;
-      line-height: 1.35;
-    }
-    .termin-tag {
-      font-weight: 800;
-      color: var(--rot);
-      min-width: 22px;
-      flex-shrink: 0;
-      font-size: 0.7rem;
-    }
-    .termin-text { color: var(--text); }
+    .termin { display: flex; gap: 8px; font-size: 0.78rem; margin-bottom: 5px; line-height: 1.35; }
+    .termin-tag { font-weight: 800; color: var(--rot); min-width: 22px; flex-shrink: 0; }
     .termin-leer { color: var(--grau); font-style: italic; }
 
     /* Wichtig */
     .wichtig-box {
-      background: #fff7ed;
-      border: 2px solid #f97316;
-      border-radius: 12px;
-      padding: 12px 14px;
+      background: #fff7ed; border: 2px solid #f97316;
+      border-radius: 12px; padding: 12px 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
     }
-    .wichtig-box .info-box-titel { color: #c2410c; }
+    .wichtig-box .info-titel { color: #c2410c; }
     .wichtig-text { font-size: 0.82rem; font-weight: 700; color: #7c2d12; line-height: 1.5; }
 
-    /* ════════════════════════════════════
-       RECHTE SPALTE – Checkliste
-       ════════════════════════════════════ */
-    .checkliste-liste {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .check-item {
+    /* ════════════════════════════════════════════════
+       RECHTE SPALTE – Tages-Checkliste
+       ════════════════════════════════════════════════ */
+    .check-tabelle {
       background: white;
       border-radius: 12px;
-      padding: 8px 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+
+    .check-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-      border: 2px solid transparent;
-      transition: all .2s;
+      height: var(--ROW);
+      border-bottom: 1px solid var(--hell);
     }
-    .check-item.erledigt {
-      background: #f0fdf4;
-      border-color: #86efac;
-    }
-    .check-item.abwesend-warnung {
-      background: #fefce8;
-      border-color: #fde047;
-    }
+    .check-row:last-child { border-bottom: none; }
+    .check-row.erledigt { background: #f0fdf4; }
 
-    .check-foto {
-      width: 44px;
-      height: 44px;
-      object-fit: contain;
-      border-radius: 8px;
+    /* Roter X / Grüner Haken – klickbarer Toggle */
+    .check-toggle {
+      width: var(--ROW); height: var(--ROW);
       flex-shrink: 0;
-      background: var(--bg);
-    }
-    .check-emoji {
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-      background: var(--bg);
-    }
-
-    .check-info { flex: 1; min-width: 0; }
-    .check-aufgabe {
-      font-size: 0.78rem;
-      font-weight: 800;
-      line-height: 1.2;
-      color: var(--text);
-    }
-    .check-item.erledigt .check-aufgabe { color: var(--gruen); }
-
-    .check-person {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--grau);
-      margin-top: 2px;
-    }
-    .check-person.keiner { color: #f97316; }
-    .check-person.abwesend-warn { color: #ca8a04; }
-
-    .check-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 2.5px solid var(--hell);
-      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; font-weight: 900;
+      background: var(--rot); color: white;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-      transition: all .15s;
+      border: none; font-family: inherit;
+      border-right: 2px solid rgba(0,0,0,.1);
+      transition: background .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .check-btn:hover { border-color: var(--gruen); background: #f0fdf4; }
-    .check-item.erledigt .check-btn {
+    .check-row.erledigt .check-toggle {
       background: var(--gruen);
-      border-color: var(--gruen);
-      color: white;
-      font-size: 1.4rem;
     }
+    .check-toggle:hover { filter: brightness(1.1); }
+    .check-toggle:active { filter: brightness(.9); }
+
+    /* Aufgaben-Symbol */
+    .check-symbol {
+      width: var(--ROW); height: var(--ROW);
+      object-fit: contain;
+      flex-shrink: 0;
+      border-right: 1px solid var(--hell);
+      background: #fafafa;
+      padding: 4px;
+    }
+
+    /* Beschriftung */
+    .check-label {
+      padding: 0 14px;
+      font-size: 0.9rem; font-weight: 800;
+      color: var(--text);
+      flex: 1;
+      line-height: 1.25;
+    }
+    .check-row.erledigt .check-label { color: var(--gruen); }
 
     /* ── Footer ── */
     footer {
-      text-align: center;
-      padding: 10px;
-      background: var(--rot);
-      color: white;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-
-    /* ── Responsiv ── */
-    @media (max-width: 900px) {
-      .checkpoint-grid {
-        grid-template-columns: 1fr;
-      }
+      text-align: center; padding: 10px;
+      background: var(--rot); color: white; font-size: 0.78rem; font-weight: 600;
+      margin-top: auto;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <img src="header.jpg" alt="Studjo – Arbeit und Qualifizierung"
-       onerror="this.style.display='none'">
+  <img src="header.jpg" alt="Studjo" onerror="this.style.display='none'">
 </header>
 
-<div class="wochen-banner">
+<div class="banner">
   <div>
-    <div class="wochen-kw" id="wochen-kw">KW –</div>
-    <h1 id="gruppen-name">Gruppen·Checkpoint</h1>
+    <div class="banner-kw" id="banner-kw"></div>
+    <h1 id="banner-name">Gruppen·Checkpoint</h1>
   </div>
   <button class="btn-reset" onclick="tagesReset(true)">🔄 Neuer Tag</button>
 </div>
 
-<main class="checkpoint-grid">
+<div class="grid">
 
   <!-- ══ LINKE SPALTE ══ -->
-  <section>
+  <div>
     <div class="spalte-titel">👤 Namen &amp; Zuständigkeiten</div>
-    <div class="namen-grid" id="namen-grid">
-      <!-- wird per JS befüllt -->
-    </div>
-  </section>
+    <div class="namen-tabelle" id="namen-tabelle"><!-- JS --></div>
+  </div>
 
   <!-- ══ MITTLERE SPALTE ══ -->
-  <section>
+  <div>
     <div class="spalte-titel">📋 Infos &amp; Termine</div>
-    <div class="mitte-inner">
+    <div class="mitte">
 
-      <!-- Gruppenleitung / Vertretung -->
-      <div class="info-box" id="gl-box">
-        <div class="info-box-titel">⭐ Leitung heute</div>
-        <div class="gl-person" id="gl-person">
-          <!-- JS -->
-        </div>
-      </div>
-
-      <!-- Termine -->
       <div class="info-box">
-        <div class="info-box-titel">📅 Termine diese Woche</div>
-        <div class="termin-liste" id="termin-liste">
-          <!-- JS -->
-        </div>
+        <div class="info-titel">⭐ Leitung heute</div>
+        <div class="gl-person" id="gl-person"><!-- JS --></div>
       </div>
 
-      <!-- Diese Woche wichtig -->
-      <div class="wichtig-box" id="wichtig-box">
-        <div class="info-box-titel">⚠️ Diese Woche wichtig</div>
-        <div class="wichtig-text" id="wichtig-text">–</div>
+      <div class="info-box">
+        <div class="info-titel">📅 Termine diese Woche</div>
+        <div id="termin-liste"><!-- JS --></div>
+      </div>
+
+      <div class="wichtig-box">
+        <div class="info-titel">⚠️ Diese Woche wichtig</div>
+        <div class="wichtig-text" id="wichtig-text"></div>
       </div>
 
     </div>
-  </section>
+  </div>
 
   <!-- ══ RECHTE SPALTE ══ -->
-  <section>
+  <div>
     <div class="spalte-titel">✅ Tages-Checkliste</div>
-    <div class="checkliste-liste" id="checkliste-liste">
-      <!-- JS -->
-    </div>
-  </section>
+    <div class="check-tabelle" id="check-tabelle"><!-- JS --></div>
+  </div>
 
-</main>
+</div>
 
 <footer>
   &copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen·Checkpoint
@@ -444,299 +289,225 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   ██  KONFIGURATION  ██  – wöchentlich von der Gruppenleitung anpassen
+   KONFIGURATION – wöchentlich anpassen
    ═══════════════════════════════════════════════════════════════ */
 
 const GRUPPE = {
-  name: "Gruppe Freisenberg",   // ← Gruppenname
-  woche: "KW 31 | 28.07.–01.08.2025",  // ← Aktuelle Woche
+  name:  "Gruppe Freisenberg",
+  woche: "KW 31 | 28.07.–01.08.2025",
 
-  // ── Gruppenleitung / Vertretung ──────────────────────────────
-  // personId: ID der vertretenden Person (0 = keine Vertretung aktiv)
   gruppenvertretung: {
     personId: 3,
     hinweis: "Vertretung Mo–Mi (GL in Besprechung)"
   },
 
-  // ── Termine Mo–Fr ────────────────────────────────────────────
   termine: [
     { tag: "Mo", text: "Frührunde 8:15 Uhr" },
     { tag: "Di", text: "" },
     { tag: "Mi", text: "Unterweisung Arbeitssicherheit 10:30 Uhr" },
-    { tag: "Do", text: "Besuch Herr Meier (Kundenaudit)" },
+    { tag: "Do", text: "Besuch Kundenaudit" },
     { tag: "Fr", text: "Frühschluss 14:45 Uhr 🎉" }
   ],
 
-  // ── Diese Woche wichtig ──────────────────────────────────────
-  wichtig: "⚠️ Achtung: Roter Hubwagen ist defekt!\nBitte NICHT benutzen – Meldung an Gruppenleitung.",
+  wichtig: "⚠️ Roter Hubwagen defekt!\nBitte NICHT benutzen – Meldung an Gruppenleitung.",
 
-  // ── Zuständigkeiten diese Woche ─────────────────────────────
-  // typ "checkliste" = max. 1 Person  |  typ "allgemein" = bis zu 2 Personen
+  /* ── Zuständigkeiten diese Woche ──────────────────────────────
+     typ "checkliste" = max. 1 Person  |  typ "allgemein" = bis zu 2   */
   zustaendigkeiten: [
-    { personId: 1,  aufgabeId: "fegen",           typ: "checkliste" },
-    { personId: 2,  aufgabeId: "muell",            typ: "checkliste" },
-    { personId: 3,  aufgabeId: "tische",           typ: "checkliste" },
-    { personId: 4,  aufgabeId: "geschirr",         typ: "checkliste" },
-    { personId: 5,  aufgabeId: "fenster",          typ: "checkliste" },
-    { personId: 6,  aufgabeId: "strom",            typ: "checkliste" },
-    { personId: 7,  aufgabeId: "desinfizieren",    typ: "checkliste" },
-    { personId: 8,  aufgabeId: "versand",          typ: "checkliste" },
-    { personId: 9,  aufgabeId: "arb_sicherheit",   typ: "checkliste" },
-    { personId: 10, aufgabeId: "arb_vorbereitung", typ: "checkliste" },
-    { personId: 11, aufgabeId: "essensmarken",     typ: "checkliste" },
-    { personId: 12, aufgabeId: "kontrolle",        typ: "checkliste" },
-    { personId: 1,  aufgabeId: "botengaenge",      typ: "allgemein"  },
-    { personId: 13, aufgabeId: "botengaenge",      typ: "allgemein"  },
-    { personId: 5,  aufgabeId: "hubwagen",         typ: "allgemein"  },
-    { personId: 2,  aufgabeId: "qualitaet",        typ: "allgemein"  },
-    { personId: 14, aufgabeId: "telefon",          typ: "allgemein"  },
+    { personId: 1,  aufgabeId: "fegen",               typ: "checkliste" },
+    { personId: 2,  aufgabeId: "muell",               typ: "checkliste" },
+    { personId: 3,  aufgabeId: "tische",              typ: "checkliste" },
+    { personId: 4,  aufgabeId: "geschirr",            typ: "checkliste" },
+    { personId: 5,  aufgabeId: "fenster",             typ: "checkliste" },
+    { personId: 6,  aufgabeId: "strom",               typ: "checkliste" },
+    { personId: 7,  aufgabeId: "tuerklinken",         typ: "checkliste" },
+    { personId: 8,  aufgabeId: "versandvorbereitung", typ: "checkliste" },
+    { personId: 9,  aufgabeId: "sicherheit",          typ: "checkliste" },
+    { personId: 10, aufgabeId: "arbeitsvorbereitung", typ: "checkliste" },
+    { personId: 11, aufgabeId: "checkpoint",          typ: "checkliste" },
+    { personId: 1,  aufgabeId: "betriebsmittel",      typ: "allgemein"  },
+    { personId: 2,  aufgabeId: "botengaenge",         typ: "allgemein"  },
+    { personId: 12, aufgabeId: "botengaenge",         typ: "allgemein"  },
+    { personId: 3,  aufgabeId: "hubwagen",            typ: "allgemein"  },
+    { personId: 5,  aufgabeId: "qualitaet",           typ: "allgemein"  },
+    { personId: 13, aufgabeId: "diensttelefon",       typ: "allgemein"  },
+    { personId: 14, aufgabeId: "essensmarken",        typ: "allgemein"  },
+    { personId: 7,  aufgabeId: "materialbeschaffung", typ: "allgemein"  },
+    { personId: 15, aufgabeId: "mentor",              typ: "allgemein"  },
   ]
 };
 
-/* ── 16 Mitarbeitende ─────────────────────────────────────────
-   name: Anzeigename (abgekürzter Nachname)
-   foto: Dateiname des Fotos (jpg, im selben Ordner)
-   farbe: Hintergrundfarbe des Initialen-Kreises (falls kein Foto)  */
+/* ── 16 Mitarbeitende ─────────────────────────────────────── */
 const MITARBEITENDE = [
-  { id: 1,  name: "Müller",    foto: "ma-01.jpg", farbe: "#1e40af" },
-  { id: 2,  name: "Schmidt",   foto: "ma-02.jpg", farbe: "#15803d" },
-  { id: 3,  name: "Hoffmann",  foto: "ma-03.jpg", farbe: "#b61f29" },
-  { id: 4,  name: "Fischer",   foto: "ma-04.jpg", farbe: "#7e22ce" },
-  { id: 5,  name: "Weber",     foto: "ma-05.jpg", farbe: "#0e7490" },
-  { id: 6,  name: "Meyer",     foto: "ma-06.jpg", farbe: "#c25e00" },
-  { id: 7,  name: "Wagner",    foto: "ma-07.jpg", farbe: "#475569" },
-  { id: 8,  name: "Becker",    foto: "ma-08.jpg", farbe: "#9f1239" },
-  { id: 9,  name: "Schulz",    foto: "ma-09.jpg", farbe: "#4338ca" },
-  { id: 10, name: "Zimmerm.",  foto: "ma-10.jpg", farbe: "#0f766e" },
-  { id: 11, name: "Braun",     foto: "ma-11.jpg", farbe: "#1e3a8a" },
-  { id: 12, name: "Krüger",    foto: "ma-12.jpg", farbe: "#92400e" },
-  { id: 13, name: "Hartmann",  foto: "ma-13.jpg", farbe: "#166534" },
-  { id: 14, name: "Klein",     foto: "ma-14.jpg", farbe: "#6d28d9" },
-  { id: 15, name: "Wolf",      foto: "ma-15.jpg", farbe: "#0c4a6e" },
-  { id: 16, name: "Neumann",   foto: "ma-16.jpg", farbe: "#7f1d1d" },
+  { id: 1,  name: "Anna B."      },
+  { id: 2,  name: "Thomas K."    },
+  { id: 3,  name: "Maria S."     },
+  { id: 4,  name: "Klaus H."     },
+  { id: 5,  name: "Sandra M."    },
+  { id: 6,  name: "Peter W."     },
+  { id: 7,  name: "Nicole F."    },
+  { id: 8,  name: "Stefan R."    },
+  { id: 9,  name: "Monika L."    },
+  { id: 10, name: "Michael G."   },
+  { id: 11, name: "Christine D." },
+  { id: 12, name: "Andreas N."   },
+  { id: 13, name: "Sabine T."    },
+  { id: 14, name: "Markus E."    },
+  { id: 15, name: "Ursula C."    },
+  { id: 16, name: "Frank J."     },
 ];
 
-/* ── Aufgaben-Definitionen (fest, nicht wöchentlich ändern) ──
-   foto: Metacom-Bilddatei (Marc lädt diese selbst hoch)
-   emoji: Fallback-Anzeige wenn Foto fehlt                      */
+/* ── Aufgaben-Definitionen ────────────────────────────────── */
 const AUFGABEN = {
-  fegen:           { label: "Fegen",                   foto: "check-fegen.jpg",    emoji: "🧹", farbe: "#1e40af" },
-  muell:           { label: "Müll entsorgen",          foto: "check-muell.jpg",    emoji: "🗑️", farbe: "#15803d" },
-  tische:          { label: "Tische wischen",          foto: "check-tische.jpg",   emoji: "🧽", farbe: "#c25e00" },
-  geschirr:        { label: "Geschirr wegräumen",      foto: "check-geschirr.jpg", emoji: "🍽️", farbe: "#7e22ce" },
-  fenster:         { label: "Fenster schließen",       foto: "check-fenster.jpg",  emoji: "🪟", farbe: "#0e7490" },
-  strom:           { label: "Strom ausschalten",       foto: "check-strom.jpg",    emoji: "🔌", farbe: "#b45309" },
-  desinfizieren:   { label: "Türklinke desinfizieren", foto: "check-desinf.jpg",   emoji: "🧴", farbe: "#9f1239" },
-  versand:         { label: "Versand vorbereiten",     foto: "check-versand.jpg",  emoji: "📦", farbe: "#4338ca" },
-  arb_sicherheit:  { label: "Arbeitssicherheit",       foto: "check-arbsich.jpg",  emoji: "🦺", farbe: "#b61f29" },
-  arb_vorbereitung:{ label: "Arbeitsvorbereitung",     foto: "check-arbvorb.jpg",  emoji: "🔧", farbe: "#475569" },
-  essensmarken:    { label: "Essensmarken zuordnen",   foto: "check-essen.jpg",    emoji: "🎫", farbe: "#0f766e" },
-  kontrolle:       { label: "Kontrolle Checkpoint",    foto: "check-kontroll.jpg", emoji: "✔️", farbe: "#1e3a8a" },
-  // Allgemeine Zuständigkeiten
-  botengaenge:     { label: "Botengänge",              foto: "zust-bote.jpg",      emoji: "🚶", farbe: "#15803d" },
-  hubwagen:        { label: "Hubwagen fahren",         foto: "zust-hubwagen.jpg",  emoji: "🏭", farbe: "#c25e00" },
-  qualitaet:       { label: "Qualität prüfen",         foto: "zust-qualit.jpg",    emoji: "🔍", farbe: "#4338ca" },
-  telefon:         { label: "Dienst-Telefon",          foto: "zust-telefon.jpg",   emoji: "📞", farbe: "#7e22ce" },
-  material:        { label: "Material bringen",        foto: "zust-material.jpg",  emoji: "📦", farbe: "#0e7490" },
-  betriebsmittel:  { label: "Betriebsmittel prüfen",   foto: "zust-betrm.jpg",     emoji: "⚙️", farbe: "#b45309" },
-  pate:            { label: "Pate Praktikanten",       foto: "zust-pate.jpg",      emoji: "🤝", farbe: "#9f1239" },
+  /* Checklisten-Aufgaben (11) */
+  fegen:               { label: "Boden fegen",                foto: "check-fegen.jpg"               },
+  muell:               { label: "Müll entsorgen",             foto: "check-muell.jpg"               },
+  tische:              { label: "Tische wischen",             foto: "check-tische.jpg"              },
+  geschirr:            { label: "Geschirr wegräumen",         foto: "check-geschirr.jpg"            },
+  fenster:             { label: "Fenster schließen",          foto: "check-fenster.jpg"             },
+  strom:               { label: "Strom ausschalten",          foto: "check-strom.jpg"               },
+  tuerklinken:         { label: "Türklinken desinfizieren",   foto: "check-tuerklinken.jpg"         },
+  versandvorbereitung: { label: "Versand vorbereiten",        foto: "check-versandvorbereitung.jpg" },
+  sicherheit:          { label: "Arbeitssicherheit prüfen",   foto: "check-sicherheit.jpg"          },
+  arbeitsvorbereitung: { label: "Arbeit vorbereiten",         foto: "check-arbeitsvorbereitung.jpg" },
+  checkpoint:          { label: "Kontrolle Checkpoint",       foto: "check-checkpoint.jpg"          },
+  /* Allgemeine Zuständigkeiten (8) */
+  betriebsmittel:      { label: "Betriebsmittel prüfen",      foto: "zust-betriebsmittel.jpg"       },
+  botengaenge:         { label: "Botengänge",                 foto: "zust-botengaenge.jpg"          },
+  hubwagen:            { label: "Hubwagen fahren",            foto: "zust-hubwagen.jpg"             },
+  qualitaet:           { label: "Qualität prüfen",            foto: "zust-qualitaet.jpg"            },
+  diensttelefon:       { label: "Dienst-Telefon",             foto: "zust-diensttelefon.jpg"        },
+  essensmarken:        { label: "Essensmarken zuordnen",      foto: "zust-essensmarken.jpg"         },
+  materialbeschaffung: { label: "Materialbeschaffung",        foto: "zust-materialbeschaffung.jpg"  },
+  mentor:              { label: "Mentor / Pate",              foto: "zust-mentor.jpg"               },
 };
 
-
 /* ═══════════════════════════════════════════════════════════════
-   ██  ZUSTAND  ██  – täglich automatisch zurückgesetzt (localStorage)
+   ZUSTAND – localStorage, täglich auto-reset
    ═══════════════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'checkpoint-v2';
 
-const STORAGE_KEY = 'studjo-checkpoint-v1';
-
-function heuteDatum() {
-  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-}
+function heute() { return new Date().toISOString().slice(0, 10); }
 
 function ladeState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch { return null; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { return null; }
 }
-
-function speichereState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function speichereState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
 }
 
 function tagesReset(manuell = false) {
-  if (manuell && !confirm('Tages-Reset: Alle Einträge (Abwesenheiten + erledigte Aufgaben) zurücksetzen?')) return;
-  const state = { datum: heuteDatum(), abwesend: [], erledigt: [] };
-  speichereState(state);
-  return state;
+  if (manuell && !confirm('Tages-Reset: Alle Einträge zurücksetzen?')) return;
+  STATE.datum    = heute();
+  STATE.abwesend = [];
+  STATE.erledigt = [];
+  speichereState();
+  renderAlles();
 }
 
-function getState() {
-  let state = ladeState();
-  // Auto-Reset bei neuem Tag
-  if (!state || state.datum !== heuteDatum()) {
-    state = tagesReset();
-  }
-  return state;
-}
-
-let STATE = getState();
-
+let raw = ladeState();
+let STATE = (raw && raw.datum === heute())
+  ? raw
+  : { datum: heute(), abwesend: [], erledigt: [] };
 
 /* ═══════════════════════════════════════════════════════════════
-   ██  HILFSFUNKTIONEN  ██
+   RENDER – Linke Spalte
    ═══════════════════════════════════════════════════════════════ */
-
-function personById(id) {
-  return MITARBEITENDE.find(p => p.id === id);
-}
-
-// Alle Zuständigkeiten einer Person
-function zustaendigkeitenFuerPerson(personId) {
-  return GRUPPE.zustaendigkeiten.filter(z => z.personId === personId);
-}
-
-// Zuständige Person für eine Checklisten-Aufgabe
-function personFuerAufgabe(aufgabeId) {
-  const z = GRUPPE.zustaendigkeiten.find(
-    z => z.aufgabeId === aufgabeId && z.typ === 'checkliste'
-  );
-  return z ? personById(z.personId) : null;
-}
-
-function istAbwesend(personId) {
-  return STATE.abwesend.includes(personId);
-}
-
-function istErledigt(aufgabeId) {
-  return STATE.erledigt.includes(aufgabeId);
-}
-
-// Foto mit Fallback auf Initialen-Kreis
-function fotoOderInitialen(person, groesse, cssClass) {
-  const initiale = person.name.charAt(0).toUpperCase();
-  return `
-    <img src="${person.foto}" alt="${person.name}"
-         class="${cssClass}" style="width:${groesse}px;height:${groesse}px;"
-         onerror="this.outerHTML='<div class=\\"${cssClass}\\" style=\\"width:${groesse}px;height:${groesse}px;background:${person.farbe};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${Math.round(groesse*0.4)}px;font-weight:900;color:white;flex-shrink:0;\\">${initiale}</div>'">
-  `;
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ██  RENDER-FUNKTIONEN  ██
-   ═══════════════════════════════════════════════════════════════ */
-
 function renderNamen() {
-  const grid = document.getElementById('namen-grid');
-  grid.innerHTML = MITARBEITENDE.map(person => {
-    const zust  = zustaendigkeitenFuerPerson(person.id);
-    const abw   = istAbwesend(person.id);
-    const badges = zust.map(z => {
+  const tabelle = document.getElementById('namen-tabelle');
+  tabelle.innerHTML = MITARBEITENDE.map(p => {
+    const abw   = STATE.abwesend.includes(p.id);
+    const zust  = GRUPPE.zustaendigkeiten.filter(z => z.personId === p.id);
+    const icons = zust.map(z => {
       const a = AUFGABEN[z.aufgabeId];
-      if (!a) return '';
-      return `<span class="zust-badge ${z.typ}"
-                    style="background:${a.farbe}"
-                    title="${a.label}">
-                ${a.emoji} ${a.label}
-              </span>`;
+      return a
+        ? `<img src="${a.foto}" alt="${a.label}" title="${a.label}" class="aufg-icon">`
+        : '';
     }).join('');
 
     return `
-      <div class="person-karte ${abw ? 'abwesend' : ''}"
-           id="person-${person.id}"
-           onclick="toggleAbwesend(${person.id})"
-           title="${abw ? 'Klicken: Anwesend markieren' : 'Klicken: Abwesend markieren'}">
-        <div class="person-kopf">
-          ${fotoOderInitialen(person, 40, 'person-foto')}
-          <div>
-            <div class="person-name">${person.name}</div>
-            <div class="abwesend-label">abwesend</div>
-          </div>
-        </div>
-        ${badges ? `<div class="zust-badges">${badges}</div>` : ''}
+      <div class="namen-row ${abw ? 'abwesend' : ''}"
+           onclick="toggleAbwesend(${p.id})"
+           title="${abw ? 'Klicken: wieder anwesend' : 'Klicken: abwesend markieren'}">
+        <img src="portrait.jpg" alt="${p.name}" class="person-portrait"
+             onerror="this.style.background='#e2e8f0'">
+        <div class="person-name">${p.name}</div>
+        <div class="aufgaben-icons">${icons}</div>
       </div>`;
   }).join('');
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   RENDER – Mittlere Spalte
+   ═══════════════════════════════════════════════════════════════ */
 function renderMitte() {
-  // Gruppenleitung
-  const glPerson = document.getElementById('gl-person');
   const vId = GRUPPE.gruppenvertretung.personId;
-  if (vId) {
-    const p = personById(vId);
-    if (p) {
-      glPerson.innerHTML = `
-        ${fotoOderInitialen(p, 52, 'gl-foto')}
-        <div>
-          <div class="gl-name">${p.name}</div>
-          <div class="gl-role">Gruppenvertretung</div>
-          <div class="gl-hinweis">${GRUPPE.gruppenvertretung.hinweis}</div>
-        </div>`;
-    }
-  } else {
-    glPerson.innerHTML = `<div style="color:var(--grau);font-size:.85rem;">Keine Vertretung eingetragen</div>`;
-  }
+  const vp  = vId ? MITARBEITENDE.find(p => p.id === vId) : null;
+  document.getElementById('gl-person').innerHTML = vp
+    ? `<img src="portrait.jpg" alt="${vp.name}" class="gl-foto"
+            onerror="this.style.background='#e2e8f0'">
+       <div>
+         <div class="gl-name">${vp.name}</div>
+         <div class="gl-rolle">Gruppenvertretung</div>
+         <div class="gl-hinweis">${GRUPPE.gruppenvertretung.hinweis}</div>
+       </div>`
+    : '<span style="color:var(--grau);font-size:.85rem;">Keine Vertretung</span>';
 
-  // Termine
-  const terminListe = document.getElementById('termin-liste');
-  terminListe.innerHTML = GRUPPE.termine.map(t => `
-    <div class="termin-zeile">
-      <span class="termin-tag">${t.tag}</span>
-      <span class="${t.text ? 'termin-text' : 'termin-leer'}">${t.text || '–'}</span>
-    </div>`).join('');
+  document.getElementById('termin-liste').innerHTML = GRUPPE.termine.map(t =>
+    `<div class="termin">
+       <span class="termin-tag">${t.tag}</span>
+       <span class="${t.text ? '' : 'termin-leer'}">${t.text || '–'}</span>
+     </div>`
+  ).join('');
 
-  // Diese Woche wichtig
   document.getElementById('wichtig-text').innerHTML =
     (GRUPPE.wichtig || '–').replace(/\n/g, '<br>');
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   RENDER – Rechte Spalte (Checkliste)
+   ═══════════════════════════════════════════════════════════════ */
 function renderCheckliste() {
-  const liste = document.getElementById('checkliste-liste');
-  // Nur Checklisten-Aufgaben anzeigen (in Konfigurationsreihenfolge)
-  const checkAufgaben = GRUPPE.zustaendigkeiten
-    .filter(z => z.typ === 'checkliste')
-    .map(z => z.aufgabeId)
-    .filter((id, idx, arr) => arr.indexOf(id) === idx); // deduplizieren
+  /* Nur Checklisten-Aufgaben, in der Reihenfolge aus AUFGABEN */
+  const checkIds = Object.keys(AUFGABEN).filter(id =>
+    GRUPPE.zustaendigkeiten.some(z => z.aufgabeId === id && z.typ === 'checkliste')
+  );
 
-  liste.innerHTML = checkAufgaben.map(aufgabeId => {
-    const aufgabe  = AUFGABEN[aufgabeId];
-    if (!aufgabe) return '';
-    const person   = personFuerAufgabe(aufgabeId);
-    const erledigt = istErledigt(aufgabeId);
-    const persAbw  = person && istAbwesend(person.id);
-
-    let personLabel, personClass;
-    if (!person) {
-      personLabel = '⚠️ Niemand zugewiesen';
-      personClass = 'keiner';
-    } else if (persAbw) {
-      personLabel = `⚠️ ${person.name} (abwesend!)`;
-      personClass = 'abwesend-warn';
-    } else {
-      personLabel = `👤 ${person.name}`;
-      personClass = '';
-    }
-
-    const itemClass = erledigt ? 'erledigt' : persAbw ? 'abwesend-warnung' : '';
+  document.getElementById('check-tabelle').innerHTML = checkIds.map(id => {
+    const a        = AUFGABEN[id];
+    const erledigt = STATE.erledigt.includes(id);
 
     return `
-      <div class="check-item ${itemClass}" id="check-${aufgabeId}">
-        <img src="${aufgabe.foto}" alt="${aufgabe.label}" class="check-foto"
-             onerror="this.outerHTML='<div class=\\"check-emoji\\">${aufgabe.emoji}</div>'">
-        <div class="check-info">
-          <div class="check-aufgabe">${aufgabe.label}</div>
-          <div class="check-person ${personClass}">${personLabel}</div>
-        </div>
-        <button class="check-btn"
-                onclick="toggleErledigt('${aufgabeId}')"
-                title="${erledigt ? 'Als offen markieren' : 'Als erledigt markieren'}"
-                aria-label="${aufgabe.label} ${erledigt ? 'erledigt (klicken zum Rückgängig)' : 'noch offen'}">
-          ${erledigt ? '✓' : ''}
+      <div class="check-row ${erledigt ? 'erledigt' : ''}" id="cr-${id}">
+        <button class="check-toggle"
+                onclick="toggleErledigt('${id}')"
+                title="${erledigt ? 'Rückgängig' : 'Als erledigt markieren'}"
+                aria-label="${a.label} ${erledigt ? 'erledigt' : 'noch offen'}">
+          ${erledigt ? '✓' : '✗'}
         </button>
+        <img src="${a.foto}" alt="${a.label}" class="check-symbol">
+        <div class="check-label">${a.label}</div>
       </div>`;
   }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EVENTS
+   ═══════════════════════════════════════════════════════════════ */
+function toggleAbwesend(personId) {
+  const idx = STATE.abwesend.indexOf(personId);
+  if (idx === -1) STATE.abwesend.push(personId);
+  else            STATE.abwesend.splice(idx, 1);
+  speichereState();
+  renderNamen();
+}
+
+function toggleErledigt(aufgabeId) {
+  const idx = STATE.erledigt.indexOf(aufgabeId);
+  if (idx === -1) STATE.erledigt.push(aufgabeId);
+  else            STATE.erledigt.splice(idx, 1);
+  speichereState();
+  renderCheckliste();
 }
 
 function renderAlles() {
@@ -745,37 +516,12 @@ function renderAlles() {
   renderCheckliste();
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
-   ██  EVENT-HANDLER  ██
+   INIT
    ═══════════════════════════════════════════════════════════════ */
-
-function toggleAbwesend(personId) {
-  const idx = STATE.abwesend.indexOf(personId);
-  if (idx === -1) STATE.abwesend.push(personId);
-  else            STATE.abwesend.splice(idx, 1);
-  speichereState(STATE);
-  renderNamen();
-  renderCheckliste(); // Warnung aktualisieren
-}
-
-function toggleErledigt(aufgabeId) {
-  const idx = STATE.erledigt.indexOf(aufgabeId);
-  if (idx === -1) STATE.erledigt.push(aufgabeId);
-  else            STATE.erledigt.splice(idx, 1);
-  speichereState(STATE);
-  renderCheckliste();
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ██  INITIALISIERUNG  ██
-   ═══════════════════════════════════════════════════════════════ */
-
-document.getElementById('gruppen-name').textContent = GRUPPE.name;
-document.getElementById('wochen-kw').textContent    = GRUPPE.woche;
-document.getElementById('jahr').textContent         = new Date().getFullYear();
-
+document.getElementById('banner-name').textContent = GRUPPE.name;
+document.getElementById('banner-kw').textContent   = GRUPPE.woche;
+document.getElementById('jahr').textContent        = new Date().getFullYear();
 renderAlles();
 </script>
 </body>
