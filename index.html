@@ -7,18 +7,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --rot:    #b61f29;
-      --gruen:  #16a34a;
-      --gelb:   #ca8a04;
-      --bg:     #f0f2f5;
-      --text:   #0f2f37;
-      --grau:   #64748b;
-      --hell:   #e2e8f0;
-      --ROW:    80px;
+      --rot:        #b61f29;
+      --gruen:      #16a34a;
+      --gelb:       #ca8a04;
+      --bg:         #f0f2f5;
+      --text:       #0f2f37;
+      --grau:       #64748b;
+      --hell:       #e2e8f0;
+      --ROW:        80px;
+      --check-bg:   #fef9c3;   /* Checklisten-Aufgaben – gelb */
+      --check-rand: #fde047;
+      --zust-bg:    #eff6ff;   /* Allg. Zuständigkeiten – blau */
+      --zust-rand:  #93c5fd;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Nunito Sans', sans-serif;
       background: var(--bg); color: var(--text);
@@ -27,16 +30,17 @@
 
     /* ── Header ── */
     header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
-    header img { width: 100%; max-height: 80px; object-fit: cover; object-position: left; display: block; }
+    header img { width:100%; max-height:80px; object-fit:cover; object-position:left; display:block; }
 
     /* ── Banner ── */
     .banner {
       background: var(--rot); color: white;
       padding: 8px 16px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap;
     }
-    .banner h1 { font-size: 1rem; font-weight: 800; }
-    .banner-kw { font-size: 0.8rem; opacity: .85; }
+    .banner h1  { font-size: 1rem; font-weight: 800; }
+    .banner-kw  { font-size: 0.8rem; opacity: .85; }
     .banner-btns { display: flex; gap: 8px; align-items: center; }
 
     .btn-banner {
@@ -45,10 +49,8 @@
       font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
       transition: background .2s;
     }
-    .btn-banner:hover { background: rgba(255,255,255,.35); }
-    .btn-banner.aktiv {
-      background: white; color: var(--rot); border-color: white;
-    }
+    .btn-banner:hover  { background: rgba(255,255,255,.35); }
+    .btn-banner.aktiv  { background: white; color: var(--rot); }
 
     /* ── Edit-Hinweisleiste ── */
     .edit-leiste {
@@ -59,21 +61,23 @@
       align-items: center; gap: 10px; flex-wrap: wrap;
     }
     .edit-leiste.sichtbar { display: flex; }
-    .btn-reset-assign {
-      background: #92400e; color: white; border: none;
-      border-radius: 999px; padding: 4px 12px;
+    .edit-leiste-tipp { flex: 1; }
+
+    .btn-leiste {
+      border: none; border-radius: 999px; padding: 5px 14px;
       font-family: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer;
     }
-    .btn-reset-assign:hover { background: #78350f; }
+    .btn-leiste-dunkel { background: #92400e; color: white; }
+    .btn-leiste-dunkel:hover { background: #78350f; }
+    .btn-leiste-blau { background: #1d4ed8; color: white; }
+    .btn-leiste-blau:hover { background: #1e40af; }
 
     /* ── 3-Spalten-Layout ── */
     .grid {
       display: grid;
       grid-template-columns: auto 1fr auto;
-      gap: 10px; padding: 10px;
-      align-items: start;
+      gap: 10px; padding: 10px; align-items: start;
     }
-
     .spalte-titel {
       font-size: 0.62rem; font-weight: 800;
       text-transform: uppercase; letter-spacing: .08em;
@@ -87,39 +91,23 @@
     .namen-tabelle {
       background: white; border-radius: 12px;
       overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08);
-      transition: outline .2s;
     }
-
-    /* Edit-Modus: visuelle Hervorhebung */
-    body.edit-modus .namen-tabelle {
-      outline: 3px dashed var(--gelb);
-      outline-offset: 2px;
-    }
-    body.edit-modus .aufg-icon {
-      cursor: grab;
-      border: 2px dashed rgba(202,138,4,.5);
-      border-radius: 6px;
-    }
-    body.edit-modus .aufg-icon:hover { opacity: .85; }
-    body.edit-modus .aufgaben-icons { background: rgba(254,243,199,.4); }
-    /* Leere Drop-Zone bleibt sichtbar */
-    body.edit-modus .aufgaben-icons {
-      min-width: 80px; min-height: var(--ROW);
-    }
+    body.edit-modus .namen-tabelle { outline: 3px dashed var(--gelb); outline-offset: 2px; }
 
     .namen-row {
       display: flex; align-items: center;
       height: var(--ROW);
       border-bottom: 1px solid var(--hell);
-      cursor: pointer;
-      transition: background .15s;
+      cursor: pointer; transition: background .15s;
       -webkit-tap-highlight-color: transparent;
     }
     .namen-row:last-child { border-bottom: none; }
     .namen-row:hover { background: #fef2f2; }
     .namen-row.abwesend { background: #f8fafc; opacity: .5; }
 
-    body.edit-modus .namen-row { cursor: default; }
+    /* Im Edit-Modus: Hover zeigt Bearbeitbarkeit an */
+    body.edit-modus .namen-row:hover { background: #fefce8; }
+    body.edit-modus .namen-row { cursor: pointer; }
 
     .person-portrait {
       width: var(--ROW); height: var(--ROW);
@@ -134,191 +122,219 @@
       border-right: 1px solid var(--hell);
       overflow: hidden; white-space: nowrap;
     }
-    .namen-row.abwesend .person-name {
-      text-decoration: line-through; color: var(--grau);
+    .namen-row.abwesend .person-name { text-decoration: line-through; color: var(--grau); }
+
+    /* Edit-Modus: Stift-Indikator im Namensfeld */
+    body.edit-modus .person-name::after {
+      content: ' ✏️';
+      font-size: 0.7rem;
+      opacity: .6;
     }
-    .aufgaben-icons {
-      display: flex; align-items: center;
-      height: var(--ROW);
-    }
+
+    .aufgaben-icons { display: flex; align-items: center; height: var(--ROW); }
+
+    /* ── Farbkodierung der Icons ─────────────────── */
     .aufg-icon {
       width: var(--ROW); height: var(--ROW);
       object-fit: contain; flex-shrink: 0;
       border-right: 1px solid var(--hell);
-      background: #fafafa; padding: 4px;
-      transition: opacity .15s;
+      padding: 6px;
+    }
+    /* Checklisten-Aufgaben: gelb */
+    .aufg-icon[data-typ="checkliste"] {
+      background: var(--check-bg);
+      outline: 3px solid var(--check-rand);
+      outline-offset: -3px;
+    }
+    /* Allg. Zuständigkeiten: blau */
+    .aufg-icon[data-typ="allgemein"] {
+      background: var(--zust-bg);
+      outline: 3px solid var(--zust-rand);
+      outline-offset: -3px;
     }
     .aufg-icon:last-child { border-right: none; }
 
+    /* Edit-Modus: Drag-Cursor + Dashed-Rand */
+    body.edit-modus .aufg-icon { cursor: grab; }
+    body.edit-modus .aufg-icon[data-typ="checkliste"] { outline: 3px dashed #eab308; outline-offset: -3px; }
+    body.edit-modus .aufg-icon[data-typ="allgemein"]  { outline: 3px dashed #3b82f6; outline-offset: -3px; }
+    body.edit-modus .aufgaben-icons { min-width: var(--ROW); min-height: var(--ROW); }
+
     /* ════════════════════════════════════════════════
-       MITTLERE SPALTE – Info
+       MITTLERE SPALTE
        ════════════════════════════════════════════════ */
     .mitte { display: flex; flex-direction: column; gap: 10px; }
-
-    .info-box {
-      background: white; border-radius: 12px;
-      padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07);
-    }
-    .info-titel {
-      font-size: 0.6rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: .07em;
-      color: var(--grau); margin-bottom: 8px;
-    }
+    .info-box { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+    .info-titel { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--grau); margin-bottom: 8px; }
     .gl-person { display: flex; align-items: center; gap: 10px; }
-    .gl-foto {
-      width: 52px; height: 52px; border-radius: 50%;
-      object-fit: cover; border: 3px solid var(--rot);
-      flex-shrink: 0; background: var(--bg);
-    }
+    .gl-foto { width:52px; height:52px; border-radius:50%; object-fit:cover; border:3px solid var(--rot); flex-shrink:0; background:var(--bg); }
     .gl-name { font-size: 1rem; font-weight: 800; }
     .gl-rolle { font-size: 0.72rem; color: var(--rot); font-weight: 700; }
     .gl-hinweis { font-size: 0.7rem; color: var(--grau); margin-top: 2px; }
-
-    .termin { display: flex; gap: 8px; font-size: 0.78rem; margin-bottom: 5px; line-height: 1.35; }
-    .termin-tag { font-weight: 800; color: var(--rot); min-width: 22px; flex-shrink: 0; }
-    .termin-leer { color: var(--grau); font-style: italic; }
-
-    .wichtig-box {
-      background: #fff7ed; border: 2px solid #f97316;
-      border-radius: 12px; padding: 12px 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.07);
-    }
+    .termin { display:flex; gap:8px; font-size:0.78rem; margin-bottom:5px; line-height:1.35; }
+    .termin-tag { font-weight:800; color:var(--rot); min-width:22px; flex-shrink:0; }
+    .termin-leer { color:var(--grau); font-style:italic; }
+    .wichtig-box { background:#fff7ed; border:2px solid #f97316; border-radius:12px; padding:12px 14px; box-shadow:0 2px 8px rgba(0,0,0,.07); }
     .wichtig-box .info-titel { color: #c2410c; }
-    .wichtig-text { font-size: 0.82rem; font-weight: 700; color: #7c2d12; line-height: 1.5; }
+    .wichtig-text { font-size:0.82rem; font-weight:700; color:#7c2d12; line-height:1.5; }
 
     /* ════════════════════════════════════════════════
        RECHTE SPALTE – Checkliste
        ════════════════════════════════════════════════ */
-    .check-tabelle {
-      background: white; border-radius: 12px;
-      overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08);
-    }
-    .check-row {
-      display: flex; align-items: center;
-      height: var(--ROW);
-      border-bottom: 1px solid var(--hell);
-      transition: background .2s;
-    }
-    .check-row:last-child { border-bottom: none; }
-    .check-row.erledigt  { background: #f0fdf4; }
-    .check-row.warnung   { background: #fefce8; }
+    .check-tabelle { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .check-row { display:flex; align-items:center; height:var(--ROW); border-bottom:1px solid var(--hell); transition:background .2s; }
+    .check-row:last-child { border-bottom:none; }
+    .check-row.erledigt { background: #f0fdf4; }
+    .check-row.warnung  { background: #fefce8; }
 
     .check-toggle {
-      width: var(--ROW); height: var(--ROW);
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem; font-weight: 900;
-      background: var(--rot); color: white;
-      cursor: pointer; border: none; font-family: inherit;
-      border-right: 2px solid rgba(0,0,0,.1);
-      transition: background .15s, font-size .15s;
+      width:var(--ROW); height:var(--ROW); flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.2rem; font-weight:900;
+      background:var(--rot); color:white;
+      cursor:pointer; border:none; font-family:inherit;
+      border-right:2px solid rgba(0,0,0,.1);
+      transition:background .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .check-toggle:hover  { filter: brightness(1.1); }
-    .check-toggle:active { filter: brightness(.9); }
+    .check-toggle:hover { filter:brightness(1.1); }
     .check-row.erledigt .check-toggle { background: var(--gruen); }
-    .check-row.warnung  .check-toggle { background: var(--gelb); font-size: 1.7rem; }
+    .check-row.warnung  .check-toggle { background: var(--gelb); font-size:1.7rem; }
 
+    /* Checklisten-Symbol: immer gelb (alle check-Symbole) */
     .check-symbol {
-      width: var(--ROW); height: var(--ROW);
-      object-fit: contain; flex-shrink: 0;
-      border-right: 1px solid var(--hell);
-      background: #fafafa; padding: 4px;
+      width:var(--ROW); height:var(--ROW);
+      object-fit:contain; flex-shrink:0;
+      border-right:1px solid var(--hell);
+      padding:6px;
+      background: var(--check-bg);
+      outline: 3px solid var(--check-rand);
+      outline-offset: -3px;
     }
-    .check-label {
-      padding: 0 14px; font-size: 0.9rem; font-weight: 800;
-      color: var(--text); flex: 1; line-height: 1.25;
-    }
+    .check-label { padding:0 14px; font-size:0.9rem; font-weight:800; color:var(--text); flex:1; line-height:1.25; }
     .check-row.erledigt .check-label { color: var(--gruen); }
-    .check-warnung {
-      display: flex; align-items: center; gap: 4px;
-      font-size: 0.65rem; font-weight: 800; color: #92400e; margin-top: 3px;
-    }
+    .check-warnung { display:flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:800; color:#92400e; margin-top:3px; }
 
     /* ════════════════════════════════════════════════
-       NAMEN-MODAL
+       MODAL – gemeinsame Basis
        ════════════════════════════════════════════════ */
     .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.55);
-      z-index: 8000;
-      align-items: center; justify-content: center;
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,.55); z-index:8000;
+      align-items:center; justify-content:center;
     }
-    .modal-overlay.sichtbar { display: flex; }
-
+    .modal-overlay.sichtbar { display:flex; }
     .modal-box {
-      background: white; border-radius: 16px;
-      padding: 24px; width: min(580px, 95vw);
-      max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      background:white; border-radius:16px; padding:24px;
+      width:min(640px,96vw); max-height:90vh; overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
     }
     .modal-kopf {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 18px;
+      display:flex; align-items:center;
+      justify-content:space-between; margin-bottom:16px;
     }
-    .modal-kopf h2 { font-size: 1.1rem; font-weight: 900; color: var(--rot); }
+    .modal-kopf h2 { font-size:1.1rem; font-weight:900; color:var(--rot); }
     .modal-schliessen {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: none; background: var(--bg);
-      font-size: 1.2rem; cursor: pointer; color: var(--grau);
-      display: flex; align-items: center; justify-content: center;
+      width:36px; height:36px; border-radius:50%;
+      border:none; background:var(--bg); font-size:1.2rem;
+      cursor:pointer; color:var(--grau);
+      display:flex; align-items:center; justify-content:center;
     }
-    .modal-schliessen:hover { background: var(--hell); }
-
-    .namen-felder {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-    .namen-feld {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .namen-nr {
-      width: 24px; font-size: 0.7rem; font-weight: 800;
-      color: var(--grau); text-align: right; flex-shrink: 0;
-    }
-    .namen-input {
-      flex: 1; padding: 8px 10px;
-      border: 2px solid var(--hell); border-radius: 8px;
-      font-family: inherit; font-size: 0.88rem; font-weight: 700;
-      color: var(--text);
-      transition: border-color .15s;
-    }
-    .namen-input:focus { outline: none; border-color: var(--rot); }
-
-    .modal-btns {
-      display: flex; gap: 10px; justify-content: flex-end;
-    }
+    .modal-schliessen:hover { background:var(--hell); }
+    .modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
     .btn-modal-primary {
-      background: var(--rot); color: white; border: none;
-      border-radius: 999px; padding: 9px 22px;
-      font-family: inherit; font-size: 0.88rem; font-weight: 800;
-      cursor: pointer;
+      background:var(--rot); color:white; border:none;
+      border-radius:999px; padding:9px 22px;
+      font-family:inherit; font-size:0.88rem; font-weight:800; cursor:pointer;
     }
-    .btn-modal-primary:hover { background: #9b1a23; }
+    .btn-modal-primary:hover { background:#9b1a23; }
     .btn-modal-secondary {
-      background: var(--bg); color: var(--grau);
-      border: 2px solid var(--hell); border-radius: 999px;
-      padding: 9px 18px;
-      font-family: inherit; font-size: 0.88rem; font-weight: 700;
-      cursor: pointer;
+      background:var(--bg); color:var(--grau);
+      border:2px solid var(--hell); border-radius:999px; padding:9px 18px;
+      font-family:inherit; font-size:0.88rem; font-weight:700; cursor:pointer;
     }
-    .btn-modal-secondary:hover { background: var(--hell); }
+    .btn-modal-secondary:hover { background:var(--hell); }
     .btn-modal-reset {
-      background: none; color: var(--grau);
-      border: none; font-family: inherit; font-size: 0.78rem;
-      font-weight: 700; cursor: pointer; margin-right: auto;
-      text-decoration: underline;
+      background:none; color:var(--grau); border:none;
+      font-family:inherit; font-size:0.78rem; font-weight:700;
+      cursor:pointer; margin-right:auto; text-decoration:underline;
     }
-    .btn-modal-reset:hover { color: var(--rot); }
+    .btn-modal-reset:hover { color:var(--rot); }
+
+    /* ── Namen-Modal ── */
+    .namen-felder { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px; }
+    .namen-feld   { display:flex; align-items:center; gap:8px; }
+    .namen-nr     { width:24px; font-size:0.7rem; font-weight:800; color:var(--grau); text-align:right; flex-shrink:0; }
+    .namen-input  {
+      flex:1; padding:8px 10px; border:2px solid var(--hell);
+      border-radius:8px; font-family:inherit; font-size:0.88rem;
+      font-weight:700; color:var(--text); transition:border-color .15s;
+    }
+    .namen-input:focus { outline:none; border-color:var(--rot); }
+
+    /* ── Aufgaben-Modal (Zuweisung per Klick auf Namen) ── */
+    .aufg-modal-person {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; background:var(--bg); border-radius:10px; margin-bottom:14px;
+    }
+    .aufg-modal-person img { width:44px; height:44px; object-fit:cover; border-radius:50%; border:2px solid var(--rot); }
+    .aufg-modal-person-name { font-size:1rem; font-weight:900; }
+
+    .aufg-abschnitt-titel {
+      font-size:0.65rem; font-weight:800; text-transform:uppercase;
+      letter-spacing:.07em; margin:14px 0 8px;
+      display:flex; align-items:center; gap:6px;
+    }
+    .aufg-abschnitt-titel.gelb { color:#92400e; }
+    .aufg-abschnitt-titel.blau { color:#1e40af; }
+    .aufg-abschnitt-titel span {
+      display:inline-block; width:12px; height:12px; border-radius:2px; flex-shrink:0;
+    }
+    .aufg-abschnitt-titel.gelb span { background:var(--check-rand); }
+    .aufg-abschnitt-titel.blau span { background:var(--zust-rand); }
+
+    .aufg-chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .aufg-chip {
+      display:flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:10px; cursor:pointer;
+      border:2px solid var(--hell); background:white;
+      font-family:inherit; font-size:0.78rem; font-weight:700;
+      color:var(--text); transition:all .15s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .aufg-chip img { width:32px; height:32px; object-fit:contain; border-radius:4px; }
+    .aufg-chip.check-chip { border-color:var(--check-rand); background:var(--check-bg); }
+    .aufg-chip.zust-chip  { border-color:var(--zust-rand);  background:var(--zust-bg);  }
+    .aufg-chip.gewaehlt.check-chip { background:#fef08a; border-color:#ca8a04; outline:2px solid #ca8a04; }
+    .aufg-chip.gewaehlt.zust-chip  { background:#bfdbfe; border-color:#2563eb; outline:2px solid #2563eb; }
+    .aufg-chip-check { width:20px; height:20px; border-radius:50%; border:2px solid #cbd5e1; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.7rem; }
+    .aufg-chip.gewaehlt .aufg-chip-check { background:var(--rot); border-color:var(--rot); color:white; }
+    .aufg-chip-belegt { font-size:0.6rem; color:var(--grau); font-weight:600; }
+
+    /* ── Checkliste-Modal ── */
+    .check-modal-liste { display:flex; flex-direction:column; gap:6px; }
+    .check-modal-item {
+      display:flex; align-items:center; gap:10px;
+      padding:8px 10px; border-radius:10px; cursor:pointer;
+      border:2px solid var(--hell); background:var(--check-bg);
+      font-family:inherit; transition:all .15s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .check-modal-item.gewaehlt {
+      border-color:#ca8a04; background:#fef08a; outline:2px solid #ca8a04;
+    }
+    .check-modal-item.fixiert { opacity:.55; cursor:not-allowed; }
+    .check-modal-item img { width:44px; height:44px; object-fit:contain; border-radius:6px; flex-shrink:0; }
+    .check-modal-label { font-size:0.88rem; font-weight:800; flex:1; }
+    .check-modal-cb { width:22px; height:22px; border-radius:50%; border:2px solid #cbd5e1; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.75rem; }
+    .check-modal-item.gewaehlt .check-modal-cb { background:var(--gruen); border-color:var(--gruen); color:white; }
+    .check-modal-hinweis { font-size:0.65rem; color:#92400e; font-weight:700; }
 
     /* ── Footer ── */
     footer {
-      text-align: center; padding: 10px;
-      background: var(--rot); color: white;
-      font-size: 0.78rem; font-weight: 600; margin-top: auto;
+      text-align:center; padding:10px;
+      background:var(--rot); color:white;
+      font-size:0.78rem; font-weight:600; margin-top:auto;
     }
   </style>
 </head>
@@ -340,38 +356,71 @@
   </div>
 </div>
 
-<!-- Hinweisleiste im Bearbeitungs-Modus -->
 <div class="edit-leiste" id="edit-leiste">
-  ✏️ <strong>Bearbeiten-Modus:</strong>
-  Symbole gedrückt halten und in eine andere Zeile ziehen, um Zuständigkeiten zu verschieben.
-  <button class="btn-reset-assign" onclick="resetZuordnung()">↩ Zuordnung zurücksetzen</button>
+  <span class="edit-leiste-tipp">
+    ✏️ <strong>Bearbeiten-Modus:</strong>
+    Symbole ziehen zum Verschieben · Namen antippen zum Zuweisen · Checkliste anpassen
+  </span>
+  <button class="btn-leiste btn-leiste-blau"   onclick="oeffneChecklisteModal()">📋 Checkliste anpassen</button>
+  <button class="btn-leiste btn-leiste-dunkel" onclick="resetZuordnung()">↩ Zuordnung zurücksetzen</button>
 </div>
 
-<!-- ══ NAMEN-MODAL ══ -->
-<div class="modal-overlay" id="namen-modal" onclick="modalAussenKlick(event)">
+<!-- ══ MODAL: Namen bearbeiten ══ -->
+<div class="modal-overlay" id="namen-modal" onclick="modalAussenKlick(event,'namen-modal')">
   <div class="modal-box">
     <div class="modal-kopf">
       <h2>👤 Namen bearbeiten</h2>
-      <button class="modal-schliessen" onclick="schliesseNamenModal()" title="Schließen">✕</button>
+      <button class="modal-schliessen" onclick="schliesseModal('namen-modal')">✕</button>
     </div>
-    <div class="namen-felder" id="namen-felder"><!-- JS --></div>
+    <div class="namen-felder" id="namen-felder"></div>
     <div class="modal-btns">
-      <button class="btn-modal-reset" onclick="resetNamen()">↩ Standard wiederherstellen</button>
-      <button class="btn-modal-secondary" onclick="schliesseNamenModal()">Abbrechen</button>
-      <button class="btn-modal-primary"   onclick="speichereNamenAusModal()">💾 Speichern</button>
+      <button class="btn-modal-reset"      onclick="resetNamen()">↩ Standard</button>
+      <button class="btn-modal-secondary"  onclick="schliesseModal('namen-modal')">Abbrechen</button>
+      <button class="btn-modal-primary"    onclick="speichereNamenAusModal()">💾 Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Aufgaben einer Person zuweisen ══ -->
+<div class="modal-overlay" id="aufgaben-modal" onclick="modalAussenKlick(event,'aufgaben-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf">
+      <h2>📋 Aufgaben zuweisen</h2>
+      <button class="modal-schliessen" onclick="schliesseModal('aufgaben-modal')">✕</button>
+    </div>
+    <div id="aufgaben-modal-inhalt"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schliesseModal('aufgaben-modal')">Abbrechen</button>
+      <button class="btn-modal-primary"   onclick="speichereAufgabenAusModal()">💾 Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Checkliste konfigurieren ══ -->
+<div class="modal-overlay" id="checkliste-modal" onclick="modalAussenKlick(event,'checkliste-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf">
+      <h2>📋 Tages-Checkliste anpassen</h2>
+      <button class="modal-schliessen" onclick="schliesseModal('checkliste-modal')">✕</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">
+      Wähle, welche Aufgaben heute in der Checkliste erscheinen sollen.<br>
+      <strong>„Kontrolle Checkpoint"</strong> steht immer an erster Stelle.
+    </p>
+    <div class="check-modal-liste" id="check-modal-liste"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset"     onclick="resetAktiveChecks()">↩ Alle aktivieren</button>
+      <button class="btn-modal-secondary" onclick="schliesseModal('checkliste-modal')">Abbrechen</button>
+      <button class="btn-modal-primary"   onclick="speichereChecklisteAusModal()">💾 Speichern</button>
     </div>
   </div>
 </div>
 
 <div class="grid">
-
-  <!-- LINKE SPALTE -->
   <div>
     <div class="spalte-titel">👤 Namen &amp; Zuständigkeiten</div>
-    <div class="namen-tabelle" id="namen-tabelle"><!-- JS --></div>
+    <div class="namen-tabelle" id="namen-tabelle"></div>
   </div>
-
-  <!-- MITTLERE SPALTE -->
   <div>
     <div class="spalte-titel">📋 Infos &amp; Termine</div>
     <div class="mitte">
@@ -389,23 +438,15 @@
       </div>
     </div>
   </div>
-
-  <!-- RECHTE SPALTE -->
   <div>
     <div class="spalte-titel">✅ Tages-Checkliste</div>
     <div class="check-tabelle" id="check-tabelle"></div>
   </div>
-
 </div>
 
-<footer>
-  &copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen·Checkpoint
-</footer>
+<footer>&copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen·Checkpoint</footer>
 
-<!-- SortableJS – Datei ins Repo hochladen:
-     https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js -->
 <script src="sortable.min.js"></script>
-
 <script>
 /* ═══════════════════════════════════════════════════════════════
    KONFIGURATION – wöchentlich anpassen
@@ -413,259 +454,160 @@
 const GRUPPE = {
   name:  "Gruppe Freisenberg",
   woche: "KW 31 | 28.07.–01.08.2025",
-
-  gruppenvertretung: {
-    personId: 3,
-    hinweis: "Vertretung Mo–Mi (GL in Besprechung)"
-  },
-
+  gruppenvertretung: { personId: 3, hinweis: "Vertretung Mo–Mi (GL in Besprechung)" },
   termine: [
-    { tag: "Mo", text: "Frührunde 8:15 Uhr" },
-    { tag: "Di", text: "" },
-    { tag: "Mi", text: "Unterweisung Arbeitssicherheit 10:30 Uhr" },
-    { tag: "Do", text: "Besuch Kundenaudit" },
-    { tag: "Fr", text: "Frühschluss 14:45 Uhr 🎉" }
+    { tag:"Mo", text:"Frührunde 8:15 Uhr" },
+    { tag:"Di", text:"" },
+    { tag:"Mi", text:"Unterweisung Arbeitssicherheit 10:30 Uhr" },
+    { tag:"Do", text:"Besuch Kundenaudit" },
+    { tag:"Fr", text:"Frühschluss 14:45 Uhr 🎉" }
   ],
-
   wichtig: "⚠️ Roter Hubwagen defekt!\nBitte NICHT benutzen – Meldung an Gruppenleitung.",
-
-  /* Standard-Zuordnung – wird durch drag & drop überschrieben */
   zustaendigkeiten: [
-    { personId: 1,  aufgabeId: "fegen",               typ: "checkliste" },
-    { personId: 2,  aufgabeId: "muell",               typ: "checkliste" },
-    { personId: 3,  aufgabeId: "tische",              typ: "checkliste" },
-    { personId: 4,  aufgabeId: "geschirr",            typ: "checkliste" },
-    { personId: 5,  aufgabeId: "fenster",             typ: "checkliste" },
-    { personId: 6,  aufgabeId: "strom",               typ: "checkliste" },
-    { personId: 7,  aufgabeId: "tuerklinken",         typ: "checkliste" },
-    { personId: 8,  aufgabeId: "versandvorbereitung", typ: "checkliste" },
-    { personId: 9,  aufgabeId: "sicherheit",          typ: "checkliste" },
-    { personId: 10, aufgabeId: "arbeitsvorbereitung", typ: "checkliste" },
-    { personId: 11, aufgabeId: "checkpoint",          typ: "checkliste" },
-    { personId: 1,  aufgabeId: "betriebsmittel",      typ: "allgemein"  },
-    { personId: 2,  aufgabeId: "botengaenge",         typ: "allgemein"  },
-    { personId: 12, aufgabeId: "botengaenge",         typ: "allgemein"  },
-    { personId: 3,  aufgabeId: "hubwagen",            typ: "allgemein"  },
-    { personId: 5,  aufgabeId: "qualitaet",           typ: "allgemein"  },
-    { personId: 13, aufgabeId: "diensttelefon",       typ: "allgemein"  },
-    { personId: 14, aufgabeId: "essensmarken",        typ: "allgemein"  },
-    { personId: 7,  aufgabeId: "materialbeschaffung", typ: "allgemein"  },
-    { personId: 15, aufgabeId: "mentor",              typ: "allgemein"  },
+    { personId:1,  aufgabeId:"fegen",               typ:"checkliste" },
+    { personId:2,  aufgabeId:"muell",               typ:"checkliste" },
+    { personId:3,  aufgabeId:"tische",              typ:"checkliste" },
+    { personId:4,  aufgabeId:"geschirr",            typ:"checkliste" },
+    { personId:5,  aufgabeId:"fenster",             typ:"checkliste" },
+    { personId:6,  aufgabeId:"strom",               typ:"checkliste" },
+    { personId:7,  aufgabeId:"tuerklinken",         typ:"checkliste" },
+    { personId:8,  aufgabeId:"versandvorbereitung", typ:"checkliste" },
+    { personId:9,  aufgabeId:"sicherheit",          typ:"checkliste" },
+    { personId:10, aufgabeId:"arbeitsvorbereitung", typ:"checkliste" },
+    { personId:11, aufgabeId:"checkpoint",          typ:"checkliste" },
+    { personId:1,  aufgabeId:"betriebsmittel",      typ:"allgemein"  },
+    { personId:2,  aufgabeId:"botengaenge",         typ:"allgemein"  },
+    { personId:12, aufgabeId:"botengaenge",         typ:"allgemein"  },
+    { personId:3,  aufgabeId:"hubwagen",            typ:"allgemein"  },
+    { personId:5,  aufgabeId:"qualitaet",           typ:"allgemein"  },
+    { personId:13, aufgabeId:"diensttelefon",       typ:"allgemein"  },
+    { personId:14, aufgabeId:"essensmarken",        typ:"allgemein"  },
+    { personId:7,  aufgabeId:"materialbeschaffung", typ:"allgemein"  },
+    { personId:15, aufgabeId:"mentor",              typ:"allgemein"  },
   ]
 };
-
-/* Standard-Zuordnung als Fallback speichern */
 const ZUORDNUNG_DEFAULT = JSON.parse(JSON.stringify(GRUPPE.zustaendigkeiten));
 
-/* ── 16 Mitarbeitende ── */
 const MITARBEITENDE = [
-  { id: 1,  name: "Anna B."      },
-  { id: 2,  name: "Thomas K."    },
-  { id: 3,  name: "Maria S."     },
-  { id: 4,  name: "Klaus H."     },
-  { id: 5,  name: "Sandra M."    },
-  { id: 6,  name: "Peter W."     },
-  { id: 7,  name: "Nicole F."    },
-  { id: 8,  name: "Stefan R."    },
-  { id: 9,  name: "Monika L."    },
-  { id: 10, name: "Michael G."   },
-  { id: 11, name: "Christine D." },
-  { id: 12, name: "Andreas N."   },
-  { id: 13, name: "Sabine T."    },
-  { id: 14, name: "Markus E."    },
-  { id: 15, name: "Ursula C."    },
-  { id: 16, name: "Frank J."     },
+  { id:1,  name:"Anna B."      }, { id:2,  name:"Thomas K."    },
+  { id:3,  name:"Maria S."     }, { id:4,  name:"Klaus H."     },
+  { id:5,  name:"Sandra M."    }, { id:6,  name:"Peter W."     },
+  { id:7,  name:"Nicole F."    }, { id:8,  name:"Stefan R."    },
+  { id:9,  name:"Monika L."    }, { id:10, name:"Michael G."   },
+  { id:11, name:"Christine D." }, { id:12, name:"Andreas N."   },
+  { id:13, name:"Sabine T."    }, { id:14, name:"Markus E."    },
+  { id:15, name:"Ursula C."    }, { id:16, name:"Frank J."     },
 ];
 
-/* ── Aufgaben ── */
+/* Aufgaben: "checkpoint" zuerst in Definition → stets Sortier-Anker */
 const AUFGABEN = {
-  fegen:               { label: "Boden fegen",              foto: "check-fegen.jpg"               },
-  muell:               { label: "Müll entsorgen",           foto: "check-muell.jpg"               },
-  tische:              { label: "Tische wischen",           foto: "check-tische.jpg"              },
-  geschirr:            { label: "Geschirr wegräumen",       foto: "check-geschirr.jpg"            },
-  fenster:             { label: "Fenster schließen",        foto: "check-fenster.jpg"             },
-  strom:               { label: "Strom ausschalten",        foto: "check-strom.jpg"               },
-  tuerklinken:         { label: "Türklinken desinfizieren", foto: "check-tuerklinken.jpg"         },
-  versandvorbereitung: { label: "Versand vorbereiten",      foto: "check-versandvorbereitung.jpg" },
-  sicherheit:          { label: "Arbeitssicherheit prüfen", foto: "check-sicherheit.jpg"          },
-  arbeitsvorbereitung: { label: "Arbeit vorbereiten",       foto: "check-arbeitsvorbereitung.jpg" },
-  checkpoint:          { label: "Kontrolle Checkpoint",     foto: "check-checkpoint.jpg"          },
-  betriebsmittel:      { label: "Betriebsmittel prüfen",    foto: "zust-betriebsmittel.jpg"       },
-  botengaenge:         { label: "Botengänge",               foto: "zust-botengaenge.jpg"          },
-  hubwagen:            { label: "Hubwagen fahren",          foto: "zust-hubwagen.jpg"             },
-  qualitaet:           { label: "Qualität prüfen",          foto: "zust-qualitaet.jpg"            },
-  diensttelefon:       { label: "Dienst-Telefon",           foto: "zust-diensttelefon.jpg"        },
-  essensmarken:        { label: "Essensmarken zuordnen",    foto: "zust-essensmarken.jpg"         },
-  materialbeschaffung: { label: "Materialbeschaffung",      foto: "zust-materialbeschaffung.jpg"  },
-  mentor:              { label: "Mentor / Pate",            foto: "zust-mentor.jpg"               },
+  checkpoint:          { label:"Kontrolle Checkpoint",      foto:"check-checkpoint.jpg",          typ:"checkliste" },
+  arbeitsvorbereitung: { label:"Arbeit vorbereiten",        foto:"check-arbeitsvorbereitung.jpg", typ:"checkliste" },
+  sicherheit:          { label:"Arbeitssicherheit prüfen",  foto:"check-sicherheit.jpg",          typ:"checkliste" },
+  fegen:               { label:"Boden fegen",               foto:"check-fegen.jpg",               typ:"checkliste" },
+  fenster:             { label:"Fenster schließen",         foto:"check-fenster.jpg",             typ:"checkliste" },
+  geschirr:            { label:"Geschirr wegräumen",        foto:"check-geschirr.jpg",            typ:"checkliste" },
+  muell:               { label:"Müll entsorgen",            foto:"check-muell.jpg",               typ:"checkliste" },
+  strom:               { label:"Strom ausschalten",         foto:"check-strom.jpg",               typ:"checkliste" },
+  tische:              { label:"Tische wischen",            foto:"check-tische.jpg",              typ:"checkliste" },
+  tuerklinken:         { label:"Türklinken desinfizieren",  foto:"check-tuerklinken.jpg",         typ:"checkliste" },
+  versandvorbereitung: { label:"Versand vorbereiten",       foto:"check-versandvorbereitung.jpg", typ:"checkliste" },
+  /* Allgemeine Zuständigkeiten */
+  betriebsmittel:      { label:"Betriebsmittel prüfen",     foto:"zust-betriebsmittel.jpg",       typ:"allgemein"  },
+  botengaenge:         { label:"Botengänge",                foto:"zust-botengaenge.jpg",          typ:"allgemein"  },
+  diensttelefon:       { label:"Dienst-Telefon",            foto:"zust-diensttelefon.jpg",        typ:"allgemein"  },
+  essensmarken:        { label:"Essensmarken zuordnen",     foto:"zust-essensmarken.jpg",         typ:"allgemein"  },
+  hubwagen:            { label:"Hubwagen fahren",           foto:"zust-hubwagen.jpg",             typ:"allgemein"  },
+  materialbeschaffung: { label:"Materialbeschaffung",       foto:"zust-materialbeschaffung.jpg",  typ:"allgemein"  },
+  mentor:              { label:"Mentor / Pate",             foto:"zust-mentor.jpg",               typ:"allgemein"  },
+  qualitaet:           { label:"Qualität prüfen",           foto:"zust-qualitaet.jpg",            typ:"allgemein"  },
 };
 
+/* IDs aller check-Aufgaben, alphabetisch mit checkpoint an erster Stelle */
+function sortierteCheckIds() {
+  const alle = Object.keys(AUFGABEN).filter(id => AUFGABEN[id].typ === 'checkliste');
+  return [
+    'checkpoint',
+    ...alle.filter(id => id !== 'checkpoint')
+           .sort((a,b) => AUFGABEN[a].label.localeCompare(AUFGABEN[b].label, 'de'))
+  ];
+}
+
 /* ═══════════════════════════════════════════════════════════════
-   PERSISTENCE  –  2 getrennte Speicher
-   STATE_KEY   = Tagesstatus (abwesend, erledigt) → täglicher Reset
-   ASSIGN_KEY  = Zuordnungen (wer hat welche Aufgabe) → dauerhaft
+   PERSISTENCE
    ═══════════════════════════════════════════════════════════════ */
-const STATE_KEY  = 'checkpoint-state-v2';
-const ASSIGN_KEY = 'checkpoint-assign-v2';
+const STATE_KEY        = 'checkpoint-state-v2';
+const ASSIGN_KEY       = 'checkpoint-assign-v2';
+const NAMEN_KEY        = 'checkpoint-namen-v2';
+const CHECKS_KEY       = 'checkpoint-checks-v2';
 
-function heute() { return new Date().toISOString().slice(0, 10); }
+function heute() { return new Date().toISOString().slice(0,10); }
 
-/* Tagesstatus */
-function ladeState() {
-  try { return JSON.parse(localStorage.getItem(STATE_KEY)); } catch { return null; }
-}
-function speichereState() {
-  localStorage.setItem(STATE_KEY, JSON.stringify(STATE));
-}
-function tagesReset(manuell = false) {
+/* ── Tagesstatus ── */
+function ladeState() { try { return JSON.parse(localStorage.getItem(STATE_KEY)); } catch { return null; } }
+function speichereState() { localStorage.setItem(STATE_KEY, JSON.stringify(STATE)); }
+function tagesReset(manuell=false) {
   if (manuell && !confirm('Tages-Reset: Abwesenheiten und erledigte Aufgaben zurücksetzen?')) return;
-  STATE.datum    = heute();
-  STATE.abwesend = [];
-  STATE.erledigt = [];
-  speichereState();
-  // Alle Zeilen visuell aktualisieren
-  document.querySelectorAll('.namen-row').forEach(row => row.classList.remove('abwesend'));
+  STATE.datum=''; STATE.abwesend=[]; STATE.erledigt=[];
+  STATE.datum = heute(); speichereState();
+  document.querySelectorAll('.namen-row').forEach(r => r.classList.remove('abwesend'));
   renderCheckliste();
 }
-let raw   = ladeState();
-let STATE = (raw && raw.datum === heute())
-  ? raw
-  : { datum: heute(), abwesend: [], erledigt: [] };
+let raw = ladeState();
+let STATE = (raw && raw.datum === heute()) ? raw : { datum:heute(), abwesend:[], erledigt:[] };
 
-/* Zuordnungen */
+/* ── Zuordnungen ── */
 function ladeZuordnung() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(ASSIGN_KEY));
-    if (saved && Array.isArray(saved)) GRUPPE.zustaendigkeiten = saved;
-  } catch {}
+  try { const s=JSON.parse(localStorage.getItem(ASSIGN_KEY)); if(s&&Array.isArray(s)) GRUPPE.zustaendigkeiten=s; } catch {}
 }
-function speichereZuordnung() {
-  localStorage.setItem(ASSIGN_KEY, JSON.stringify(GRUPPE.zustaendigkeiten));
-}
+function speichereZuordnung() { localStorage.setItem(ASSIGN_KEY, JSON.stringify(GRUPPE.zustaendigkeiten)); }
 function resetZuordnung() {
-  if (!confirm('Alle Zuordnungen auf den Standard zurücksetzen?')) return;
+  if (!confirm('Alle Zuordnungen zurücksetzen?')) return;
   GRUPPE.zustaendigkeiten = JSON.parse(JSON.stringify(ZUORDNUNG_DEFAULT));
   localStorage.removeItem(ASSIGN_KEY);
-  renderNamen();
-  initSortable();
-  renderCheckliste();
+  renderNamen(); initSortable(); renderCheckliste();
 }
 
-/* Gespeicherte Zuordnung beim Start laden */
-ladeZuordnung();
-
-/* ═══════════════════════════════════════════════════════════════
-   NAMEN-PERSISTENZ  –  dauerhaft in localStorage
-   ═══════════════════════════════════════════════════════════════ */
-const NAMEN_KEY      = 'checkpoint-namen-v2';
-const NAMEN_DEFAULT  = MITARBEITENDE.map(p => ({ id: p.id, name: p.name }));
-
+/* ── Namen ── */
+const NAMEN_DEFAULT = MITARBEITENDE.map(p => ({ id:p.id, name:p.name }));
 function ladeNamen() {
   try {
-    const saved = JSON.parse(localStorage.getItem(NAMEN_KEY));
-    if (!saved || !Array.isArray(saved)) return;
-    saved.forEach(s => {
-      const p = MITARBEITENDE.find(p => p.id === s.id);
-      if (p && s.name && s.name.trim()) p.name = s.name.trim();
-    });
+    const s=JSON.parse(localStorage.getItem(NAMEN_KEY));
+    if(!s||!Array.isArray(s)) return;
+    s.forEach(d => { const p=MITARBEITENDE.find(p=>p.id===d.id); if(p&&d.name) p.name=d.name; });
   } catch {}
 }
 
-function oeffneNamenModal() {
-  /* Felder dynamisch befüllen */
-  document.getElementById('namen-felder').innerHTML =
-    MITARBEITENDE.map(p => `
-      <label class="namen-feld">
-        <span class="namen-nr">${p.id}.</span>
-        <input class="namen-input"
-               type="text"
-               value="${p.name}"
-               data-person-id="${p.id}"
-               maxlength="20"
-               placeholder="Vorname N."
-               onkeydown="if(event.key==='Enter') speichereNamenAusModal()">
-      </label>`
-    ).join('');
-
-  document.getElementById('namen-modal').classList.add('sichtbar');
-
-  /* Erstes Feld fokussieren */
-  setTimeout(() => {
-    const ersterInput = document.querySelector('.namen-input');
-    if (ersterInput) ersterInput.focus();
-  }, 80);
+/* ── Aktive Checklisten-Aufgaben ── */
+let AKTIVE_CHECKS = sortierteCheckIds(); // Standard: alle aktiv
+function ladeAktiveChecks() {
+  try {
+    const s=JSON.parse(localStorage.getItem(CHECKS_KEY));
+    if(s&&Array.isArray(s)) AKTIVE_CHECKS=s;
+  } catch {}
 }
+function speichereAktiveChecks() { localStorage.setItem(CHECKS_KEY, JSON.stringify(AKTIVE_CHECKS)); }
 
-function schliesseNamenModal() {
-  document.getElementById('namen-modal').classList.remove('sichtbar');
-}
-
-/* Klick außerhalb des Modal-Rahmens schließt es */
-function modalAussenKlick(e) {
-  if (e.target === document.getElementById('namen-modal')) schliesseNamenModal();
-}
-
-function speichereNamenAusModal() {
-  document.querySelectorAll('.namen-input').forEach(input => {
-    const id  = parseInt(input.dataset.personId);
-    const neu = input.value.trim();
-    const p   = MITARBEITENDE.find(p => p.id === id);
-    if (p && neu) p.name = neu;
-  });
-
-  localStorage.setItem(NAMEN_KEY,
-    JSON.stringify(MITARBEITENDE.map(p => ({ id: p.id, name: p.name })))
-  );
-
-  schliesseNamenModal();
-  renderNamen();
-  initSortable();
-  renderCheckliste(); /* Warnungen mit neuen Namen aktualisieren */
-}
-
-function resetNamen() {
-  if (!confirm('Alle Namen auf den Standard zurücksetzen?')) return;
-  NAMEN_DEFAULT.forEach(d => {
-    const p = MITARBEITENDE.find(p => p.id === d.id);
-    if (p) p.name = d.name;
-  });
-  localStorage.removeItem(NAMEN_KEY);
-  schliesseNamenModal();
-  renderNamen();
-  initSortable();
-  renderCheckliste();
-}
-
-/* Namen beim Start laden */
-ladeNamen();
+/* Beim Start alles laden */
+ladeZuordnung(); ladeNamen(); ladeAktiveChecks();
 
 /* ═══════════════════════════════════════════════════════════════
-   RENDER – Linke Spalte
-   (Wird nur beim Start und nach resetZuordnung komplett neu gebaut.
-    toggleAbwesend ändert danach nur die CSS-Klasse, kein Rebuild.)
+   RENDER
    ═══════════════════════════════════════════════════════════════ */
 function renderNamen() {
   document.getElementById('namen-tabelle').innerHTML =
     MITARBEITENDE.map(p => {
       const abw  = STATE.abwesend.includes(p.id);
-      const zust = GRUPPE.zustaendigkeiten.filter(z => z.personId === p.id);
+      const zust = GRUPPE.zustaendigkeiten.filter(z => z.personId===p.id);
       const icons = zust.map(z => {
         const a = AUFGABEN[z.aufgabeId];
-        return a
-          ? `<img src="${a.foto}"
-                  alt="${a.label}"
-                  title="${a.label}"
-                  class="aufg-icon"
-                  data-aufgabe-id="${z.aufgabeId}"
-                  data-typ="${z.typ}">`
-          : '';
+        return a ? `<img src="${a.foto}" alt="${a.label}" title="${a.label}"
+                        class="aufg-icon" data-aufgabe-id="${z.aufgabeId}" data-typ="${z.typ}">` : '';
       }).join('');
-
       return `
-        <div class="namen-row ${abw ? 'abwesend' : ''}"
-             data-person-id="${p.id}"
+        <div class="namen-row ${abw?'abwesend':''}" data-person-id="${p.id}"
              onclick="toggleAbwesend(${p.id})"
-             title="${abw ? 'Klicken: wieder anwesend' : 'Klicken: abwesend markieren'}">
+             title="${abw?'Klicken: wieder anwesend':'Klicken: abwesend markieren'}">
           <img src="portrait.jpg" alt="${p.name}" class="person-portrait"
                onerror="this.style.background='#e2e8f0'">
           <div class="person-name">${p.name}</div>
@@ -674,94 +616,232 @@ function renderNamen() {
     }).join('');
 }
 
-/* ── Mitte ── */
 function renderMitte() {
-  const vId = GRUPPE.gruppenvertretung.personId;
-  const vp  = vId ? MITARBEITENDE.find(p => p.id === vId) : null;
+  const vp = GRUPPE.gruppenvertretung.personId
+    ? MITARBEITENDE.find(p => p.id===GRUPPE.gruppenvertretung.personId) : null;
   document.getElementById('gl-person').innerHTML = vp
-    ? `<img src="portrait.jpg" alt="${vp.name}" class="gl-foto"
-            onerror="this.style.background='#e2e8f0'">
-       <div>
-         <div class="gl-name">${vp.name}</div>
-         <div class="gl-rolle">Gruppenvertretung</div>
-         <div class="gl-hinweis">${GRUPPE.gruppenvertretung.hinweis}</div>
-       </div>`
+    ? `<img src="portrait.jpg" alt="${vp.name}" class="gl-foto" onerror="this.style.background='#e2e8f0'">
+       <div><div class="gl-name">${vp.name}</div>
+            <div class="gl-rolle">Gruppenvertretung</div>
+            <div class="gl-hinweis">${GRUPPE.gruppenvertretung.hinweis}</div></div>`
     : '<span style="color:var(--grau);font-size:.85rem;">Keine Vertretung</span>';
 
   document.getElementById('termin-liste').innerHTML = GRUPPE.termine.map(t =>
-    `<div class="termin">
-       <span class="termin-tag">${t.tag}</span>
-       <span class="${t.text ? '' : 'termin-leer'}">${t.text || '–'}</span>
-     </div>`
-  ).join('');
+    `<div class="termin"><span class="termin-tag">${t.tag}</span>
+     <span class="${t.text?'':'termin-leer'}">${t.text||'–'}</span></div>`).join('');
 
-  document.getElementById('wichtig-text').innerHTML =
-    (GRUPPE.wichtig || '–').replace(/\n/g, '<br>');
+  document.getElementById('wichtig-text').innerHTML = (GRUPPE.wichtig||'–').replace(/\n/g,'<br>');
 }
 
-/* ── Checkliste ── */
 function renderCheckliste() {
-  const checkIds = Object.keys(AUFGABEN).filter(id =>
-    GRUPPE.zustaendigkeiten.some(z => z.aufgabeId === id && z.typ === 'checkliste')
-  );
+  /* Nur aktive Aufgaben, Reihenfolge: checkpoint zuerst, dann alpha */
+  const ids = sortierteCheckIds().filter(id => AKTIVE_CHECKS.includes(id));
 
-  document.getElementById('check-tabelle').innerHTML = checkIds.map(id => {
+  document.getElementById('check-tabelle').innerHTML = ids.map(id => {
     const a        = AUFGABEN[id];
     const erledigt = STATE.erledigt.includes(id);
-    const zust     = GRUPPE.zustaendigkeiten.find(z => z.aufgabeId === id && z.typ === 'checkliste');
-    const person   = zust ? MITARBEITENDE.find(p => p.id === zust.personId) : null;
+    const zust     = GRUPPE.zustaendigkeiten.find(z => z.aufgabeId===id && z.typ==='checkliste');
+    const person   = zust ? MITARBEITENDE.find(p => p.id===zust.personId) : null;
     const abw      = !erledigt && person && STATE.abwesend.includes(person.id);
 
-    let rowKlasse, toggleKlasse, symbol, tipp;
-    if (erledigt) {
-      rowKlasse = 'erledigt'; toggleKlasse = '';        symbol = '✓'; tipp = 'Rückgängig machen';
-    } else if (abw) {
-      rowKlasse = 'warnung';  toggleKlasse = 'warnung'; symbol = '⚠'; tipp = `${person.name} abwesend – trotzdem erledigt?`;
-    } else {
-      rowKlasse = '';          toggleKlasse = '';        symbol = '✗'; tipp = 'Als erledigt markieren';
-    }
+    let rowKlasse, toggleKlasse, symbol;
+    if      (erledigt) { rowKlasse='erledigt'; toggleKlasse='';        symbol='✓'; }
+    else if (abw)      { rowKlasse='warnung';  toggleKlasse='warnung'; symbol='⚠'; }
+    else               { rowKlasse='';          toggleKlasse='';        symbol='✗'; }
 
-    const warnHinweis = abw
-      ? `<div class="check-warnung">⚠ ${person.name} ist abwesend</div>`
-      : '';
+    const tipp = erledigt ? 'Rückgängig' : abw ? `${person.name} abwesend – trotzdem erledigt?` : 'Als erledigt markieren';
+    const warn = abw ? `<div class="check-warnung">⚠ ${person.name} ist abwesend</div>` : '';
 
     return `
       <div class="check-row ${rowKlasse}" id="cr-${id}">
-        <button class="check-toggle ${toggleKlasse}"
-                onclick="toggleErledigt('${id}')"
-                title="${tipp}" aria-label="${a.label}: ${tipp}">
-          ${symbol}
-        </button>
+        <button class="check-toggle ${toggleKlasse}" onclick="toggleErledigt('${id}')"
+                title="${tipp}" aria-label="${a.label}: ${tipp}">${symbol}</button>
         <img src="${a.foto}" alt="${a.label}" class="check-symbol">
-        <div class="check-label">${a.label}${warnHinweis}</div>
+        <div class="check-label">${a.label}${warn}</div>
       </div>`;
   }).join('');
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   EVENTS
+   EVENTS – Anwesenheit & Checkliste
    ═══════════════════════════════════════════════════════════════ */
 function toggleAbwesend(personId) {
-  if (editModus) return;  // Im Bearbeiten-Modus keine Abwesenheit umschalten
-
+  if (editModus) { oeffneAufgabenModal(personId); return; }
   const idx = STATE.abwesend.indexOf(personId);
-  if (idx === -1) STATE.abwesend.push(personId);
-  else            STATE.abwesend.splice(idx, 1);
+  if (idx===-1) STATE.abwesend.push(personId); else STATE.abwesend.splice(idx,1);
   speichereState();
-
-  /* Nur CSS-Klasse der betreffenden Zeile toggeln – kein DOM-Rebuild */
   const row = document.querySelector(`.namen-row[data-person-id="${personId}"]`);
   if (row) row.classList.toggle('abwesend', STATE.abwesend.includes(personId));
-
-  /* Checkliste sofort aktualisieren – Warnungen sofort sichtbar */
   renderCheckliste();
 }
 
 function toggleErledigt(aufgabeId) {
   const idx = STATE.erledigt.indexOf(aufgabeId);
-  if (idx === -1) STATE.erledigt.push(aufgabeId);
-  else            STATE.erledigt.splice(idx, 1);
-  speichereState();
+  if (idx===-1) STATE.erledigt.push(aufgabeId); else STATE.erledigt.splice(idx,1);
+  speichereState(); renderCheckliste();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL – gemeinsame Helfer
+   ═══════════════════════════════════════════════════════════════ */
+function schliesseModal(id) { document.getElementById(id).classList.remove('sichtbar'); }
+function modalAussenKlick(e, id) { if (e.target===document.getElementById(id)) schliesseModal(id); }
+
+/* ── Namen-Modal ── */
+function oeffneNamenModal() {
+  document.getElementById('namen-felder').innerHTML =
+    MITARBEITENDE.map(p => `
+      <label class="namen-feld">
+        <span class="namen-nr">${p.id}.</span>
+        <input class="namen-input" type="text" value="${p.name}"
+               data-person-id="${p.id}" maxlength="20" placeholder="Vorname N."
+               onkeydown="if(event.key==='Enter')speichereNamenAusModal()">
+      </label>`).join('');
+  document.getElementById('namen-modal').classList.add('sichtbar');
+  setTimeout(() => { const f=document.querySelector('.namen-input'); if(f) f.focus(); }, 80);
+}
+function speichereNamenAusModal() {
+  document.querySelectorAll('.namen-input').forEach(input => {
+    const p = MITARBEITENDE.find(p => p.id===parseInt(input.dataset.personId));
+    if (p && input.value.trim()) p.name = input.value.trim();
+  });
+  localStorage.setItem(NAMEN_KEY, JSON.stringify(MITARBEITENDE.map(p => ({id:p.id,name:p.name}))));
+  schliesseModal('namen-modal'); renderNamen(); initSortable(); renderCheckliste();
+}
+function resetNamen() {
+  if (!confirm('Namen zurücksetzen?')) return;
+  NAMEN_DEFAULT.forEach(d => { const p=MITARBEITENDE.find(p=>p.id===d.id); if(p) p.name=d.name; });
+  localStorage.removeItem(NAMEN_KEY);
+  schliesseModal('namen-modal'); renderNamen(); initSortable(); renderCheckliste();
+}
+
+/* ── Aufgaben-Modal (Klick auf Namen im Edit-Modus) ── */
+let aufgabenModalPersonId = null;
+
+function oeffneAufgabenModal(personId) {
+  aufgabenModalPersonId = personId;
+  const person    = MITARBEITENDE.find(p => p.id===personId);
+  const aktuell   = GRUPPE.zustaendigkeiten.filter(z => z.personId===personId).map(z => z.aufgabeId);
+
+  const checkIds  = sortierteCheckIds();
+  const zustIds   = Object.keys(AUFGABEN).filter(id => AUFGABEN[id].typ==='allgemein')
+                      .sort((a,b) => AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de'));
+
+  function chipHtml(id, chipKlasse) {
+    const a         = AUFGABEN[id];
+    const gewaehlt  = aktuell.includes(id);
+    // Wer hat diese check-Aufgabe sonst?
+    const anderer   = a.typ==='checkliste'
+      ? GRUPPE.zustaendigkeiten.find(z => z.aufgabeId===id && z.personId!==personId)
+      : null;
+    const anderePerson = anderer ? MITARBEITENDE.find(p=>p.id===anderer.personId) : null;
+    const belegtHint   = anderePerson && !gewaehlt
+      ? `<span class="aufg-chip-belegt">→ ${anderePerson.name}</span>` : '';
+    return `
+      <button class="aufg-chip ${chipKlasse} ${gewaehlt?'gewaehlt':''}"
+              data-aufgabe-id="${id}" onclick="chipToggle(this)">
+        <img src="${a.foto}" alt="${a.label}">
+        <span>${a.label}${belegtHint}</span>
+        <div class="aufg-chip-check">${gewaehlt?'✓':''}</div>
+      </button>`;
+  }
+
+  document.getElementById('aufgaben-modal-inhalt').innerHTML = `
+    <div class="aufg-modal-person">
+      <img src="portrait.jpg" alt="${person.name}" onerror="this.style.background='#e2e8f0'">
+      <div class="aufg-modal-person-name">${person.name}</div>
+    </div>
+    <div class="aufg-abschnitt-titel gelb"><span></span> Checklisten-Aufgaben (täglich)</div>
+    <div class="aufg-chips" id="chips-check">
+      ${checkIds.map(id => chipHtml(id,'check-chip')).join('')}
+    </div>
+    <div class="aufg-abschnitt-titel blau"><span></span> Allgemeine Zuständigkeiten</div>
+    <div class="aufg-chips" id="chips-zust">
+      ${zustIds.map(id => chipHtml(id,'zust-chip')).join('')}
+    </div>`;
+
+  document.getElementById('aufgaben-modal').classList.add('sichtbar');
+}
+
+function chipToggle(btn) {
+  btn.classList.toggle('gewaehlt');
+  const cb = btn.querySelector('.aufg-chip-check');
+  cb.textContent = btn.classList.contains('gewaehlt') ? '✓' : '';
+}
+
+function speichereAufgabenAusModal() {
+  const personId = aufgabenModalPersonId;
+  const neu = [];
+
+  /* Alle anderen Zuordnungen behalten */
+  GRUPPE.zustaendigkeiten
+    .filter(z => z.personId !== personId)
+    .forEach(z => neu.push(z));
+
+  /* Ausgewählte Chips dieser Person einlesen */
+  document.querySelectorAll('.aufg-chip.gewaehlt').forEach(chip => {
+    const aufgabeId = chip.dataset.aufgabeId;
+    const a         = AUFGABEN[aufgabeId];
+
+    /* Bei checkliste: vorherige Zuweisung bei anderer Person entfernen */
+    if (a.typ === 'checkliste') {
+      const idx = neu.findIndex(z => z.aufgabeId===aufgabeId && z.typ==='checkliste');
+      if (idx !== -1) neu.splice(idx, 1);
+    }
+    neu.push({ personId, aufgabeId, typ: a.typ });
+  });
+
+  GRUPPE.zustaendigkeiten = neu;
+  speichereZuordnung();
+  schliesseModal('aufgaben-modal');
+  renderNamen();
+  initSortable();
+  renderCheckliste();
+}
+
+/* ── Checkliste-Modal ── */
+function oeffneChecklisteModal() {
+  const ids = sortierteCheckIds();
+  document.getElementById('check-modal-liste').innerHTML = ids.map(id => {
+    const a        = AUFGABEN[id];
+    const aktiv    = AKTIVE_CHECKS.includes(id);
+    const fixiert  = id === 'checkpoint'; // immer aktiv
+    return `
+      <button class="check-modal-item ${aktiv?'gewaehlt':''} ${fixiert?'fixiert':''}"
+              data-check-id="${id}"
+              onclick="${fixiert?'':''this.classList.toggle(\'gewaehlt\');checkModalCb(this)''"
+              ${fixiert?'disabled':''}>
+        <img src="${a.foto}" alt="${a.label}">
+        <span class="check-modal-label">${a.label}
+          ${fixiert?'<span class="check-modal-hinweis"> (immer aktiv)</span>':''}
+        </span>
+        <div class="check-modal-cb">${aktiv?'✓':''}</div>
+      </button>`;
+  }).join('');
+  document.getElementById('checkliste-modal').classList.add('sichtbar');
+}
+
+function checkModalCb(btn) {
+  const cb = btn.querySelector('.check-modal-cb');
+  cb.textContent = btn.classList.contains('gewaehlt') ? '✓' : '';
+}
+
+function speichereChecklisteAusModal() {
+  AKTIVE_CHECKS = ['checkpoint']; // checkpoint immer drin
+  document.querySelectorAll('.check-modal-item.gewaehlt:not(.fixiert)').forEach(btn => {
+    AKTIVE_CHECKS.push(btn.dataset.checkId);
+  });
+  /* Alphabetisch sortieren, checkpoint zuerst */
+  AKTIVE_CHECKS = sortierteCheckIds().filter(id => AKTIVE_CHECKS.includes(id));
+  speichereAktiveChecks();
+  schliesseModal('checkliste-modal');
+  renderCheckliste();
+}
+
+function resetAktiveChecks() {
+  AKTIVE_CHECKS = sortierteCheckIds();
+  speichereAktiveChecks();
+  schliesseModal('checkliste-modal');
   renderCheckliste();
 }
 
@@ -772,53 +852,35 @@ let editModus = false;
 let sortableInstances = [];
 
 function initSortable() {
-  /* Alte Instanzen zerstören */
   sortableInstances.forEach(s => s.destroy());
   sortableInstances = [];
-
   document.querySelectorAll('.aufgaben-icons').forEach(el => {
-    sortableInstances.push(
-      new Sortable(el, {
-        group:     'aufgaben',   // Icons zwischen allen Zeilen austauschbar
-        animation: 150,
-        disabled:  true,         // Startet deaktiviert
-        delay:     150,          // Kurzes Halten vor Drag-Start (verhindert Versehen)
-        delayOnTouchOnly: true,  // Delay nur bei Touch, Maus sofort
-        ghostClass: 'aufg-drag-ghost',
-
-        onEnd: function () {
-          /* Zuordnung aus dem DOM neu einlesen und speichern */
-          const neu = [];
-          document.querySelectorAll('.namen-row[data-person-id]').forEach(row => {
-            const pId = parseInt(row.dataset.personId);
-            row.querySelectorAll('.aufg-icon[data-aufgabe-id]').forEach(icon => {
-              neu.push({
-                personId:  pId,
-                aufgabeId: icon.dataset.aufgabeId,
-                typ:       icon.dataset.typ
-              });
-            });
+    sortableInstances.push(new Sortable(el, {
+      group: 'aufgaben', animation: 150, disabled: true,
+      delay: 150, delayOnTouchOnly: true,
+      onEnd() {
+        const neu = [];
+        document.querySelectorAll('.namen-row[data-person-id]').forEach(row => {
+          const pId = parseInt(row.dataset.personId);
+          row.querySelectorAll('.aufg-icon[data-aufgabe-id]').forEach(icon => {
+            neu.push({ personId:pId, aufgabeId:icon.dataset.aufgabeId, typ:icon.dataset.typ });
           });
-          GRUPPE.zustaendigkeiten = neu;
-          speichereZuordnung();
-          renderCheckliste();  // Warnungen nach Verschieben sofort aktualisieren
-        }
-      })
-    );
+        });
+        GRUPPE.zustaendigkeiten = neu;
+        speichereZuordnung();
+        renderCheckliste();
+      }
+    }));
   });
 }
 
 function toggleEditModus() {
   editModus = !editModus;
-  const btn    = document.getElementById('btn-edit');
-  const leiste = document.getElementById('edit-leiste');
-
+  const btn = document.getElementById('btn-edit');
   document.body.classList.toggle('edit-modus', editModus);
   btn.classList.toggle('aktiv', editModus);
   btn.textContent = editModus ? '✓ Fertig' : '✏️ Bearbeiten';
-  leiste.classList.toggle('sichtbar', editModus);
-
-  /* Sortable ein-/ausschalten */
+  document.getElementById('edit-leiste').classList.toggle('sichtbar', editModus);
   sortableInstances.forEach(s => s.option('disabled', !editModus));
 }
 
@@ -828,12 +890,7 @@ function toggleEditModus() {
 document.getElementById('banner-name').textContent = GRUPPE.name;
 document.getElementById('banner-kw').textContent   = GRUPPE.woche;
 document.getElementById('jahr').textContent        = new Date().getFullYear();
-
-renderNamen();
-renderMitte();
-renderCheckliste();
-initSortable();
+renderNamen(); renderMitte(); renderCheckliste(); initSortable();
 </script>
-
 </body>
 </html>
