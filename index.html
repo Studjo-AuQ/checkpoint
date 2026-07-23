@@ -7,51 +7,70 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --rot:   #b61f29;
-      --gruen: #16a34a;
-      --bg:    #f0f2f5;
-      --text:  #0f2f37;
-      --grau:  #64748b;
-      --hell:  #e2e8f0;
-      --ROW:   80px;   /* ← Zeilenhöhe überall */
+      --rot:    #b61f29;
+      --gruen:  #16a34a;
+      --gelb:   #ca8a04;
+      --bg:     #f0f2f5;
+      --text:   #0f2f37;
+      --grau:   #64748b;
+      --hell:   #e2e8f0;
+      --ROW:    80px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Nunito Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column;
     }
 
     /* ── Header ── */
     header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
     header img { width: 100%; max-height: 80px; object-fit: cover; object-position: left; display: block; }
 
-    /* ── Wochen-Banner ── */
+    /* ── Banner ── */
     .banner {
       background: var(--rot); color: white;
       padding: 8px 16px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
     }
     .banner h1 { font-size: 1rem; font-weight: 800; }
     .banner-kw { font-size: 0.8rem; opacity: .85; }
-    .btn-reset {
+    .banner-btns { display: flex; gap: 8px; align-items: center; }
+
+    .btn-banner {
       background: rgba(255,255,255,.2); border: 2px solid white; color: white;
       border-radius: 999px; padding: 5px 14px;
       font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      transition: background .2s;
     }
-    .btn-reset:hover { background: rgba(255,255,255,.35); }
+    .btn-banner:hover { background: rgba(255,255,255,.35); }
+    .btn-banner.aktiv {
+      background: white; color: var(--rot); border-color: white;
+    }
+
+    /* ── Edit-Hinweisleiste ── */
+    .edit-leiste {
+      display: none;
+      background: #fef3c7; border-bottom: 2px solid #f59e0b;
+      padding: 7px 16px;
+      font-size: 0.78rem; font-weight: 700; color: #92400e;
+      align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .edit-leiste.sichtbar { display: flex; }
+    .btn-reset-assign {
+      background: #92400e; color: white; border: none;
+      border-radius: 999px; padding: 4px 12px;
+      font-family: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-reset-assign:hover { background: #78350f; }
 
     /* ── 3-Spalten-Layout ── */
     .grid {
       display: grid;
       grid-template-columns: auto 1fr auto;
-      gap: 10px;
-      padding: 10px;
+      gap: 10px; padding: 10px;
       align-items: start;
     }
 
@@ -66,15 +85,30 @@
        LINKE SPALTE – Namen & Zuständigkeiten
        ════════════════════════════════════════════════ */
     .namen-tabelle {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      background: white; border-radius: 12px;
+      overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      transition: outline .2s;
+    }
+
+    /* Edit-Modus: visuelle Hervorhebung */
+    body.edit-modus .namen-tabelle {
+      outline: 3px dashed var(--gelb);
+      outline-offset: 2px;
+    }
+    body.edit-modus .aufg-icon {
+      cursor: grab;
+      border: 2px dashed rgba(202,138,4,.5);
+      border-radius: 6px;
+    }
+    body.edit-modus .aufg-icon:hover { opacity: .85; }
+    body.edit-modus .aufgaben-icons { background: rgba(254,243,199,.4); }
+    /* Leere Drop-Zone bleibt sichtbar */
+    body.edit-modus .aufgaben-icons {
+      min-width: 80px; min-height: var(--ROW);
     }
 
     .namen-row {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       height: var(--ROW);
       border-bottom: 1px solid var(--hell);
       cursor: pointer;
@@ -85,17 +119,15 @@
     .namen-row:hover { background: #fef2f2; }
     .namen-row.abwesend { background: #f8fafc; opacity: .5; }
 
-    /* Portrait */
+    body.edit-modus .namen-row { cursor: default; }
+
     .person-portrait {
       width: var(--ROW); height: var(--ROW);
       object-fit: cover; flex-shrink: 0;
       border-right: 1px solid var(--hell);
     }
-
-    /* Name */
     .person-name {
-      width: 148px; min-width: 148px;
-      height: var(--ROW);
+      width: 148px; min-width: 148px; height: var(--ROW);
       display: flex; align-items: center;
       padding: 0 12px;
       font-size: 0.95rem; font-weight: 800;
@@ -103,23 +135,18 @@
       overflow: hidden; white-space: nowrap;
     }
     .namen-row.abwesend .person-name {
-      text-decoration: line-through;
-      color: var(--grau);
+      text-decoration: line-through; color: var(--grau);
     }
-
-    /* Aufgaben-Icons */
     .aufgaben-icons {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       height: var(--ROW);
     }
     .aufg-icon {
       width: var(--ROW); height: var(--ROW);
-      object-fit: contain;
-      flex-shrink: 0;
+      object-fit: contain; flex-shrink: 0;
       border-right: 1px solid var(--hell);
-      background: #fafafa;
-      padding: 4px;
+      background: #fafafa; padding: 4px;
+      transition: opacity .15s;
     }
     .aufg-icon:last-child { border-right: none; }
 
@@ -130,16 +157,13 @@
 
     .info-box {
       background: white; border-radius: 12px;
-      padding: 12px 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+      padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07);
     }
     .info-titel {
       font-size: 0.6rem; font-weight: 800;
       text-transform: uppercase; letter-spacing: .07em;
       color: var(--grau); margin-bottom: 8px;
     }
-
-    /* Gruppenleitung */
     .gl-person { display: flex; align-items: center; gap: 10px; }
     .gl-foto {
       width: 52px; height: 52px; border-radius: 50%;
@@ -150,12 +174,10 @@
     .gl-rolle { font-size: 0.72rem; color: var(--rot); font-weight: 700; }
     .gl-hinweis { font-size: 0.7rem; color: var(--grau); margin-top: 2px; }
 
-    /* Termine */
     .termin { display: flex; gap: 8px; font-size: 0.78rem; margin-bottom: 5px; line-height: 1.35; }
     .termin-tag { font-weight: 800; color: var(--rot); min-width: 22px; flex-shrink: 0; }
     .termin-leer { color: var(--grau); font-style: italic; }
 
-    /* Wichtig */
     .wichtig-box {
       background: #fff7ed; border: 2px solid #f97316;
       border-radius: 12px; padding: 12px 14px;
@@ -165,88 +187,138 @@
     .wichtig-text { font-size: 0.82rem; font-weight: 700; color: #7c2d12; line-height: 1.5; }
 
     /* ════════════════════════════════════════════════
-       RECHTE SPALTE – Tages-Checkliste
+       RECHTE SPALTE – Checkliste
        ════════════════════════════════════════════════ */
     .check-tabelle {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      background: white; border-radius: 12px;
+      overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08);
     }
-
     .check-row {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       height: var(--ROW);
       border-bottom: 1px solid var(--hell);
+      transition: background .2s;
     }
     .check-row:last-child { border-bottom: none; }
-    .check-row.erledigt { background: #f0fdf4; }
+    .check-row.erledigt  { background: #f0fdf4; }
+    .check-row.warnung   { background: #fefce8; }
 
-    /* Roter X / Grüner Haken – klickbarer Toggle */
     .check-toggle {
       width: var(--ROW); height: var(--ROW);
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
       font-size: 2.2rem; font-weight: 900;
       background: var(--rot); color: white;
-      cursor: pointer;
-      border: none; font-family: inherit;
+      cursor: pointer; border: none; font-family: inherit;
       border-right: 2px solid rgba(0,0,0,.1);
-      transition: background .15s;
+      transition: background .15s, font-size .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .check-row.erledigt .check-toggle {
-      background: var(--gruen);
-    }
-    .check-toggle:hover { filter: brightness(1.1); }
+    .check-toggle:hover  { filter: brightness(1.1); }
     .check-toggle:active { filter: brightness(.9); }
+    .check-row.erledigt .check-toggle { background: var(--gruen); }
+    .check-row.warnung  .check-toggle { background: var(--gelb); font-size: 1.7rem; }
 
-    /* Aufgaben-Symbol */
     .check-symbol {
       width: var(--ROW); height: var(--ROW);
-      object-fit: contain;
-      flex-shrink: 0;
+      object-fit: contain; flex-shrink: 0;
       border-right: 1px solid var(--hell);
-      background: #fafafa;
-      padding: 4px;
+      background: #fafafa; padding: 4px;
     }
-
-    /* Beschriftung */
     .check-label {
-      padding: 0 14px;
-      font-size: 0.9rem; font-weight: 800;
-      color: var(--text);
-      flex: 1;
-      line-height: 1.25;
+      padding: 0 14px; font-size: 0.9rem; font-weight: 800;
+      color: var(--text); flex: 1; line-height: 1.25;
     }
     .check-row.erledigt .check-label { color: var(--gruen); }
-
-    /* ── Warnung: zuständige Person abwesend ── */
-    .check-row.warnung { background: #fefce8; }
-
-    .check-toggle.warnung {
-      background: #ca8a04;   /* Bernstein-Gelb */
-      font-size: 1.7rem;
-    }
-    .check-toggle.warnung:hover { filter: brightness(1.12); }
-
     .check-warnung {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #92400e;
-      margin-top: 3px;
-      line-height: 1.2;
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.65rem; font-weight: 800; color: #92400e; margin-top: 3px;
     }
+
+    /* ════════════════════════════════════════════════
+       NAMEN-MODAL
+       ════════════════════════════════════════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 8000;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.sichtbar { display: flex; }
+
+    .modal-box {
+      background: white; border-radius: 16px;
+      padding: 24px; width: min(580px, 95vw);
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .modal-kopf {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 18px;
+    }
+    .modal-kopf h2 { font-size: 1.1rem; font-weight: 900; color: var(--rot); }
+    .modal-schliessen {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: none; background: var(--bg);
+      font-size: 1.2rem; cursor: pointer; color: var(--grau);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-schliessen:hover { background: var(--hell); }
+
+    .namen-felder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .namen-feld {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .namen-nr {
+      width: 24px; font-size: 0.7rem; font-weight: 800;
+      color: var(--grau); text-align: right; flex-shrink: 0;
+    }
+    .namen-input {
+      flex: 1; padding: 8px 10px;
+      border: 2px solid var(--hell); border-radius: 8px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 700;
+      color: var(--text);
+      transition: border-color .15s;
+    }
+    .namen-input:focus { outline: none; border-color: var(--rot); }
+
+    .modal-btns {
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .btn-modal-primary {
+      background: var(--rot); color: white; border: none;
+      border-radius: 999px; padding: 9px 22px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-modal-primary:hover { background: #9b1a23; }
+    .btn-modal-secondary {
+      background: var(--bg); color: var(--grau);
+      border: 2px solid var(--hell); border-radius: 999px;
+      padding: 9px 18px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-modal-secondary:hover { background: var(--hell); }
+    .btn-modal-reset {
+      background: none; color: var(--grau);
+      border: none; font-family: inherit; font-size: 0.78rem;
+      font-weight: 700; cursor: pointer; margin-right: auto;
+      text-decoration: underline;
+    }
+    .btn-modal-reset:hover { color: var(--rot); }
 
     /* ── Footer ── */
     footer {
       text-align: center; padding: 10px;
-      background: var(--rot); color: white; font-size: 0.78rem; font-weight: 600;
-      margin-top: auto;
+      background: var(--rot); color: white;
+      font-size: 0.78rem; font-weight: 600; margin-top: auto;
     }
   </style>
 </head>
@@ -261,44 +333,67 @@
     <div class="banner-kw" id="banner-kw"></div>
     <h1 id="banner-name">Gruppen·Checkpoint</h1>
   </div>
-  <button class="btn-reset" onclick="tagesReset(true)">🔄 Neuer Tag</button>
+  <div class="banner-btns">
+    <button class="btn-banner" id="btn-edit"      onclick="toggleEditModus()">✏️ Bearbeiten</button>
+    <button class="btn-banner" id="btn-namen"     onclick="oeffneNamenModal()">👤 Namen</button>
+    <button class="btn-banner" id="btn-neuer-tag" onclick="tagesReset(true)">🔄 Neuer Tag</button>
+  </div>
+</div>
+
+<!-- Hinweisleiste im Bearbeitungs-Modus -->
+<div class="edit-leiste" id="edit-leiste">
+  ✏️ <strong>Bearbeiten-Modus:</strong>
+  Symbole gedrückt halten und in eine andere Zeile ziehen, um Zuständigkeiten zu verschieben.
+  <button class="btn-reset-assign" onclick="resetZuordnung()">↩ Zuordnung zurücksetzen</button>
+</div>
+
+<!-- ══ NAMEN-MODAL ══ -->
+<div class="modal-overlay" id="namen-modal" onclick="modalAussenKlick(event)">
+  <div class="modal-box">
+    <div class="modal-kopf">
+      <h2>👤 Namen bearbeiten</h2>
+      <button class="modal-schliessen" onclick="schliesseNamenModal()" title="Schließen">✕</button>
+    </div>
+    <div class="namen-felder" id="namen-felder"><!-- JS --></div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="resetNamen()">↩ Standard wiederherstellen</button>
+      <button class="btn-modal-secondary" onclick="schliesseNamenModal()">Abbrechen</button>
+      <button class="btn-modal-primary"   onclick="speichereNamenAusModal()">💾 Speichern</button>
+    </div>
+  </div>
 </div>
 
 <div class="grid">
 
-  <!-- ══ LINKE SPALTE ══ -->
+  <!-- LINKE SPALTE -->
   <div>
     <div class="spalte-titel">👤 Namen &amp; Zuständigkeiten</div>
     <div class="namen-tabelle" id="namen-tabelle"><!-- JS --></div>
   </div>
 
-  <!-- ══ MITTLERE SPALTE ══ -->
+  <!-- MITTLERE SPALTE -->
   <div>
     <div class="spalte-titel">📋 Infos &amp; Termine</div>
     <div class="mitte">
-
       <div class="info-box">
         <div class="info-titel">⭐ Leitung heute</div>
-        <div class="gl-person" id="gl-person"><!-- JS --></div>
+        <div class="gl-person" id="gl-person"></div>
       </div>
-
       <div class="info-box">
         <div class="info-titel">📅 Termine diese Woche</div>
-        <div id="termin-liste"><!-- JS --></div>
+        <div id="termin-liste"></div>
       </div>
-
       <div class="wichtig-box">
         <div class="info-titel">⚠️ Diese Woche wichtig</div>
         <div class="wichtig-text" id="wichtig-text"></div>
       </div>
-
     </div>
   </div>
 
-  <!-- ══ RECHTE SPALTE ══ -->
+  <!-- RECHTE SPALTE -->
   <div>
     <div class="spalte-titel">✅ Tages-Checkliste</div>
-    <div class="check-tabelle" id="check-tabelle"><!-- JS --></div>
+    <div class="check-tabelle" id="check-tabelle"></div>
   </div>
 
 </div>
@@ -307,11 +402,14 @@
   &copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen·Checkpoint
 </footer>
 
+<!-- SortableJS – Datei ins Repo hochladen:
+     https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js -->
+<script src="sortable.min.js"></script>
+
 <script>
 /* ═══════════════════════════════════════════════════════════════
    KONFIGURATION – wöchentlich anpassen
    ═══════════════════════════════════════════════════════════════ */
-
 const GRUPPE = {
   name:  "Gruppe Freisenberg",
   woche: "KW 31 | 28.07.–01.08.2025",
@@ -331,8 +429,7 @@ const GRUPPE = {
 
   wichtig: "⚠️ Roter Hubwagen defekt!\nBitte NICHT benutzen – Meldung an Gruppenleitung.",
 
-  /* ── Zuständigkeiten diese Woche ──────────────────────────────
-     typ "checkliste" = max. 1 Person  |  typ "allgemein" = bis zu 2   */
+  /* Standard-Zuordnung – wird durch drag & drop überschrieben */
   zustaendigkeiten: [
     { personId: 1,  aufgabeId: "fegen",               typ: "checkliste" },
     { personId: 2,  aufgabeId: "muell",               typ: "checkliste" },
@@ -357,7 +454,10 @@ const GRUPPE = {
   ]
 };
 
-/* ── 16 Mitarbeitende ─────────────────────────────────────── */
+/* Standard-Zuordnung als Fallback speichern */
+const ZUORDNUNG_DEFAULT = JSON.parse(JSON.stringify(GRUPPE.zustaendigkeiten));
+
+/* ── 16 Mitarbeitende ── */
 const MITARBEITENDE = [
   { id: 1,  name: "Anna B."      },
   { id: 2,  name: "Thomas K."    },
@@ -377,89 +477,204 @@ const MITARBEITENDE = [
   { id: 16, name: "Frank J."     },
 ];
 
-/* ── Aufgaben-Definitionen ────────────────────────────────── */
+/* ── Aufgaben ── */
 const AUFGABEN = {
-  /* Checklisten-Aufgaben (11) */
-  fegen:               { label: "Boden fegen",                foto: "check-fegen.jpg"               },
-  muell:               { label: "Müll entsorgen",             foto: "check-muell.jpg"               },
-  tische:              { label: "Tische wischen",             foto: "check-tische.jpg"              },
-  geschirr:            { label: "Geschirr wegräumen",         foto: "check-geschirr.jpg"            },
-  fenster:             { label: "Fenster schließen",          foto: "check-fenster.jpg"             },
-  strom:               { label: "Strom ausschalten",          foto: "check-strom.jpg"               },
-  tuerklinken:         { label: "Türklinken desinfizieren",   foto: "check-tuerklinken.jpg"         },
-  versandvorbereitung: { label: "Versand vorbereiten",        foto: "check-versandvorbereitung.jpg" },
-  sicherheit:          { label: "Arbeitssicherheit prüfen",   foto: "check-sicherheit.jpg"          },
-  arbeitsvorbereitung: { label: "Arbeit vorbereiten",         foto: "check-arbeitsvorbereitung.jpg" },
-  checkpoint:          { label: "Kontrolle Checkpoint",       foto: "check-checkpoint.jpg"          },
-  /* Allgemeine Zuständigkeiten (8) */
-  betriebsmittel:      { label: "Betriebsmittel prüfen",      foto: "zust-betriebsmittel.jpg"       },
-  botengaenge:         { label: "Botengänge",                 foto: "zust-botengaenge.jpg"          },
-  hubwagen:            { label: "Hubwagen fahren",            foto: "zust-hubwagen.jpg"             },
-  qualitaet:           { label: "Qualität prüfen",            foto: "zust-qualitaet.jpg"            },
-  diensttelefon:       { label: "Dienst-Telefon",             foto: "zust-diensttelefon.jpg"        },
-  essensmarken:        { label: "Essensmarken zuordnen",      foto: "zust-essensmarken.jpg"         },
-  materialbeschaffung: { label: "Materialbeschaffung",        foto: "zust-materialbeschaffung.jpg"  },
-  mentor:              { label: "Mentor / Pate",              foto: "zust-mentor.jpg"               },
+  fegen:               { label: "Boden fegen",              foto: "check-fegen.jpg"               },
+  muell:               { label: "Müll entsorgen",           foto: "check-muell.jpg"               },
+  tische:              { label: "Tische wischen",           foto: "check-tische.jpg"              },
+  geschirr:            { label: "Geschirr wegräumen",       foto: "check-geschirr.jpg"            },
+  fenster:             { label: "Fenster schließen",        foto: "check-fenster.jpg"             },
+  strom:               { label: "Strom ausschalten",        foto: "check-strom.jpg"               },
+  tuerklinken:         { label: "Türklinken desinfizieren", foto: "check-tuerklinken.jpg"         },
+  versandvorbereitung: { label: "Versand vorbereiten",      foto: "check-versandvorbereitung.jpg" },
+  sicherheit:          { label: "Arbeitssicherheit prüfen", foto: "check-sicherheit.jpg"          },
+  arbeitsvorbereitung: { label: "Arbeit vorbereiten",       foto: "check-arbeitsvorbereitung.jpg" },
+  checkpoint:          { label: "Kontrolle Checkpoint",     foto: "check-checkpoint.jpg"          },
+  betriebsmittel:      { label: "Betriebsmittel prüfen",    foto: "zust-betriebsmittel.jpg"       },
+  botengaenge:         { label: "Botengänge",               foto: "zust-botengaenge.jpg"          },
+  hubwagen:            { label: "Hubwagen fahren",          foto: "zust-hubwagen.jpg"             },
+  qualitaet:           { label: "Qualität prüfen",          foto: "zust-qualitaet.jpg"            },
+  diensttelefon:       { label: "Dienst-Telefon",           foto: "zust-diensttelefon.jpg"        },
+  essensmarken:        { label: "Essensmarken zuordnen",    foto: "zust-essensmarken.jpg"         },
+  materialbeschaffung: { label: "Materialbeschaffung",      foto: "zust-materialbeschaffung.jpg"  },
+  mentor:              { label: "Mentor / Pate",            foto: "zust-mentor.jpg"               },
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   ZUSTAND – localStorage, täglich auto-reset
+   PERSISTENCE  –  2 getrennte Speicher
+   STATE_KEY   = Tagesstatus (abwesend, erledigt) → täglicher Reset
+   ASSIGN_KEY  = Zuordnungen (wer hat welche Aufgabe) → dauerhaft
    ═══════════════════════════════════════════════════════════════ */
-const STORAGE_KEY = 'checkpoint-v2';
+const STATE_KEY  = 'checkpoint-state-v2';
+const ASSIGN_KEY = 'checkpoint-assign-v2';
 
 function heute() { return new Date().toISOString().slice(0, 10); }
 
+/* Tagesstatus */
 function ladeState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { return null; }
+  try { return JSON.parse(localStorage.getItem(STATE_KEY)); } catch { return null; }
 }
 function speichereState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+  localStorage.setItem(STATE_KEY, JSON.stringify(STATE));
 }
-
 function tagesReset(manuell = false) {
-  if (manuell && !confirm('Tages-Reset: Alle Einträge zurücksetzen?')) return;
+  if (manuell && !confirm('Tages-Reset: Abwesenheiten und erledigte Aufgaben zurücksetzen?')) return;
   STATE.datum    = heute();
   STATE.abwesend = [];
   STATE.erledigt = [];
   speichereState();
-  renderAlles();
+  // Alle Zeilen visuell aktualisieren
+  document.querySelectorAll('.namen-row').forEach(row => row.classList.remove('abwesend'));
+  renderCheckliste();
 }
-
-let raw = ladeState();
+let raw   = ladeState();
 let STATE = (raw && raw.datum === heute())
   ? raw
   : { datum: heute(), abwesend: [], erledigt: [] };
 
-/* ═══════════════════════════════════════════════════════════════
-   RENDER – Linke Spalte
-   ═══════════════════════════════════════════════════════════════ */
-function renderNamen() {
-  const tabelle = document.getElementById('namen-tabelle');
-  tabelle.innerHTML = MITARBEITENDE.map(p => {
-    const abw   = STATE.abwesend.includes(p.id);
-    const zust  = GRUPPE.zustaendigkeiten.filter(z => z.personId === p.id);
-    const icons = zust.map(z => {
-      const a = AUFGABEN[z.aufgabeId];
-      return a
-        ? `<img src="${a.foto}" alt="${a.label}" title="${a.label}" class="aufg-icon">`
-        : '';
-    }).join('');
-
-    return `
-      <div class="namen-row ${abw ? 'abwesend' : ''}"
-           onclick="toggleAbwesend(${p.id})"
-           title="${abw ? 'Klicken: wieder anwesend' : 'Klicken: abwesend markieren'}">
-        <img src="portrait.jpg" alt="${p.name}" class="person-portrait"
-             onerror="this.style.background='#e2e8f0'">
-        <div class="person-name">${p.name}</div>
-        <div class="aufgaben-icons">${icons}</div>
-      </div>`;
-  }).join('');
+/* Zuordnungen */
+function ladeZuordnung() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ASSIGN_KEY));
+    if (saved && Array.isArray(saved)) GRUPPE.zustaendigkeiten = saved;
+  } catch {}
+}
+function speichereZuordnung() {
+  localStorage.setItem(ASSIGN_KEY, JSON.stringify(GRUPPE.zustaendigkeiten));
+}
+function resetZuordnung() {
+  if (!confirm('Alle Zuordnungen auf den Standard zurücksetzen?')) return;
+  GRUPPE.zustaendigkeiten = JSON.parse(JSON.stringify(ZUORDNUNG_DEFAULT));
+  localStorage.removeItem(ASSIGN_KEY);
+  renderNamen();
+  initSortable();
+  renderCheckliste();
 }
 
+/* Gespeicherte Zuordnung beim Start laden */
+ladeZuordnung();
+
 /* ═══════════════════════════════════════════════════════════════
-   RENDER – Mittlere Spalte
+   NAMEN-PERSISTENZ  –  dauerhaft in localStorage
    ═══════════════════════════════════════════════════════════════ */
+const NAMEN_KEY      = 'checkpoint-namen-v2';
+const NAMEN_DEFAULT  = MITARBEITENDE.map(p => ({ id: p.id, name: p.name }));
+
+function ladeNamen() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(NAMEN_KEY));
+    if (!saved || !Array.isArray(saved)) return;
+    saved.forEach(s => {
+      const p = MITARBEITENDE.find(p => p.id === s.id);
+      if (p && s.name && s.name.trim()) p.name = s.name.trim();
+    });
+  } catch {}
+}
+
+function oeffneNamenModal() {
+  /* Felder dynamisch befüllen */
+  document.getElementById('namen-felder').innerHTML =
+    MITARBEITENDE.map(p => `
+      <label class="namen-feld">
+        <span class="namen-nr">${p.id}.</span>
+        <input class="namen-input"
+               type="text"
+               value="${p.name}"
+               data-person-id="${p.id}"
+               maxlength="20"
+               placeholder="Vorname N."
+               onkeydown="if(event.key==='Enter') speichereNamenAusModal()">
+      </label>`
+    ).join('');
+
+  document.getElementById('namen-modal').classList.add('sichtbar');
+
+  /* Erstes Feld fokussieren */
+  setTimeout(() => {
+    const ersterInput = document.querySelector('.namen-input');
+    if (ersterInput) ersterInput.focus();
+  }, 80);
+}
+
+function schliesseNamenModal() {
+  document.getElementById('namen-modal').classList.remove('sichtbar');
+}
+
+/* Klick außerhalb des Modal-Rahmens schließt es */
+function modalAussenKlick(e) {
+  if (e.target === document.getElementById('namen-modal')) schliesseNamenModal();
+}
+
+function speichereNamenAusModal() {
+  document.querySelectorAll('.namen-input').forEach(input => {
+    const id  = parseInt(input.dataset.personId);
+    const neu = input.value.trim();
+    const p   = MITARBEITENDE.find(p => p.id === id);
+    if (p && neu) p.name = neu;
+  });
+
+  localStorage.setItem(NAMEN_KEY,
+    JSON.stringify(MITARBEITENDE.map(p => ({ id: p.id, name: p.name })))
+  );
+
+  schliesseNamenModal();
+  renderNamen();
+  initSortable();
+  renderCheckliste(); /* Warnungen mit neuen Namen aktualisieren */
+}
+
+function resetNamen() {
+  if (!confirm('Alle Namen auf den Standard zurücksetzen?')) return;
+  NAMEN_DEFAULT.forEach(d => {
+    const p = MITARBEITENDE.find(p => p.id === d.id);
+    if (p) p.name = d.name;
+  });
+  localStorage.removeItem(NAMEN_KEY);
+  schliesseNamenModal();
+  renderNamen();
+  initSortable();
+  renderCheckliste();
+}
+
+/* Namen beim Start laden */
+ladeNamen();
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER – Linke Spalte
+   (Wird nur beim Start und nach resetZuordnung komplett neu gebaut.
+    toggleAbwesend ändert danach nur die CSS-Klasse, kein Rebuild.)
+   ═══════════════════════════════════════════════════════════════ */
+function renderNamen() {
+  document.getElementById('namen-tabelle').innerHTML =
+    MITARBEITENDE.map(p => {
+      const abw  = STATE.abwesend.includes(p.id);
+      const zust = GRUPPE.zustaendigkeiten.filter(z => z.personId === p.id);
+      const icons = zust.map(z => {
+        const a = AUFGABEN[z.aufgabeId];
+        return a
+          ? `<img src="${a.foto}"
+                  alt="${a.label}"
+                  title="${a.label}"
+                  class="aufg-icon"
+                  data-aufgabe-id="${z.aufgabeId}"
+                  data-typ="${z.typ}">`
+          : '';
+      }).join('');
+
+      return `
+        <div class="namen-row ${abw ? 'abwesend' : ''}"
+             data-person-id="${p.id}"
+             onclick="toggleAbwesend(${p.id})"
+             title="${abw ? 'Klicken: wieder anwesend' : 'Klicken: abwesend markieren'}">
+          <img src="portrait.jpg" alt="${p.name}" class="person-portrait"
+               onerror="this.style.background='#e2e8f0'">
+          <div class="person-name">${p.name}</div>
+          <div class="aufgaben-icons">${icons}</div>
+        </div>`;
+    }).join('');
+}
+
+/* ── Mitte ── */
 function renderMitte() {
   const vId = GRUPPE.gruppenvertretung.personId;
   const vp  = vId ? MITARBEITENDE.find(p => p.id === vId) : null;
@@ -484,11 +699,8 @@ function renderMitte() {
     (GRUPPE.wichtig || '–').replace(/\n/g, '<br>');
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RENDER – Rechte Spalte (Checkliste)
-   ═══════════════════════════════════════════════════════════════ */
+/* ── Checkliste ── */
 function renderCheckliste() {
-  /* Nur Checklisten-Aufgaben, in der Reihenfolge aus AUFGABEN */
   const checkIds = Object.keys(AUFGABEN).filter(id =>
     GRUPPE.zustaendigkeiten.some(z => z.aufgabeId === id && z.typ === 'checkliste')
   );
@@ -496,48 +708,32 @@ function renderCheckliste() {
   document.getElementById('check-tabelle').innerHTML = checkIds.map(id => {
     const a        = AUFGABEN[id];
     const erledigt = STATE.erledigt.includes(id);
+    const zust     = GRUPPE.zustaendigkeiten.find(z => z.aufgabeId === id && z.typ === 'checkliste');
+    const person   = zust ? MITARBEITENDE.find(p => p.id === zust.personId) : null;
+    const abw      = !erledigt && person && STATE.abwesend.includes(person.id);
 
-    /* Zuständige Person herausfinden (nur checkliste-Typ) */
-    const zust   = GRUPPE.zustaendigkeiten.find(z => z.aufgabeId === id && z.typ === 'checkliste');
-    const person = zust ? MITARBEITENDE.find(p => p.id === zust.personId) : null;
-    const abw    = !erledigt && person && STATE.abwesend.includes(person.id);
-
-    /* Zustand bestimmen: erledigt → grün | abwesend → gelb | normal → rot */
     let rowKlasse, toggleKlasse, symbol, tipp;
     if (erledigt) {
-      rowKlasse    = 'erledigt';
-      toggleKlasse = '';
-      symbol       = '✓';
-      tipp         = 'Rückgängig machen';
+      rowKlasse = 'erledigt'; toggleKlasse = '';        symbol = '✓'; tipp = 'Rückgängig machen';
     } else if (abw) {
-      rowKlasse    = 'warnung';
-      toggleKlasse = 'warnung';
-      symbol       = '⚠';
-      tipp         = `${person.name} ist heute abwesend! Trotzdem erledigt?`;
+      rowKlasse = 'warnung';  toggleKlasse = 'warnung'; symbol = '⚠'; tipp = `${person.name} abwesend – trotzdem erledigt?`;
     } else {
-      rowKlasse    = '';
-      toggleKlasse = '';
-      symbol       = '✗';
-      tipp         = 'Als erledigt markieren';
+      rowKlasse = '';          toggleKlasse = '';        symbol = '✗'; tipp = 'Als erledigt markieren';
     }
 
     const warnHinweis = abw
-      ? `<div class="check-warnung">⚠ ${person.name} abwesend</div>`
+      ? `<div class="check-warnung">⚠ ${person.name} ist abwesend</div>`
       : '';
 
     return `
       <div class="check-row ${rowKlasse}" id="cr-${id}">
         <button class="check-toggle ${toggleKlasse}"
                 onclick="toggleErledigt('${id}')"
-                title="${tipp}"
-                aria-label="${a.label}: ${tipp}">
+                title="${tipp}" aria-label="${a.label}: ${tipp}">
           ${symbol}
         </button>
         <img src="${a.foto}" alt="${a.label}" class="check-symbol">
-        <div class="check-label">
-          ${a.label}
-          ${warnHinweis}
-        </div>
+        <div class="check-label">${a.label}${warnHinweis}</div>
       </div>`;
   }).join('');
 }
@@ -546,11 +742,19 @@ function renderCheckliste() {
    EVENTS
    ═══════════════════════════════════════════════════════════════ */
 function toggleAbwesend(personId) {
+  if (editModus) return;  // Im Bearbeiten-Modus keine Abwesenheit umschalten
+
   const idx = STATE.abwesend.indexOf(personId);
   if (idx === -1) STATE.abwesend.push(personId);
   else            STATE.abwesend.splice(idx, 1);
   speichereState();
-  renderNamen();
+
+  /* Nur CSS-Klasse der betreffenden Zeile toggeln – kein DOM-Rebuild */
+  const row = document.querySelector(`.namen-row[data-person-id="${personId}"]`);
+  if (row) row.classList.toggle('abwesend', STATE.abwesend.includes(personId));
+
+  /* Checkliste sofort aktualisieren – Warnungen sofort sichtbar */
+  renderCheckliste();
 }
 
 function toggleErledigt(aufgabeId) {
@@ -561,10 +765,61 @@ function toggleErledigt(aufgabeId) {
   renderCheckliste();
 }
 
-function renderAlles() {
-  renderNamen();
-  renderMitte();
-  renderCheckliste();
+/* ═══════════════════════════════════════════════════════════════
+   DRAG & DROP – SortableJS
+   ═══════════════════════════════════════════════════════════════ */
+let editModus = false;
+let sortableInstances = [];
+
+function initSortable() {
+  /* Alte Instanzen zerstören */
+  sortableInstances.forEach(s => s.destroy());
+  sortableInstances = [];
+
+  document.querySelectorAll('.aufgaben-icons').forEach(el => {
+    sortableInstances.push(
+      new Sortable(el, {
+        group:     'aufgaben',   // Icons zwischen allen Zeilen austauschbar
+        animation: 150,
+        disabled:  true,         // Startet deaktiviert
+        delay:     150,          // Kurzes Halten vor Drag-Start (verhindert Versehen)
+        delayOnTouchOnly: true,  // Delay nur bei Touch, Maus sofort
+        ghostClass: 'aufg-drag-ghost',
+
+        onEnd: function () {
+          /* Zuordnung aus dem DOM neu einlesen und speichern */
+          const neu = [];
+          document.querySelectorAll('.namen-row[data-person-id]').forEach(row => {
+            const pId = parseInt(row.dataset.personId);
+            row.querySelectorAll('.aufg-icon[data-aufgabe-id]').forEach(icon => {
+              neu.push({
+                personId:  pId,
+                aufgabeId: icon.dataset.aufgabeId,
+                typ:       icon.dataset.typ
+              });
+            });
+          });
+          GRUPPE.zustaendigkeiten = neu;
+          speichereZuordnung();
+          renderCheckliste();  // Warnungen nach Verschieben sofort aktualisieren
+        }
+      })
+    );
+  });
+}
+
+function toggleEditModus() {
+  editModus = !editModus;
+  const btn    = document.getElementById('btn-edit');
+  const leiste = document.getElementById('edit-leiste');
+
+  document.body.classList.toggle('edit-modus', editModus);
+  btn.classList.toggle('aktiv', editModus);
+  btn.textContent = editModus ? '✓ Fertig' : '✏️ Bearbeiten';
+  leiste.classList.toggle('sichtbar', editModus);
+
+  /* Sortable ein-/ausschalten */
+  sortableInstances.forEach(s => s.option('disabled', !editModus));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -573,7 +828,12 @@ function renderAlles() {
 document.getElementById('banner-name').textContent = GRUPPE.name;
 document.getElementById('banner-kw').textContent   = GRUPPE.woche;
 document.getElementById('jahr').textContent        = new Date().getFullYear();
-renderAlles();
+
+renderNamen();
+renderMitte();
+renderCheckliste();
+initSortable();
 </script>
+
 </body>
 </html>
