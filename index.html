@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gruppen·Checkpoint – Studjo</title>
+  <title>Gruppen&middot;Checkpoint &ndash; Studjo</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -23,28 +23,39 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 
+    /* ── Header ── */
     header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
     header img { width: 100%; max-height: 80px; object-fit: cover; object-position: left; display: block; }
 
-    .banner { background: var(--rot); color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .banner h1 { font-size: 1rem; font-weight: 800; }
-    .banner-kw { font-size: 0.8rem; opacity: .85; }
-    .banner-btns { display: flex; gap: 8px; align-items: center; }
-    .btn-banner { background: rgba(255,255,255,.2); border: 2px solid white; color: white; border-radius: 999px; padding: 5px 14px; font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background .2s; }
+    /* ── Banner (rot) – nur noch Neuer Tag ── */
+    .banner { background: var(--rot); color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .banner-links h1 { font-size: 1rem; font-weight: 800; }
+    .banner-links .kw { font-size: 0.78rem; opacity: .85; }
+    .btn-banner { background: rgba(255,255,255,.2); border: 2px solid white; color: white; border-radius: 999px; padding: 5px 16px; font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background .2s; }
     .btn-banner:hover { background: rgba(255,255,255,.35); }
-    .btn-banner.aktiv { background: white; color: var(--rot); }
 
-    .edit-leiste { display: none; background: #fef3c7; border-bottom: 2px solid #f59e0b; padding: 7px 16px; font-size: 0.78rem; font-weight: 700; color: #92400e; align-items: center; gap: 10px; flex-wrap: wrap; }
+    /* ── Edit-Hinweisleiste ── */
+    .edit-leiste { display: none; background: #fef3c7; border-bottom: 2px solid #f59e0b; padding: 6px 16px; font-size: 0.78rem; font-weight: 700; color: #92400e; align-items: center; gap: 10px; flex-wrap: wrap; }
     .edit-leiste.sichtbar { display: flex; }
-    .edit-leiste-tipp { flex: 1; }
-    .btn-leiste { border: none; border-radius: 999px; padding: 5px 14px; font-family: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
-    .btn-leiste-dunkel { background: #92400e; color: white; }
+    .btn-leiste-dunkel { background: #92400e; color: white; border: none; border-radius: 999px; padding: 4px 12px; font-family: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
     .btn-leiste-dunkel:hover { background: #78350f; }
-    .btn-leiste-blau { background: #1d4ed8; color: white; }
-    .btn-leiste-blau:hover { background: #1e40af; }
 
+    /* ── 3-Spalten-Grid ── */
     .grid { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 10px; align-items: start; }
-    .spalte-titel { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--rot); border-bottom: 2px solid var(--rot); padding-bottom: 5px; margin-bottom: 6px; }
+
+    /* ── Spalten-Wrapper mit eigenem Header ── */
+    .col-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+    /* ── Spalten-Header (ersetzt spalte-titel) ── */
+    .col-header { display: flex; gap: 6px; align-items: center; padding-bottom: 5px; border-bottom: 2px solid var(--rot); flex-wrap: wrap; }
+    .col-btn {
+      font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--rot); background: none; border: none; cursor: pointer; font-family: inherit;
+      padding: 3px 8px; border-radius: 6px; transition: background .15s;
+    }
+    .col-btn:hover { background: rgba(182,31,41,.1); }
+    .col-btn.aktiv { background: var(--rot); color: white; border-radius: 6px; }
+    .col-btn-sep { color: var(--hell); font-size: 0.7rem; }
 
     /* ── Linke Spalte ── */
     .namen-tabelle { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
@@ -59,7 +70,7 @@
     .person-portrait { width: var(--ROW); height: var(--ROW); object-fit: cover; flex-shrink: 0; border-right: 1px solid var(--hell); }
     .person-name { width: 148px; min-width: 148px; height: var(--ROW); display: flex; align-items: center; padding: 0 12px; font-size: 0.95rem; font-weight: 800; border-right: 1px solid var(--hell); overflow: hidden; white-space: nowrap; }
     .namen-row.abwesend .person-name { text-decoration: line-through; color: var(--grau); }
-    body.edit-modus .person-name::after { content: ' ✏️'; font-size: 0.7rem; opacity: .6; }
+    body.edit-modus .person-name::after { content: ' \270F'; font-size: 0.7rem; opacity: .5; }
 
     .aufgaben-icons { display: flex; align-items: center; height: var(--ROW); }
     .aufg-icon { width: var(--ROW); height: var(--ROW); object-fit: contain; flex-shrink: 0; border-right: 1px solid var(--hell); padding: 6px; }
@@ -75,11 +86,18 @@
     .mitte { display: flex; flex-direction: column; gap: 10px; }
     .info-box { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
     .info-titel { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--grau); margin-bottom: 8px; }
-    .gl-person { display: flex; align-items: center; gap: 10px; }
-    .gl-foto { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 3px solid var(--rot); flex-shrink: 0; background: var(--bg); }
-    .gl-name { font-size: 1rem; font-weight: 800; }
-    .gl-rolle { font-size: 0.72rem; color: var(--rot); font-weight: 700; }
-    .gl-hinweis { font-size: 0.7rem; color: var(--grau); margin-top: 2px; }
+
+    /* Leitung-Box */
+    .leitung-zeile { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; margin-bottom: 4px; transition: background .2s; }
+    .leitung-zeile:last-child { margin-bottom: 0; }
+    .leitung-zeile.aktiv { background: #dcfce7; border: 1px solid #86efac; }
+    .leitung-symbol { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; flex-shrink: 0; }
+    .leitung-zeile.aktiv .leitung-symbol { background: var(--gruen); color: white; }
+    .leitung-zeile:not(.aktiv) .leitung-symbol { background: var(--hell); color: var(--grau); }
+    .leitung-name { font-size: 0.95rem; font-weight: 800; line-height: 1.2; }
+    .leitung-name.leer { color: var(--grau); font-style: italic; font-weight: 600; font-size: 0.82rem; }
+    .leitung-rolle { font-size: 0.6rem; font-weight: 700; color: var(--grau); text-transform: uppercase; letter-spacing: .05em; }
+
     .termin { display: flex; gap: 8px; font-size: 0.78rem; margin-bottom: 5px; line-height: 1.35; }
     .termin-tag { font-weight: 800; color: var(--rot); min-width: 22px; flex-shrink: 0; }
     .termin-leer { color: var(--grau); font-style: italic; }
@@ -110,7 +128,7 @@
     .modal-kopf h2 { font-size: 1.1rem; font-weight: 900; color: var(--rot); }
     .modal-schliessen { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--bg); font-size: 1.2rem; cursor: pointer; color: var(--grau); display: flex; align-items: center; justify-content: center; }
     .modal-schliessen:hover { background: var(--hell); }
-    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
     .btn-modal-primary { background: var(--rot); color: white; border: none; border-radius: 999px; padding: 9px 22px; font-family: inherit; font-size: 0.88rem; font-weight: 800; cursor: pointer; }
     .btn-modal-primary:hover { background: #9b1a23; }
     .btn-modal-secondary { background: var(--bg); color: var(--grau); border: 2px solid var(--hell); border-radius: 999px; padding: 9px 18px; font-family: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
@@ -125,6 +143,15 @@
     .namen-input { flex: 1; padding: 8px 10px; border: 2px solid var(--hell); border-radius: 8px; font-family: inherit; font-size: 0.88rem; font-weight: 700; color: var(--text); transition: border-color .15s; }
     .namen-input:focus { outline: none; border-color: var(--rot); }
 
+    /* Leitung-Modal */
+    .leitung-modal-zeile { display: flex; align-items: center; gap: 14px; padding: 12px 10px; border-radius: 10px; margin-bottom: 8px; border: 2px solid var(--hell); background: white; transition: border-color .2s; }
+    .leitung-modal-zeile.aktiv { border-color: var(--gruen); background: #f0fdf4; }
+    .leitung-radio { width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--gruen); cursor: pointer; }
+    .leitung-modal-info { flex: 1; }
+    .leitung-modal-rolle { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--grau); margin-bottom: 5px; }
+    .leitung-modal-input { width: 100%; padding: 7px 10px; border: 2px solid var(--hell); border-radius: 8px; font-family: inherit; font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .leitung-modal-input:focus { outline: none; border-color: var(--gruen); }
+
     /* Aufgaben-Modal */
     .aufg-modal-person { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 10px; margin-bottom: 14px; }
     .aufg-modal-person img { width: 44px; height: 44px; object-fit: cover; border-radius: 50%; border: 2px solid var(--rot); }
@@ -136,7 +163,7 @@
     .aufg-abschnitt-titel.gelb span { background: var(--check-rand); }
     .aufg-abschnitt-titel.blau span { background: var(--zust-rand); }
     .aufg-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .aufg-chip { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; cursor: pointer; border: 2px solid var(--hell); background: white; font-family: inherit; font-size: 0.78rem; font-weight: 700; color: var(--text); transition: all .15s; -webkit-tap-highlight-color: transparent; }
+    .aufg-chip { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; cursor: pointer; border: 2px solid var(--hell); background: white; font-family: inherit; font-size: 0.78rem; font-weight: 700; color: var(--text); transition: all .15s; }
     .aufg-chip img { width: 32px; height: 32px; object-fit: contain; border-radius: 4px; }
     .aufg-chip.check-chip { border-color: var(--check-rand); background: var(--check-bg); }
     .aufg-chip.zust-chip  { border-color: var(--zust-rand);  background: var(--zust-bg); }
@@ -148,7 +175,7 @@
 
     /* Checkliste-Modal */
     .check-modal-liste { display: flex; flex-direction: column; gap: 6px; }
-    .check-modal-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; border: 2px solid var(--hell); background: var(--check-bg); font-family: inherit; transition: all .15s; -webkit-tap-highlight-color: transparent; text-align: left; width: 100%; }
+    .check-modal-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; border: 2px solid var(--hell); background: var(--check-bg); font-family: inherit; transition: all .15s; text-align: left; width: 100%; }
     .check-modal-item.gewaehlt { border-color: #ca8a04; background: #fef08a; outline: 2px solid #ca8a04; }
     .check-modal-item.fixiert { opacity: .6; cursor: default; }
     .check-modal-item img { width: 44px; height: 44px; object-fit: contain; border-radius: 6px; flex-shrink: 0; }
@@ -156,6 +183,47 @@
     .check-modal-cb { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #cbd5e1; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
     .check-modal-item.gewaehlt .check-modal-cb { background: var(--gruen); border-color: var(--gruen); color: white; }
     .check-modal-hinweis { font-size: 0.65rem; color: #92400e; font-weight: 700; }
+
+    /* ── Termine-Bereich ── */
+    .termine-box { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+
+    /* Freie Zeilen (Datum + Text) */
+    .termin-frei-zeile { display: grid; grid-template-columns: 1fr 1.6fr; gap: 6px; margin-bottom: 6px; align-items: center; }
+
+    /* Pflicht-Zeilen (Datum+Uhrzeit + Icon + Label) */
+    .termin-pflicht-zeile { display: grid; grid-template-columns: 1fr 36px 1.2fr; gap: 6px; margin-bottom: 6px; align-items: center; }
+    .termin-pflicht-zeile:last-child { margin-bottom: 0; }
+
+    /* Trennzeile zwischen frei und Pflicht */
+    .termin-trenner { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--grau); padding: 8px 0 6px; border-top: 1px solid var(--hell); margin-top: 4px; }
+
+    /* Eingabe-Inputs allgemein */
+    .termin-input {
+      width: 100%; padding: 5px 8px;
+      border: 1.5px solid var(--hell); border-radius: 7px;
+      font-family: inherit; font-size: 0.75rem; font-weight: 700;
+      color: var(--text); background: var(--bg);
+      cursor: pointer; transition: border-color .15s;
+    }
+    .termin-input:focus { outline: none; border-color: var(--rot); background: white; }
+    .termin-input:not([value=""]):not([value]) { background: white; }
+
+    /* Icon-Zelle (Pflicht) */
+    .termin-icon-zelle {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      background: var(--bg); border-radius: 8px;
+      border: 1.5px solid var(--hell);
+    }
+
+    /* Label-Zelle (Pflicht) */
+    .termin-pflicht-label {
+      font-size: 0.82rem; font-weight: 800; color: var(--text);
+      padding: 5px 8px; background: var(--bg);
+      border-radius: 7px; border: 1.5px solid var(--hell);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
 
     footer { text-align: center; padding: 10px; background: var(--rot); color: white; font-size: 0.78rem; font-weight: 600; margin-top: auto; }
   </style>
@@ -166,28 +234,22 @@
   <img src="header.jpg" alt="Studjo" onerror="this.style.display='none'">
 </header>
 
+<!-- Rote Zeile: nur noch Gruppenname + Neuer Tag -->
 <div class="banner">
-  <div>
-    <div class="banner-kw" id="banner-kw"></div>
-    <h1 id="banner-name">Gruppen·Checkpoint</h1>
+  <div class="banner-links">
+    <div class="kw" id="banner-kw"></div>
+    <h1 id="banner-name">Gruppen&middot;Checkpoint</h1>
   </div>
-  <div class="banner-btns">
-    <button class="btn-banner" id="btn-edit"      onclick="toggleEditModus()">&#9998; Bearbeiten</button>
-    <button class="btn-banner" id="btn-namen"     onclick="oeffneNamenModal()">&#128100; Namen</button>
-    <button class="btn-banner" id="btn-neuer-tag" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
-  </div>
+  <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
 </div>
 
+<!-- Gelbe Drag-Hinweisleiste (nur im Bearbeiten-Modus) -->
 <div class="edit-leiste" id="edit-leiste">
-  <span class="edit-leiste-tipp">
-    <strong>Bearbeiten-Modus:</strong>
-    Symbole ziehen zum Verschieben &middot; Namen antippen zum Zuweisen
-  </span>
-  <button class="btn-leiste btn-leiste-blau"   onclick="oeffneChecklisteModal()">&#128203; Checkliste anpassen</button>
-  <button class="btn-leiste btn-leiste-dunkel" onclick="resetZuordnung()">&#8617; Zuordnung zur&uuml;cksetzen</button>
+  <span style="flex:1">&#9998; <strong>Zuständigkeiten:</strong> Symbole ziehen &middot; Namen antippen</span>
+  <button class="btn-leiste-dunkel" onclick="resetZuordnung()">&#8617; Zuordnung zur&uuml;cksetzen</button>
 </div>
 
-<!-- Modal: Namen -->
+<!-- ══ MODAL: Namen ══ -->
 <div class="modal-overlay" id="namen-modal" onclick="modalAussenKlick(event,'namen-modal')">
   <div class="modal-box">
     <div class="modal-kopf">
@@ -203,7 +265,26 @@
   </div>
 </div>
 
-<!-- Modal: Aufgaben zuweisen -->
+<!-- ══ MODAL: Leitung ══ -->
+<div class="modal-overlay" id="leitung-modal" onclick="modalAussenKlick(event,'leitung-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf">
+      <h2>&#11088; Leitung bearbeiten</h2>
+      <button class="modal-schliessen" onclick="schliesseModal('leitung-modal')">&#10005;</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;">
+      Namen eintragen und per Auswahl markieren, wer die Gruppe aktuell leitet.<br>
+      Die Namen bleiben auch nach &bdquo;Neuer Tag&ldquo; erhalten.
+    </p>
+    <div id="leitung-modal-inhalt"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schliesseModal('leitung-modal')">Abbrechen</button>
+      <button class="btn-modal-primary"   onclick="speichereLeitungAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Aufgaben zuweisen ══ -->
 <div class="modal-overlay" id="aufgaben-modal" onclick="modalAussenKlick(event,'aufgaben-modal')">
   <div class="modal-box">
     <div class="modal-kopf">
@@ -218,15 +299,15 @@
   </div>
 </div>
 
-<!-- Modal: Checkliste konfigurieren -->
+<!-- ══ MODAL: Checkliste ══ -->
 <div class="modal-overlay" id="checkliste-modal" onclick="modalAussenKlick(event,'checkliste-modal')">
   <div class="modal-box">
     <div class="modal-kopf">
-      <h2>&#128203; Tages-Checkliste anpassen</h2>
+      <h2>&#9989; Tages-Checkliste anpassen</h2>
       <button class="modal-schliessen" onclick="schliesseModal('checkliste-modal')">&#10005;</button>
     </div>
     <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">
-      Aufgaben anklicken um sie ein- oder auszublenden.<br>
+      Aufgaben antippen um sie ein- oder auszublenden.<br>
       <strong>Kontrolle Checkpoint</strong> steht immer an erster Stelle und ist immer aktiv.
     </p>
     <div class="check-modal-liste" id="check-modal-liste"></div>
@@ -238,21 +319,34 @@
   </div>
 </div>
 
+<!-- ══ HAUPT-GRID ══ -->
 <div class="grid">
-  <div>
-    <div class="spalte-titel">&#128100; Namen &amp; Zust&auml;ndigkeiten</div>
+
+  <!-- LINKE SPALTE -->
+  <div class="col-wrap">
+    <div class="col-header">
+      <button class="col-btn" onclick="oeffneNamenModal()">&#128100; Namen</button>
+      <span class="col-btn-sep">|</span>
+      <button class="col-btn" id="btn-edit" onclick="toggleEditModus()">&#9998; Zust&auml;ndigkeiten</button>
+    </div>
     <div class="namen-tabelle" id="namen-tabelle"></div>
   </div>
-  <div>
-    <div class="spalte-titel">&#128203; Infos &amp; Termine</div>
+
+  <!-- MITTLERE SPALTE -->
+  <div class="col-wrap">
+    <div class="col-header">
+      <button class="col-btn" onclick="oeffneLeitungModal()">&#11088; Leitung</button>
+      <span class="col-btn-sep">|</span>
+      <span class="col-btn" style="cursor:default;opacity:.6">&#128197; Infos &amp; Termine</span>
+    </div>
     <div class="mitte">
       <div class="info-box">
-        <div class="info-titel">&#11088; Leitung heute</div>
-        <div class="gl-person" id="gl-person"></div>
+        <div class="info-titel">&#11088; Leitung der Gruppe</div>
+        <div id="leitung-anzeige"></div>
       </div>
-      <div class="info-box">
-        <div class="info-titel">&#128197; Termine diese Woche</div>
-        <div id="termin-liste"></div>
+      <div class="termine-box">
+        <div class="info-titel">&#128197; Termine</div>
+        <div id="termine-anzeige"></div>
       </div>
       <div class="wichtig-box">
         <div class="info-titel">&#9888;&#65039; Diese Woche wichtig</div>
@@ -260,31 +354,34 @@
       </div>
     </div>
   </div>
-  <div>
-    <div class="spalte-titel">&#9989; Tages-Checkliste</div>
+
+  <!-- RECHTE SPALTE -->
+  <div class="col-wrap">
+    <div class="col-header">
+      <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
+    </div>
     <div class="check-tabelle" id="check-tabelle"></div>
   </div>
+
 </div>
 
 <footer>&copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen&middot;Checkpoint</footer>
 
-<!-- SortableJS: https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js -->
 <script src="sortable.min.js"></script>
 <script>
 
 /* ═══════════════════════════════════════════════════════════════
    KONFIGURATION
    ═══════════════════════════════════════════════════════════════ */
-const GRUPPE = {
+var GRUPPE = {
   name:  "Gruppe Freisenberg",
-  woche: "KW 31 | 28.07.–01.08.2025",
-  gruppenvertretung: { personId: 3, hinweis: "Vertretung Mo–Mi (GL in Besprechung)" },
+  woche: "KW 31 | 28.07.\u201301.08.2025",
   termine: [
-    { tag:"Mo", text:"Frührunde 8:15 Uhr" },
+    { tag:"Mo", text:"Fr\u00fchrunde 8:15 Uhr" },
     { tag:"Di", text:"" },
     { tag:"Mi", text:"Unterweisung Arbeitssicherheit 10:30 Uhr" },
     { tag:"Do", text:"Besuch Kundenaudit" },
-    { tag:"Fr", text:"Frühschluss 14:45 Uhr" }
+    { tag:"Fr", text:"Fr\u00fchschluss 14:45 Uhr" }
   ],
   wichtig: "Roter Hubwagen defekt! Bitte NICHT benutzen.",
   zustaendigkeiten: [
@@ -299,20 +396,20 @@ const GRUPPE = {
     { personId:9,  aufgabeId:"sicherheit",          typ:"checkliste" },
     { personId:10, aufgabeId:"arbeitsvorbereitung", typ:"checkliste" },
     { personId:11, aufgabeId:"checkpoint",          typ:"checkliste" },
+    { personId:14, aufgabeId:"essensmarken",        typ:"checkliste" }, /* BUG FIX: war allgemein */
     { personId:1,  aufgabeId:"betriebsmittel",      typ:"allgemein"  },
     { personId:2,  aufgabeId:"botengaenge",         typ:"allgemein"  },
     { personId:12, aufgabeId:"botengaenge",         typ:"allgemein"  },
     { personId:3,  aufgabeId:"hubwagen",            typ:"allgemein"  },
     { personId:5,  aufgabeId:"qualitaet",           typ:"allgemein"  },
     { personId:13, aufgabeId:"diensttelefon",       typ:"allgemein"  },
-    { personId:14, aufgabeId:"essensmarken",        typ:"allgemein"  },
     { personId:7,  aufgabeId:"materialbeschaffung", typ:"allgemein"  },
     { personId:15, aufgabeId:"mentor",              typ:"allgemein"  }
   ]
 };
-const ZUORDNUNG_DEFAULT = JSON.parse(JSON.stringify(GRUPPE.zustaendigkeiten));
+var ZUORDNUNG_DEFAULT = JSON.parse(JSON.stringify(GRUPPE.zustaendigkeiten));
 
-const MITARBEITENDE = [
+var MITARBEITENDE = [
   { id:1,  name:"Anna B."      }, { id:2,  name:"Thomas K."    },
   { id:3,  name:"Maria S."     }, { id:4,  name:"Klaus H."     },
   { id:5,  name:"Sandra M."    }, { id:6,  name:"Peter W."     },
@@ -323,33 +420,33 @@ const MITARBEITENDE = [
   { id:15, name:"Ursula C."    }, { id:16, name:"Frank J."     }
 ];
 
-/* "checkpoint" zuerst in Definition = stets Sortier-Anker */
-const AUFGABEN = {
+/* BUG FIX: essensmarken jetzt checkliste + check-essensmarken.jpg */
+var AUFGABEN = {
   checkpoint:          { label:"Kontrolle Checkpoint",      foto:"check-checkpoint.jpg",          typ:"checkliste" },
   arbeitsvorbereitung: { label:"Arbeit vorbereiten",        foto:"check-arbeitsvorbereitung.jpg", typ:"checkliste" },
-  sicherheit:          { label:"Arbeitssicherheit prüfen",  foto:"check-sicherheit.jpg",          typ:"checkliste" },
+  sicherheit:          { label:"Arbeitssicherheit pr\u00fcfen", foto:"check-sicherheit.jpg",      typ:"checkliste" },
+  essensmarken:        { label:"Essensmarken zuordnen",     foto:"check-essensmarken.jpg",        typ:"checkliste" }, /* war zust-essensmarken.jpg + allgemein */
   fegen:               { label:"Boden fegen",               foto:"check-fegen.jpg",               typ:"checkliste" },
-  fenster:             { label:"Fenster schließen",         foto:"check-fenster.jpg",             typ:"checkliste" },
-  geschirr:            { label:"Geschirr wegräumen",        foto:"check-geschirr.jpg",            typ:"checkliste" },
-  muell:               { label:"Müll entsorgen",            foto:"check-muell.jpg",               typ:"checkliste" },
+  fenster:             { label:"Fenster schlie\u00dfen",    foto:"check-fenster.jpg",             typ:"checkliste" },
+  geschirr:            { label:"Geschirr wegr\u00e4umen",   foto:"check-geschirr.jpg",            typ:"checkliste" },
+  muell:               { label:"M\u00fcll entsorgen",       foto:"check-muell.jpg",               typ:"checkliste" },
   strom:               { label:"Strom ausschalten",         foto:"check-strom.jpg",               typ:"checkliste" },
   tische:              { label:"Tische wischen",            foto:"check-tische.jpg",              typ:"checkliste" },
-  tuerklinken:         { label:"Türklinken desinfizieren",  foto:"check-tuerklinken.jpg",         typ:"checkliste" },
+  tuerklinken:         { label:"T\u00fcrklinken desinfizieren", foto:"check-tuerklinken.jpg",     typ:"checkliste" },
   versandvorbereitung: { label:"Versand vorbereiten",       foto:"check-versandvorbereitung.jpg", typ:"checkliste" },
-  betriebsmittel:      { label:"Betriebsmittel prüfen",     foto:"zust-betriebsmittel.jpg",       typ:"allgemein"  },
-  botengaenge:         { label:"Botengänge",                foto:"zust-botengaenge.jpg",          typ:"allgemein"  },
+  betriebsmittel:      { label:"Betriebsmittel pr\u00fcfen",foto:"zust-betriebsmittel.jpg",       typ:"allgemein"  },
+  botengaenge:         { label:"Boteng\u00e4nge",           foto:"zust-botengaenge.jpg",          typ:"allgemein"  },
   diensttelefon:       { label:"Dienst-Telefon",            foto:"zust-diensttelefon.jpg",        typ:"allgemein"  },
-  essensmarken:        { label:"Essensmarken zuordnen",     foto:"zust-essensmarken.jpg",         typ:"allgemein"  },
   hubwagen:            { label:"Hubwagen fahren",           foto:"zust-hubwagen.jpg",             typ:"allgemein"  },
   materialbeschaffung: { label:"Materialbeschaffung",       foto:"zust-materialbeschaffung.jpg",  typ:"allgemein"  },
   mentor:              { label:"Mentor / Pate",             foto:"zust-mentor.jpg",               typ:"allgemein"  },
-  qualitaet:           { label:"Qualität prüfen",           foto:"zust-qualitaet.jpg",            typ:"allgemein"  }
+  qualitaet:           { label:"Qualit\u00e4t pr\u00fcfen", foto:"zust-qualitaet.jpg",            typ:"allgemein"  }
 };
 
 function sortierteCheckIds() {
-  const alle = Object.keys(AUFGABEN).filter(function(id) { return AUFGABEN[id].typ === 'checkliste'; });
-  const rest  = alle.filter(function(id) { return id !== 'checkpoint'; })
-                    .sort(function(a,b) { return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label, 'de'); });
+  var alle = Object.keys(AUFGABEN).filter(function(id) { return AUFGABEN[id].typ === 'checkliste'; });
+  var rest = alle.filter(function(id) { return id !== 'checkpoint'; })
+                 .sort(function(a,b) { return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de'); });
   return ['checkpoint'].concat(rest);
 }
 
@@ -357,17 +454,17 @@ function sortierteCheckIds() {
    PERSISTENCE
    ═══════════════════════════════════════════════════════════════ */
 var STATE_KEY   = 'checkpoint-state-v2';
-var ASSIGN_KEY  = 'checkpoint-assign-v2';
+var ASSIGN_KEY  = 'checkpoint-assign-v3'; /* v3: essensmarken-Migration */
 var NAMEN_KEY   = 'checkpoint-namen-v2';
 var CHECKS_KEY  = 'checkpoint-checks-v2';
+var LEITUNG_KEY = 'checkpoint-leitung-v1';
 
 function heute() { return new Date().toISOString().slice(0,10); }
-
 function ladeState() { try { return JSON.parse(localStorage.getItem(STATE_KEY)); } catch(e) { return null; } }
 function speichereState() { localStorage.setItem(STATE_KEY, JSON.stringify(STATE)); }
 
 function tagesReset(manuell) {
-  if (manuell && !confirm('Tages-Reset: Abwesenheiten und erledigte Aufgaben zurücksetzen?')) return;
+  if (manuell && !confirm('Tages-Reset: Abwesenheiten und erledigte Aufgaben zur\u00fccksetzen?')) return;
   STATE = { datum: heute(), abwesend: [], erledigt: [] };
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r) { r.classList.remove('abwesend'); });
@@ -377,36 +474,81 @@ function tagesReset(manuell) {
 var raw   = ladeState();
 var STATE = (raw && raw.datum === heute()) ? raw : { datum: heute(), abwesend: [], erledigt: [] };
 
+/* Zuordnungen */
 function ladeZuordnung() {
-  try { var s = JSON.parse(localStorage.getItem(ASSIGN_KEY)); if (s && Array.isArray(s)) GRUPPE.zustaendigkeiten = s; } catch(e) {}
+  try {
+    var s = JSON.parse(localStorage.getItem(ASSIGN_KEY));
+    if (s && Array.isArray(s)) {
+      /* Migration: essensmarken immer als checkliste */
+      s = s.map(function(z) { if (z.aufgabeId === 'essensmarken') { z.typ = 'checkliste'; z.foto = 'check-essensmarken.jpg'; } return z; });
+      GRUPPE.zustaendigkeiten = s;
+    }
+  } catch(e) {}
 }
 function speichereZuordnung() { localStorage.setItem(ASSIGN_KEY, JSON.stringify(GRUPPE.zustaendigkeiten)); }
 function resetZuordnung() {
-  if (!confirm('Alle Zuordnungen zurücksetzen?')) return;
+  if (!confirm('Alle Zuordnungen zur\u00fccksetzen?')) return;
   GRUPPE.zustaendigkeiten = JSON.parse(JSON.stringify(ZUORDNUNG_DEFAULT));
   localStorage.removeItem(ASSIGN_KEY);
   renderNamen(); initSortable(); renderCheckliste();
 }
 
-var NAMEN_DEFAULT = MITARBEITENDE.map(function(p) { return { id: p.id, name: p.name }; });
+/* Namen */
+var NAMEN_DEFAULT = MITARBEITENDE.map(function(p) { return { id:p.id, name:p.name }; });
 function ladeNamen() {
   try {
     var s = JSON.parse(localStorage.getItem(NAMEN_KEY));
     if (!s || !Array.isArray(s)) return;
-    s.forEach(function(d) {
-      var p = MITARBEITENDE.find(function(p) { return p.id === d.id; });
-      if (p && d.name && d.name.trim()) p.name = d.name.trim();
-    });
+    s.forEach(function(d) { var p = MITARBEITENDE.find(function(p) { return p.id===d.id; }); if (p && d.name) p.name = d.name; });
   } catch(e) {}
 }
 
+/* Aktive Checklisten */
 var AKTIVE_CHECKS = sortierteCheckIds();
 function ladeAktiveChecks() {
   try { var s = JSON.parse(localStorage.getItem(CHECKS_KEY)); if (s && Array.isArray(s)) AKTIVE_CHECKS = s; } catch(e) {}
 }
 function speichereAktiveChecks() { localStorage.setItem(CHECKS_KEY, JSON.stringify(AKTIVE_CHECKS)); }
 
-ladeZuordnung(); ladeNamen(); ladeAktiveChecks();
+/* Leitung (persistent, kein Reset durch Neuer Tag) */
+var LEITUNG = { namen: ['','',''], aktiv: 0 };
+function ladeLeitung() {
+  try { var s = JSON.parse(localStorage.getItem(LEITUNG_KEY)); if (s) LEITUNG = s; } catch(e) {}
+}
+function speichereLeitung() { localStorage.setItem(LEITUNG_KEY, JSON.stringify(LEITUNG)); }
+
+/* Termine */
+var TERMINE_KEY = 'checkpoint-termine-v1';
+var TERMINE = {
+  frei: [
+    { datum: '', text: '' },
+    { datum: '', text: '' }
+  ],
+  pflicht: [
+    { id:'fruehrunde',       label:'Fr\u00fchrunde',        icon:'&#9200;',  datum:'', uhrzeit:'' },
+    { id:'gruppenstunde',    label:'Gruppenstunde',         icon:'&#128101;', datum:'', uhrzeit:'' },
+    { id:'dienstbesprechung',label:'Dienstbesprechung',     icon:'&#128203;', datum:'', uhrzeit:'' },
+    { id:'geburtstag',       label:'Geburtstagsfeier',      icon:'&#127874;', datum:'', uhrzeit:'' },
+    { id:'ausflug',          label:'Gruppenausflug',        icon:'&#128652;', datum:'', uhrzeit:'' }
+  ]
+};
+function ladeTermine() {
+  try {
+    var s = JSON.parse(localStorage.getItem(TERMINE_KEY));
+    if (!s) return;
+    if (s.frei    && Array.isArray(s.frei))    TERMINE.frei    = s.frei;
+    if (s.pflicht && Array.isArray(s.pflicht)) {
+      s.pflicht.forEach(function(sp) {
+        var p = TERMINE.pflicht.find(function(p){ return p.id===sp.id; });
+        if (p) { p.datum=sp.datum||''; p.uhrzeit=sp.uhrzeit||''; }
+      });
+    }
+  } catch(e) {}
+}
+function speichereTermine() { localStorage.setItem(TERMINE_KEY, JSON.stringify(TERMINE)); }
+
+/* Alles laden */
+ladeZuordnung(); ladeNamen(); ladeAktiveChecks(); ladeLeitung(); ladeTermine();
 
 /* ═══════════════════════════════════════════════════════════════
    RENDER
@@ -421,7 +563,7 @@ function renderNamen() {
       var a = AUFGABEN[z.aufgabeId];
       if (a) icons += '<img src="' + a.foto + '" alt="' + a.label + '" title="' + a.label + '" class="aufg-icon" data-aufgabe-id="' + z.aufgabeId + '" data-typ="' + z.typ + '">';
     });
-    html += '<div class="namen-row' + (abw ? ' abwesend' : '') + '" data-person-id="' + p.id + '" onclick="toggleAbwesend(' + p.id + ')" title="' + (abw ? 'Klicken: wieder anwesend' : 'Klicken: abwesend markieren') + '">'
+    html += '<div class="namen-row' + (abw?' abwesend':'') + '" data-person-id="' + p.id + '" onclick="toggleAbwesend(' + p.id + ')">'
           + '<img src="portrait.jpg" alt="' + p.name + '" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'">'
           + '<div class="person-name">' + p.name + '</div>'
           + '<div class="aufgaben-icons">' + icons + '</div>'
@@ -430,23 +572,77 @@ function renderNamen() {
   document.getElementById('namen-tabelle').innerHTML = html;
 }
 
-function renderMitte() {
-  var vId = GRUPPE.gruppenvertretung.personId;
-  var vp  = vId ? MITARBEITENDE.find(function(p) { return p.id === vId; }) : null;
-  document.getElementById('gl-person').innerHTML = vp
-    ? '<img src="portrait.jpg" alt="' + vp.name + '" class="gl-foto" onerror="this.style.background=\'#e2e8f0\'">'
-      + '<div><div class="gl-name">' + vp.name + '</div>'
-      + '<div class="gl-rolle">Gruppenvertretung</div>'
-      + '<div class="gl-hinweis">' + GRUPPE.gruppenvertretung.hinweis + '</div></div>'
-    : '<span style="color:var(--grau);font-size:.85rem;">Keine Vertretung</span>';
+function renderLeitung() {
+  var labels = ['Gruppenleitung', 'Vertretung 1', 'Vertretung 2'];
+  var html   = '';
+  for (var i = 0; i < 3; i++) {
+    var istAktiv = LEITUNG.aktiv === i;
+    var name     = LEITUNG.namen[i] ? LEITUNG.namen[i] : '';
+    html += '<div class="leitung-zeile' + (istAktiv?' aktiv':'') + '">'
+          + '<div class="leitung-symbol">' + (istAktiv ? '&#10003;' : '&#9675;') + '</div>'
+          + '<div>'
+          + '<div class="leitung-name' + (!name?' leer':'') + '">' + (name || '(nicht eingetragen)') + '</div>'
+          + '<div class="leitung-rolle">' + labels[i] + '</div>'
+          + '</div></div>';
+  }
+  document.getElementById('leitung-anzeige').innerHTML = html;
+}
 
-  var termHtml = '';
-  GRUPPE.termine.forEach(function(t) {
-    termHtml += '<div class="termin"><span class="termin-tag">' + t.tag + '</span>'
-              + '<span class="' + (t.text ? '' : 'termin-leer') + '">' + (t.text || '–') + '</span></div>';
+function renderTermine() {
+  /* Freie Zeilen */
+  var html = '';
+  for (var i=0; i<2; i++) {
+    var f = TERMINE.frei[i];
+    html += '<div class="termin-frei-zeile">'
+          + '<input type="date" class="termin-input" data-frei-idx="'+i+'" data-feld="datum"'
+          + ' value="'+(f.datum||'')+'" onchange="terminFreiSpeichern(this)">'
+          + '<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text"'
+          + ' value="'+(f.text||'')+'" placeholder="Termin eintragen\u2026" maxlength="60"'
+          + ' onchange="terminFreiSpeichern(this)" onblur="terminFreiSpeichern(this)">'
+          + '</div>';
+  }
+
+  /* Trenner */
+  html += '<div class="termin-trenner">&#8212; Regelm&auml;&szlig;ige Termine &#8212;</div>';
+
+  /* Pflicht-Zeilen */
+  TERMINE.pflicht.forEach(function(p) {
+    var dtVal = p.datum ? (p.datum + (p.uhrzeit ? 'T'+p.uhrzeit : '')) : '';
+    html += '<div class="termin-pflicht-zeile">'
+          + '<input type="datetime-local" class="termin-input" data-pflicht-id="'+p.id+'"'
+          + ' value="'+(dtVal)+'" onchange="terminPflichtSpeichern(this)">'
+          + '<div class="termin-icon-zelle">'+p.icon+'</div>'
+          + '<div class="termin-pflicht-label">'+p.label+'</div>'
+          + '</div>';
   });
-  document.getElementById('termin-liste').innerHTML = termHtml;
-  document.getElementById('wichtig-text').innerHTML = (GRUPPE.wichtig || '–').replace(/\n/g, '<br>');
+
+  document.getElementById('termine-anzeige').innerHTML = html;
+}
+
+function terminFreiSpeichern(input) {
+  var idx  = parseInt(input.dataset.freiIdx);
+  var feld = input.dataset.feld;
+  TERMINE.frei[idx][feld] = input.value;
+  speichereTermine();
+}
+
+function terminPflichtSpeichern(input) {
+  var id = input.dataset.pflichtId;
+  var p  = TERMINE.pflicht.find(function(p){ return p.id===id; });
+  if (!p) return;
+  var val = input.value; /* Format: "YYYY-MM-DDTHH:MM" */
+  if (val && val.indexOf('T')!==-1) {
+    var parts = val.split('T');
+    p.datum   = parts[0];
+    p.uhrzeit = parts[1];
+  } else {
+    p.datum = val; p.uhrzeit = '';
+  }
+  speichereTermine();
+}
+
+function renderMitte() {
+  document.getElementById('wichtig-text').innerHTML = (GRUPPE.wichtig||'&ndash;').replace(/\n/g,'<br>');
 }
 
 function renderCheckliste() {
@@ -455,16 +651,14 @@ function renderCheckliste() {
   ids.forEach(function(id) {
     var a        = AUFGABEN[id];
     var erledigt = STATE.erledigt.indexOf(id) !== -1;
-    var zust     = GRUPPE.zustaendigkeiten.find(function(z) { return z.aufgabeId === id && z.typ === 'checkliste'; });
-    var person   = zust ? MITARBEITENDE.find(function(p) { return p.id === zust.personId; }) : null;
+    var zust     = GRUPPE.zustaendigkeiten.find(function(z) { return z.aufgabeId===id && z.typ==='checkliste'; });
+    var person   = zust ? MITARBEITENDE.find(function(p) { return p.id===zust.personId; }) : null;
     var abw      = !erledigt && person && STATE.abwesend.indexOf(person.id) !== -1;
-
-    var rowKl = erledigt ? 'erledigt' : abw ? 'warnung' : '';
-    var togKl = abw && !erledigt ? 'warnung' : '';
-    var sym   = erledigt ? '&#10003;' : abw ? '&#9888;' : '&#10007;';
-    var tipp  = erledigt ? 'Rückgängig' : abw ? (person.name + ' abwesend') : 'Als erledigt markieren';
-    var warn  = abw ? '<div class="check-warnung">&#9888; ' + person.name + ' ist abwesend</div>' : '';
-
+    var rowKl    = erledigt ? 'erledigt' : abw ? 'warnung' : '';
+    var togKl    = (abw&&!erledigt) ? 'warnung' : '';
+    var sym      = erledigt ? '&#10003;' : abw ? '&#9888;' : '&#10007;';
+    var tipp     = erledigt ? 'R\u00fckg\u00e4ngig' : abw ? (person.name+' abwesend') : 'Als erledigt markieren';
+    var warn     = abw ? '<div class="check-warnung">&#9888; ' + person.name + ' ist abwesend</div>' : '';
     html += '<div class="check-row ' + rowKl + '" id="cr-' + id + '">'
           + '<button class="check-toggle ' + togKl + '" onclick="toggleErledigt(\'' + id + '\')" title="' + tipp + '">' + sym + '</button>'
           + '<img src="' + a.foto + '" alt="' + a.label + '" class="check-symbol">'
@@ -480,16 +674,15 @@ function renderCheckliste() {
 function toggleAbwesend(personId) {
   if (editModus) { oeffneAufgabenModal(personId); return; }
   var idx = STATE.abwesend.indexOf(personId);
-  if (idx === -1) STATE.abwesend.push(personId); else STATE.abwesend.splice(idx, 1);
+  if (idx===-1) STATE.abwesend.push(personId); else STATE.abwesend.splice(idx,1);
   speichereState();
-  var row = document.querySelector('.namen-row[data-person-id="' + personId + '"]');
-  if (row) row.classList.toggle('abwesend', STATE.abwesend.indexOf(personId) !== -1);
+  var row = document.querySelector('.namen-row[data-person-id="'+personId+'"]');
+  if (row) row.classList.toggle('abwesend', STATE.abwesend.indexOf(personId)!==-1);
   renderCheckliste();
 }
-
-function toggleErledigt(aufgabeId) {
-  var idx = STATE.erledigt.indexOf(aufgabeId);
-  if (idx === -1) STATE.erledigt.push(aufgabeId); else STATE.erledigt.splice(idx, 1);
+function toggleErledigt(id) {
+  var idx = STATE.erledigt.indexOf(id);
+  if (idx===-1) STATE.erledigt.push(id); else STATE.erledigt.splice(idx,1);
   speichereState(); renderCheckliste();
 }
 
@@ -497,86 +690,109 @@ function toggleErledigt(aufgabeId) {
    MODALS
    ═══════════════════════════════════════════════════════════════ */
 function schliesseModal(id) { document.getElementById(id).classList.remove('sichtbar'); }
-function modalAussenKlick(e, id) { if (e.target === document.getElementById(id)) schliesseModal(id); }
+function modalAussenKlick(e,id) { if (e.target===document.getElementById(id)) schliesseModal(id); }
 
 /* Namen */
 function oeffneNamenModal() {
   var html = '';
   MITARBEITENDE.forEach(function(p) {
-    html += '<label class="namen-feld"><span class="namen-nr">' + p.id + '.</span>'
-          + '<input class="namen-input" type="text" value="' + p.name + '" data-person-id="' + p.id + '" maxlength="20" placeholder="Vorname N."'
+    html += '<label class="namen-feld"><span class="namen-nr">'+p.id+'.</span>'
+          + '<input class="namen-input" type="text" value="'+p.name+'" data-person-id="'+p.id+'" maxlength="20" placeholder="Vorname N."'
           + ' onkeydown="if(event.key===\'Enter\')speichereNamenAusModal()"></label>';
   });
   document.getElementById('namen-felder').innerHTML = html;
   document.getElementById('namen-modal').classList.add('sichtbar');
-  setTimeout(function() { var f = document.querySelector('.namen-input'); if (f) f.focus(); }, 80);
+  setTimeout(function(){ var f=document.querySelector('.namen-input'); if(f) f.focus(); },80);
 }
 function speichereNamenAusModal() {
   document.querySelectorAll('.namen-input').forEach(function(input) {
-    var p = MITARBEITENDE.find(function(p) { return p.id === parseInt(input.dataset.personId); });
+    var p = MITARBEITENDE.find(function(p){ return p.id===parseInt(input.dataset.personId); });
     if (p && input.value.trim()) p.name = input.value.trim();
   });
-  localStorage.setItem(NAMEN_KEY, JSON.stringify(MITARBEITENDE.map(function(p) { return { id: p.id, name: p.name }; })));
+  localStorage.setItem(NAMEN_KEY, JSON.stringify(MITARBEITENDE.map(function(p){ return {id:p.id,name:p.name}; })));
   schliesseModal('namen-modal'); renderNamen(); initSortable(); renderCheckliste();
 }
 function resetNamen() {
-  if (!confirm('Namen zurücksetzen?')) return;
-  NAMEN_DEFAULT.forEach(function(d) { var p = MITARBEITENDE.find(function(p) { return p.id === d.id; }); if (p) p.name = d.name; });
+  if (!confirm('Namen zur\u00fccksetzen?')) return;
+  NAMEN_DEFAULT.forEach(function(d){ var p=MITARBEITENDE.find(function(p){return p.id===d.id;}); if(p) p.name=d.name; });
   localStorage.removeItem(NAMEN_KEY);
   schliesseModal('namen-modal'); renderNamen(); initSortable(); renderCheckliste();
 }
 
+/* Leitung */
+function oeffneLeitungModal() {
+  var labels = ['Gruppenleitung','Vertretung 1','Vertretung 2'];
+  var html   = '';
+  for (var i=0; i<3; i++) {
+    var istAktiv = LEITUNG.aktiv === i;
+    html += '<div class="leitung-modal-zeile' + (istAktiv?' aktiv':'') + '" id="lmz-'+i+'">'
+          + '<input type="radio" name="leitung-aktiv" class="leitung-radio" value="'+i+'"'+(istAktiv?' checked':'')+' onchange="leitungRadioChange()">'
+          + '<div class="leitung-modal-info">'
+          + '<div class="leitung-modal-rolle">'+labels[i]+'</div>'
+          + '<input class="leitung-modal-input" type="text" value="'+(LEITUNG.namen[i]||'')+'" data-leitung-idx="'+i+'" placeholder="Name eintragen ...">'
+          + '</div></div>';
+  }
+  document.getElementById('leitung-modal-inhalt').innerHTML = html;
+  document.getElementById('leitung-modal').classList.add('sichtbar');
+}
+function leitungRadioChange() {
+  for (var i=0; i<3; i++) {
+    var zeile = document.getElementById('lmz-'+i);
+    if (zeile) zeile.classList.remove('aktiv');
+  }
+  var checked = document.querySelector('input[name="leitung-aktiv"]:checked');
+  if (checked) { var z=document.getElementById('lmz-'+checked.value); if(z) z.classList.add('aktiv'); }
+}
+function speichereLeitungAusModal() {
+  var checked = document.querySelector('input[name="leitung-aktiv"]:checked');
+  LEITUNG.aktiv = checked ? parseInt(checked.value) : 0;
+  document.querySelectorAll('[data-leitung-idx]').forEach(function(input) {
+    LEITUNG.namen[parseInt(input.dataset.leitungIdx)] = input.value.trim();
+  });
+  speichereLeitung();
+  schliesseModal('leitung-modal');
+  renderLeitung();
+}
+
 /* Aufgaben-Zuweisung */
 var aufgabenModalPersonId = null;
-
 function oeffneAufgabenModal(personId) {
   aufgabenModalPersonId = personId;
-  var person  = MITARBEITENDE.find(function(p) { return p.id === personId; });
-  var aktuell = GRUPPE.zustaendigkeiten.filter(function(z) { return z.personId === personId; }).map(function(z) { return z.aufgabeId; });
-
+  var person  = MITARBEITENDE.find(function(p){ return p.id===personId; });
+  var aktuell = GRUPPE.zustaendigkeiten.filter(function(z){ return z.personId===personId; }).map(function(z){ return z.aufgabeId; });
   var checkIds = sortierteCheckIds();
-  var zustIds  = Object.keys(AUFGABEN).filter(function(id) { return AUFGABEN[id].typ === 'allgemein'; })
-                   .sort(function(a,b) { return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label, 'de'); });
-
-  function chipHtml(id, chipKl) {
-    var a        = AUFGABEN[id];
-    var gew      = aktuell.indexOf(id) !== -1;
-    var anderer  = a.typ === 'checkliste' ? GRUPPE.zustaendigkeiten.find(function(z) { return z.aufgabeId === id && z.personId !== personId; }) : null;
-    var andPers  = anderer ? MITARBEITENDE.find(function(p) { return p.id === anderer.personId; }) : null;
-    var hint     = andPers && !gew ? '<span class="aufg-chip-belegt">aktuell: ' + andPers.name + '</span>' : '';
-    return '<button class="aufg-chip ' + chipKl + (gew ? ' gewaehlt' : '') + '" data-aufgabe-id="' + id + '" onclick="chipToggle(this)">'
-         + '<img src="' + a.foto + '" alt="' + a.label + '"><span>' + a.label + hint + '</span>'
-         + '<div class="aufg-chip-check">' + (gew ? '&#10003;' : '') + '</div></button>';
+  var zustIds  = Object.keys(AUFGABEN).filter(function(id){ return AUFGABEN[id].typ==='allgemein'; })
+                   .sort(function(a,b){ return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de'); });
+  function chip(id, kl) {
+    var a   = AUFGABEN[id];
+    var gew = aktuell.indexOf(id)!==-1;
+    var and = a.typ==='checkliste' ? GRUPPE.zustaendigkeiten.find(function(z){ return z.aufgabeId===id&&z.personId!==personId; }) : null;
+    var andP= and ? MITARBEITENDE.find(function(p){ return p.id===and.personId; }) : null;
+    var hint= andP&&!gew ? '<span class="aufg-chip-belegt">aktuell: '+andP.name+'</span>' : '';
+    return '<button class="aufg-chip '+kl+(gew?' gewaehlt':'')+'" data-aufgabe-id="'+id+'" onclick="chipToggle(this)">'
+         + '<img src="'+a.foto+'" alt="'+a.label+'"><span>'+a.label+hint+'</span>'
+         + '<div class="aufg-chip-check">'+(gew?'&#10003;':'')+'</div></button>';
   }
-
-  var html = '<div class="aufg-modal-person">'
-           + '<img src="portrait.jpg" alt="' + person.name + '" onerror="this.style.background=\'#e2e8f0\'">'
-           + '<div class="aufg-modal-person-name">' + person.name + '</div></div>'
-           + '<div class="aufg-abschnitt-titel gelb"><span></span> Checklisten-Aufgaben (täglich)</div>'
-           + '<div class="aufg-chips">' + checkIds.map(function(id) { return chipHtml(id, 'check-chip'); }).join('') + '</div>'
-           + '<div class="aufg-abschnitt-titel blau"><span></span> Allgemeine Zuständigkeiten</div>'
-           + '<div class="aufg-chips">' + zustIds.map(function(id) { return chipHtml(id, 'zust-chip'); }).join('') + '</div>';
-
+  var html = '<div class="aufg-modal-person"><img src="portrait.jpg" alt="'+person.name+'" onerror="this.style.background=\'#e2e8f0\'"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
+           + '<div class="aufg-abschnitt-titel gelb"><span></span> Checklisten-Aufgaben</div>'
+           + '<div class="aufg-chips">'+checkIds.map(function(id){return chip(id,'check-chip');}).join('')+'</div>'
+           + '<div class="aufg-abschnitt-titel blau"><span></span> Allgemeine Zust\u00e4ndigkeiten</div>'
+           + '<div class="aufg-chips">'+zustIds.map(function(id){return chip(id,'zust-chip');}).join('')+'</div>';
   document.getElementById('aufgaben-modal-inhalt').innerHTML = html;
   document.getElementById('aufgaben-modal').classList.add('sichtbar');
 }
-
 function chipToggle(btn) {
   btn.classList.toggle('gewaehlt');
   btn.querySelector('.aufg-chip-check').innerHTML = btn.classList.contains('gewaehlt') ? '&#10003;' : '';
 }
-
 function speichereAufgabenAusModal() {
   var personId = aufgabenModalPersonId;
-  var neu = GRUPPE.zustaendigkeiten.filter(function(z) { return z.personId !== personId; });
+  var neu = GRUPPE.zustaendigkeiten.filter(function(z){ return z.personId!==personId; });
   document.querySelectorAll('.aufg-chip.gewaehlt').forEach(function(chip) {
-    var aufgabeId = chip.dataset.aufgabeId;
-    var a         = AUFGABEN[aufgabeId];
-    if (a.typ === 'checkliste') {
-      var idx = neu.findIndex(function(z) { return z.aufgabeId === aufgabeId && z.typ === 'checkliste'; });
-      if (idx !== -1) neu.splice(idx, 1);
-    }
-    neu.push({ personId: personId, aufgabeId: aufgabeId, typ: a.typ });
+    var id = chip.dataset.aufgabeId;
+    var a  = AUFGABEN[id];
+    if (a.typ==='checkliste') { var idx=neu.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';}); if(idx!==-1) neu.splice(idx,1); }
+    neu.push({ personId:personId, aufgabeId:id, typ:a.typ });
   });
   GRUPPE.zustaendigkeiten = neu;
   speichereZuordnung();
@@ -590,42 +806,34 @@ function oeffneChecklisteModal() {
   var html = '';
   ids.forEach(function(id) {
     var a       = AUFGABEN[id];
-    var aktiv   = AKTIVE_CHECKS.indexOf(id) !== -1;
-    var fixiert = id === 'checkpoint';
-    html += '<button class="check-modal-item' + (aktiv ? ' gewaehlt' : '') + (fixiert ? ' fixiert' : '') + '"'
-          + ' data-check-id="' + id + '" data-fixiert="' + fixiert + '" onclick="checkModalItemClick(this)">'
-          + '<img src="' + a.foto + '" alt="' + a.label + '">'
-          + '<span class="check-modal-label">' + a.label
-          + (fixiert ? ' <span class="check-modal-hinweis">(immer aktiv)</span>' : '') + '</span>'
-          + '<div class="check-modal-cb">' + (aktiv ? '&#10003;' : '') + '</div>'
+    var aktiv   = AKTIVE_CHECKS.indexOf(id)!==-1;
+    var fixiert = id==='checkpoint';
+    html += '<button class="check-modal-item'+(aktiv?' gewaehlt':'')+(fixiert?' fixiert':'')+'"'
+          + ' data-check-id="'+id+'" data-fixiert="'+fixiert+'" onclick="checkModalItemClick(this)">'
+          + '<img src="'+a.foto+'" alt="'+a.label+'">'
+          + '<span class="check-modal-label">'+a.label+(fixiert?' <span class="check-modal-hinweis">(immer aktiv)</span>':'')+'</span>'
+          + '<div class="check-modal-cb">'+(aktiv?'&#10003;':'')+'</div>'
           + '</button>';
   });
   document.getElementById('check-modal-liste').innerHTML = html;
   document.getElementById('checkliste-modal').classList.add('sichtbar');
 }
-
 function checkModalItemClick(btn) {
-  if (btn.dataset.fixiert === 'true') return;
+  if (btn.dataset.fixiert==='true') return;
   btn.classList.toggle('gewaehlt');
   btn.querySelector('.check-modal-cb').innerHTML = btn.classList.contains('gewaehlt') ? '&#10003;' : '';
 }
-
 function speichereChecklisteAusModal() {
   AKTIVE_CHECKS = ['checkpoint'];
   document.querySelectorAll('.check-modal-item.gewaehlt').forEach(function(btn) {
-    if (btn.dataset.fixiert !== 'true') AKTIVE_CHECKS.push(btn.dataset.checkId);
+    if (btn.dataset.fixiert!=='true') AKTIVE_CHECKS.push(btn.dataset.checkId);
   });
-  AKTIVE_CHECKS = sortierteCheckIds().filter(function(id) { return AKTIVE_CHECKS.indexOf(id) !== -1; });
-  speichereAktiveChecks();
-  schliesseModal('checkliste-modal');
-  renderCheckliste();
+  AKTIVE_CHECKS = sortierteCheckIds().filter(function(id){ return AKTIVE_CHECKS.indexOf(id)!==-1; });
+  speichereAktiveChecks(); schliesseModal('checkliste-modal'); renderCheckliste();
 }
-
 function resetAktiveChecks() {
   AKTIVE_CHECKS = sortierteCheckIds();
-  speichereAktiveChecks();
-  schliesseModal('checkliste-modal');
-  renderCheckliste();
+  speichereAktiveChecks(); schliesseModal('checkliste-modal'); renderCheckliste();
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -635,24 +843,22 @@ var editModus = false;
 var sortableInstances = [];
 
 function initSortable() {
-  if (typeof Sortable === 'undefined') return; /* Guard: sortable.min.js noch nicht hochgeladen */
-  sortableInstances.forEach(function(s) { s.destroy(); });
+  if (typeof Sortable==='undefined') return;
+  sortableInstances.forEach(function(s){ s.destroy(); });
   sortableInstances = [];
   document.querySelectorAll('.aufgaben-icons').forEach(function(el) {
-    sortableInstances.push(new Sortable(el, {
-      group: 'aufgaben', animation: 150, disabled: true,
-      delay: 150, delayOnTouchOnly: true,
+    sortableInstances.push(new Sortable(el,{
+      group:'aufgaben', animation:150, disabled:true,
+      delay:150, delayOnTouchOnly:true,
       onEnd: function() {
-        var neu = [];
-        document.querySelectorAll('.namen-row[data-person-id]').forEach(function(row) {
-          var pId = parseInt(row.dataset.personId);
-          row.querySelectorAll('.aufg-icon[data-aufgabe-id]').forEach(function(icon) {
-            neu.push({ personId: pId, aufgabeId: icon.dataset.aufgabeId, typ: icon.dataset.typ });
+        var neu=[];
+        document.querySelectorAll('.namen-row[data-person-id]').forEach(function(row){
+          var pId=parseInt(row.dataset.personId);
+          row.querySelectorAll('.aufg-icon[data-aufgabe-id]').forEach(function(icon){
+            neu.push({personId:pId, aufgabeId:icon.dataset.aufgabeId, typ:icon.dataset.typ});
           });
         });
-        GRUPPE.zustaendigkeiten = neu;
-        speichereZuordnung();
-        renderCheckliste();
+        GRUPPE.zustaendigkeiten=neu; speichereZuordnung(); renderCheckliste();
       }
     }));
   });
@@ -663,9 +869,9 @@ function toggleEditModus() {
   var btn = document.getElementById('btn-edit');
   document.body.classList.toggle('edit-modus', editModus);
   btn.classList.toggle('aktiv', editModus);
-  btn.innerHTML = editModus ? '&#10003; Fertig' : '&#9998; Bearbeiten';
+  btn.innerHTML = editModus ? '&#10003; Fertig' : '&#9998; Zust&auml;ndigkeiten';
   document.getElementById('edit-leiste').classList.toggle('sichtbar', editModus);
-  sortableInstances.forEach(function(s) { s.option('disabled', !editModus); });
+  sortableInstances.forEach(function(s){ s.option('disabled',!editModus); });
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -675,6 +881,8 @@ document.getElementById('banner-name').textContent = GRUPPE.name;
 document.getElementById('banner-kw').textContent   = GRUPPE.woche;
 document.getElementById('jahr').textContent        = new Date().getFullYear();
 renderNamen();
+renderLeitung();
+renderTermine();
 renderMitte();
 renderCheckliste();
 initSortable();
