@@ -6,22 +6,20 @@
   <title>Gruppen&middot;Checkpoint &ndash; Studjo</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --rot:#b61f29; --gruen:#16a34a; --gelb:#ca8a04;
-      --bg:#f0f2f5; --text:#0f2f37; --grau:#64748b; --hell:#e2e8f0;
-      --ROW:80px;
-      --check-bg:#fef9c3; --check-rand:#fde047;
-      --zust-bg:#eff6ff;  --zust-rand:#93c5fd;
-    }
+    :root{--rot:#b61f29;--gruen:#16a34a;--gelb:#ca8a04;--bg:#f0f2f5;--text:#0f2f37;--grau:#64748b;--hell:#e2e8f0;--ROW:80px;--check-bg:#fef9c3;--check-rand:#fde047;--zust-bg:#eff6ff;--zust-rand:#93c5fd;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-
     header{background:white;box-shadow:0 2px 10px rgba(0,0,0,.08);}
     header img{width:100%;max-height:80px;object-fit:cover;object-position:left;display:block;}
 
-    .banner{background:var(--rot);color:white;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    /* ── Banner mit Uhr ── */
+    .banner{background:var(--rot);color:white;padding:8px 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;}
     .banner-links h1{font-size:1rem;font-weight:800;}
     .banner-links .kw{font-size:0.78rem;opacity:.85;}
+    .banner-clock{text-align:center;}
+    .clock-time{font-size:1.8rem;font-weight:900;line-height:1;letter-spacing:.05em;}
+    .clock-date{font-size:0.78rem;font-weight:700;opacity:.9;margin-top:2px;}
+    .banner-rechts{display:flex;justify-content:flex-end;}
     .btn-banner{background:rgba(255,255,255,.2);border:2px solid white;color:white;border-radius:999px;padding:5px 16px;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;transition:background .2s;}
     .btn-banner:hover{background:rgba(255,255,255,.35);}
 
@@ -30,13 +28,14 @@
     .btn-leiste-dunkel{background:#92400e;color:white;border:none;border-radius:999px;padding:4px 12px;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer;}
     .btn-leiste-dunkel:hover{background:#78350f;}
 
+    /* ── Grid ── */
     .grid{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px;align-items:start;}
     .col-wrap{display:flex;flex-direction:column;gap:6px;}
     .col-header{display:flex;gap:6px;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--rot);flex-wrap:wrap;}
     .col-btn{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
     .col-btn:hover{background:rgba(182,31,41,.1);}
     .col-btn.aktiv{background:var(--rot);color:white;}
-    .col-btn-sep{color:var(--hell);font-size:0.7rem;}
+    .col-btn-sep{color:var(--hell);font-size:.7rem;}
 
     /* ── Namen-Tabelle ── */
     .namen-tabelle{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);}
@@ -47,12 +46,12 @@
     .namen-row.abwesend{background:#f8fafc;opacity:.5;}
     body.edit-modus .namen-row:hover{background:#fefce8;}
     .person-portrait{width:var(--ROW);height:var(--ROW);object-fit:cover;flex-shrink:0;border-right:1px solid var(--hell);}
-    .person-name{width:148px;min-width:148px;height:var(--ROW);display:flex;align-items:center;padding:0 12px;font-size:0.95rem;font-weight:800;border-right:1px solid var(--hell);overflow:hidden;white-space:nowrap;}
+    .person-name{width:148px;min-width:148px;height:var(--ROW);display:flex;align-items:center;padding:0 12px;font-size:.95rem;font-weight:800;border-right:1px solid var(--hell);overflow:hidden;white-space:nowrap;}
     .namen-row.abwesend .person-name{text-decoration:line-through;color:var(--grau);}
-    body.edit-modus .person-name::after{content:' \270F';font-size:0.7rem;opacity:.5;}
+    body.edit-modus .person-name::after{content:' \270F';font-size:.7rem;opacity:.5;}
     .aufgaben-icons{display:flex;align-items:center;height:var(--ROW);}
 
-    /* ── Icon-Wrapper mit Badge ── */
+    /* ── Icon-Wrap + Badge ── */
     .aufg-icon-wrap{position:relative;width:var(--ROW);height:var(--ROW);flex-shrink:0;border-right:1px solid var(--hell);}
     .aufg-icon-wrap:last-child{border-right:none;}
     .aufg-icon-img{width:100%;height:100%;object-fit:contain;padding:6px;display:block;}
@@ -62,97 +61,102 @@
     body.edit-modus .aufg-icon-wrap[data-typ="checkliste"] .aufg-icon-img{outline:3px dashed #eab308;outline-offset:-3px;}
     body.edit-modus .aufg-icon-wrap[data-typ="allgemein"]  .aufg-icon-img{outline:3px dashed #3b82f6;outline-offset:-3px;}
     body.edit-modus .aufgaben-icons{min-width:var(--ROW);min-height:var(--ROW);}
-
-    /* Badge: rundes Symbol unten rechts auf Icon */
-    .aufg-badge{
-      position:absolute;bottom:5px;right:5px;
-      width:18px;height:18px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-size:0.6rem;font-weight:900;
-      border:2px solid white;background:var(--rot);color:white;
-      z-index:2;pointer-events:none;
-    }
+    .aufg-badge{position:absolute;bottom:5px;right:5px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;border:2px solid white;background:var(--rot);color:white;z-index:2;pointer-events:none;}
     .aufg-badge.erledigt{background:var(--gruen);}
-    .aufg-badge.inaktiv{background:var(--grau);}
 
-    /* ── Mittlere Spalte ── */
+    /* ── Mitte ── */
     .mitte{display:flex;flex-direction:column;gap:10px;}
     .info-box{background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
-    .info-titel{font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--grau);margin-bottom:8px;}
-    .leitung-zeile{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;margin-bottom:4px;transition:background .2s;}
+    .info-titel{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--grau);margin-bottom:8px;}
+    .leitung-zeile{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;margin-bottom:4px;}
     .leitung-zeile:last-child{margin-bottom:0;}
     .leitung-zeile.aktiv{background:#dcfce7;border:1px solid #86efac;}
-    .leitung-symbol{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:900;flex-shrink:0;}
+    .leitung-symbol{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;flex-shrink:0;}
     .leitung-zeile.aktiv .leitung-symbol{background:var(--gruen);color:white;}
     .leitung-zeile:not(.aktiv) .leitung-symbol{background:var(--hell);color:var(--grau);}
-    .leitung-name{font-size:0.95rem;font-weight:800;line-height:1.2;}
-    .leitung-name.leer{color:var(--grau);font-style:italic;font-weight:600;font-size:0.82rem;}
-    .leitung-rolle{font-size:0.6rem;font-weight:700;color:var(--grau);text-transform:uppercase;letter-spacing:.05em;}
+    .leitung-name{font-size:.95rem;font-weight:800;line-height:1.2;}
+    .leitung-name.leer{color:var(--grau);font-style:italic;font-weight:600;font-size:.82rem;}
+    .leitung-rolle{font-size:.6rem;font-weight:700;color:var(--grau);text-transform:uppercase;letter-spacing:.05em;}
 
     /* Termine */
     .termine-box{background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
-    .termin-frei-zeile{display:grid;grid-template-columns:1fr 1.6fr;gap:6px;margin-bottom:6px;align-items:center;}
-    .termin-pflicht-zeile{display:grid;grid-template-columns:1fr 36px 1.2fr;gap:6px;margin-bottom:6px;align-items:center;}
+    .termin-frei-zeile{display:grid;grid-template-columns:1fr 1.6fr;gap:6px;margin-bottom:6px;align-items:center;border-radius:6px;padding:2px;}
+    .termin-pflicht-zeile{display:grid;grid-template-columns:1fr 36px 1.2fr;gap:6px;margin-bottom:6px;align-items:center;border-radius:6px;padding:2px;}
     .termin-pflicht-zeile:last-child{margin-bottom:0;}
-    .termin-trenner{font-size:0.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--grau);padding:8px 0 6px;border-top:1px solid var(--hell);margin-top:4px;}
-    .termin-input{width:100%;padding:5px 8px;border:1.5px solid var(--hell);border-radius:7px;font-family:inherit;font-size:0.75rem;font-weight:700;color:var(--text);background:var(--bg);cursor:pointer;transition:border-color .15s;}
+    .termin-trenner{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--grau);padding:8px 0 6px;border-top:1px solid var(--hell);margin-top:4px;}
+    .termin-input{width:100%;padding:5px 8px;border:1.5px solid var(--hell);border-radius:7px;font-family:inherit;font-size:.75rem;font-weight:700;color:var(--text);background:var(--bg);cursor:pointer;transition:border-color .15s;}
     .termin-input:focus{outline:none;border-color:var(--rot);background:white;}
     .termin-icon-zelle{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:var(--bg);border-radius:8px;border:1.5px solid var(--hell);}
-    .termin-pflicht-label{font-size:0.82rem;font-weight:800;color:var(--text);padding:5px 8px;background:var(--bg);border-radius:7px;border:1.5px solid var(--hell);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .termin-pflicht-label{font-size:.82rem;font-weight:800;color:var(--text);padding:5px 8px;background:var(--bg);border-radius:7px;border:1.5px solid var(--hell);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    /* Feature 8: Termin-Datum heute Highlight */
+    .termin-heute{background:#fef2f2;border-radius:8px;outline:2px solid var(--rot);outline-offset:1px;}
+    .termin-heute .termin-input,.termin-heute .termin-icon-zelle,.termin-heute .termin-pflicht-label{border-color:var(--rot)!important;}
 
-    /* Wichtig editierbar */
+    /* Wichtig */
     .wichtig-box{background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
     .wichtig-box .info-titel{color:#c2410c;}
     .wichtig-zeile{display:grid;grid-template-columns:130px 1fr;gap:6px;margin-bottom:6px;}
     .wichtig-zeile:last-child{margin-bottom:0;}
-    .wichtig-select,.wichtig-textin{padding:5px 8px;border:1.5px solid #f97316;border-radius:6px;background:white;color:#7c2d12;font-family:inherit;font-size:0.75rem;font-weight:700;width:100%;}
+    .wichtig-select,.wichtig-textin{padding:5px 8px;border:1.5px solid #f97316;border-radius:6px;background:white;color:#7c2d12;font-family:inherit;font-size:.75rem;font-weight:700;width:100%;}
     .wichtig-select:focus,.wichtig-textin:focus{outline:none;border-color:#c2410c;}
 
-    /* ── Checkliste rechts ── */
+    /* ── Checkliste rechts (Feature 4+7: 3 Zeilen) ── */
     .check-tabelle{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);}
-    .check-row{display:flex;align-items:center;height:var(--ROW);border-bottom:1px solid var(--hell);transition:background .2s;}
+    .check-row{display:flex;align-items:stretch;min-height:var(--ROW);border-bottom:1px solid var(--hell);}
     .check-row:last-child{border-bottom:none;}
     .check-row.erledigt{background:#f0fdf4;}
     .check-row.warnung{background:#fefce8;}
-    .check-toggle{width:var(--ROW);height:var(--ROW);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:900;background:var(--rot);color:white;cursor:pointer;border:none;font-family:inherit;border-right:2px solid rgba(0,0,0,.1);transition:background .15s;-webkit-tap-highlight-color:transparent;}
+    .check-toggle{width:var(--ROW);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:900;background:var(--rot);color:white;cursor:pointer;border:none;font-family:inherit;border-right:2px solid rgba(0,0,0,.1);transition:background .15s;-webkit-tap-highlight-color:transparent;}
     .check-toggle:hover{filter:brightness(1.1);}
     .check-row.erledigt .check-toggle{background:var(--gruen);}
     .check-row.warnung  .check-toggle{background:var(--gelb);font-size:1.7rem;}
-    .check-symbol{width:var(--ROW);height:var(--ROW);object-fit:contain;flex-shrink:0;border-right:1px solid var(--hell);padding:6px;background:var(--check-bg);outline:3px solid var(--check-rand);outline-offset:-3px;}
-    .check-label{padding:0 14px;font-size:0.9rem;font-weight:800;color:var(--text);flex:1;line-height:1.25;}
-    .check-row.erledigt .check-label{color:var(--gruen);}
-    .check-warnung{display:flex;align-items:center;gap:4px;font-size:0.65rem;font-weight:800;color:#92400e;margin-top:3px;}
+    .check-symbol{width:var(--ROW);object-fit:contain;flex-shrink:0;border-right:1px solid var(--hell);padding:6px;background:var(--check-bg);outline:3px solid var(--check-rand);outline-offset:-3px;align-self:center;}
+    .check-label-wrap{padding:8px 10px;flex:1;display:flex;flex-direction:column;justify-content:center;line-height:1.3;}
+    .check-wann-anzeige{font-size:.6rem;color:var(--grau);font-weight:700;margin-bottom:2px;}
+    .check-aufgabe-name{font-size:.95rem;font-weight:800;color:var(--text);}
+    .check-row.erledigt .check-aufgabe-name{color:var(--gruen);}
+    .check-person-zeile{font-size:.68rem;color:var(--grau);font-weight:700;margin-top:2px;}
+    .check-warnung{font-size:.62rem;color:#92400e;font-weight:800;margin-top:1px;}
+    /* Wann-Button */
+    .check-wann-btn{width:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;background:var(--bg);border:none;border-left:1px solid var(--hell);cursor:pointer;color:var(--grau);transition:background .15s;}
+    .check-wann-btn:hover{background:var(--hell);}
 
-    /* ── Modals (gemeinsam) ── */
+    /* ── Modals ── */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;align-items:center;justify-content:center;}
     .modal-overlay.sichtbar{display:flex;}
-    .modal-box{background:white;border-radius:16px;padding:24px;width:min(680px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+    .modal-box{background:white;border-radius:16px;padding:24px;width:min(700px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);}
     .modal-kopf{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
     .modal-kopf h2{font-size:1.1rem;font-weight:900;color:var(--rot);}
     .modal-schliessen{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg);font-size:1.2rem;cursor:pointer;color:var(--grau);display:flex;align-items:center;justify-content:center;}
     .modal-schliessen:hover{background:var(--hell);}
     .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;}
-    .btn-modal-primary{background:var(--rot);color:white;border:none;border-radius:999px;padding:9px 22px;font-family:inherit;font-size:0.88rem;font-weight:800;cursor:pointer;}
+    .btn-modal-primary{background:var(--rot);color:white;border:none;border-radius:999px;padding:9px 22px;font-family:inherit;font-size:.88rem;font-weight:800;cursor:pointer;}
     .btn-modal-primary:hover{background:#9b1a23;}
-    .btn-modal-secondary{background:var(--bg);color:var(--grau);border:2px solid var(--hell);border-radius:999px;padding:9px 18px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;}
+    .btn-modal-secondary{background:var(--bg);color:var(--grau);border:2px solid var(--hell);border-radius:999px;padding:9px 18px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;}
     .btn-modal-secondary:hover{background:var(--hell);}
-    .btn-modal-reset{background:none;color:var(--grau);border:none;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;margin-right:auto;text-decoration:underline;}
+    .btn-modal-reset{background:none;color:var(--grau);border:none;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;margin-right:auto;text-decoration:underline;}
     .btn-modal-reset:hover{color:var(--rot);}
 
-    /* Namen-Modal */
-    .namen-felder{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
-    .namen-feld{display:flex;align-items:center;gap:8px;}
-    .namen-nr{width:24px;font-size:0.7rem;font-weight:800;color:var(--grau);text-align:right;flex-shrink:0;}
-    .namen-input{flex:1;padding:8px 10px;border:2px solid var(--hell);border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;color:var(--text);transition:border-color .15s;}
+    /* Namen-Modal (Feature 3: 1-spaltig + drag) */
+    .namen-modal-controls{display:flex;gap:8px;margin-bottom:12px;align-items:center;}
+    .btn-alpha-sort{background:var(--bg);border:2px solid var(--hell);border-radius:999px;padding:6px 14px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--text);}
+    .btn-alpha-sort:hover{background:var(--hell);}
+    .namen-sort-liste{display:flex;flex-direction:column;gap:4px;margin-bottom:4px;}
+    .namen-sort-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg);border-radius:8px;border:1.5px solid var(--hell);}
+    .namen-sort-item:hover{border-color:var(--hell);}
+    .namen-drag-handle{font-size:1.1rem;color:var(--grau);cursor:grab;padding:0 4px;flex-shrink:0;user-select:none;}
+    .namen-drag-handle:active{cursor:grabbing;}
+    .namen-nr{min-width:24px;font-size:.7rem;font-weight:800;color:var(--grau);text-align:right;flex-shrink:0;}
+    .namen-input{flex:1;padding:7px 10px;border:2px solid var(--hell);border-radius:8px;font-family:inherit;font-size:.88rem;font-weight:700;color:var(--text);}
     .namen-input:focus{outline:none;border-color:var(--rot);}
 
     /* Leitung-Modal */
-    .leitung-modal-zeile{display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:10px;margin-bottom:8px;border:2px solid var(--hell);background:white;transition:border-color .2s;}
+    .leitung-modal-zeile{display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:10px;margin-bottom:8px;border:2px solid var(--hell);background:white;}
     .leitung-modal-zeile.aktiv{border-color:var(--gruen);background:#f0fdf4;}
     .leitung-radio{width:22px;height:22px;flex-shrink:0;accent-color:var(--gruen);cursor:pointer;}
     .leitung-modal-info{flex:1;}
-    .leitung-modal-rolle{font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--grau);margin-bottom:5px;}
-    .leitung-modal-input{width:100%;padding:7px 10px;border:2px solid var(--hell);border-radius:8px;font-family:inherit;font-size:0.9rem;font-weight:700;color:var(--text);}
+    .leitung-modal-rolle{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--grau);margin-bottom:5px;}
+    .leitung-modal-input{width:100%;padding:7px 10px;border:2px solid var(--hell);border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;color:var(--text);}
     .leitung-modal-input:focus{outline:none;border-color:var(--gruen);}
 
     /* Aufgaben-Modal: 2-spaltig */
@@ -160,21 +164,21 @@
     .aufg-modal-person img{width:44px;height:44px;object-fit:cover;border-radius:50%;border:2px solid var(--rot);}
     .aufg-modal-person-name{font-size:1rem;font-weight:900;}
     .aufg-modal-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .aufg-col-titel{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:4px 8px;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .aufg-col-titel{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:4px 8px;border-radius:6px;margin-bottom:8px;}
     .aufg-col-titel.gelb{background:var(--check-bg);color:#92400e;border:1px solid var(--check-rand);}
-    .aufg-col-titel.blau{background:var(--zust-bg); color:#1e40af;border:1px solid var(--zust-rand);}
+    .aufg-col-titel.blau{background:var(--zust-bg);color:#1e40af;border:1px solid var(--zust-rand);}
     .aufg-col-chips{display:flex;flex-direction:column;gap:6px;}
-    .aufg-chip{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;cursor:pointer;border:2px solid var(--hell);background:white;font-family:inherit;font-size:0.78rem;font-weight:700;color:var(--text);transition:all .15s;width:100%;text-align:left;}
+    .aufg-chip{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;cursor:pointer;border:2px solid var(--hell);background:white;font-family:inherit;font-size:.78rem;font-weight:700;color:var(--text);transition:all .15s;width:100%;text-align:left;}
     .aufg-chip img{width:32px;height:32px;object-fit:contain;border-radius:4px;flex-shrink:0;}
     .aufg-chip.check-chip{border-color:var(--check-rand);background:var(--check-bg);}
-    .aufg-chip.zust-chip {border-color:var(--zust-rand); background:var(--zust-bg);}
+    .aufg-chip.zust-chip{border-color:var(--zust-rand);background:var(--zust-bg);}
     .aufg-chip.gewaehlt.check-chip{background:#fef08a;border-color:#ca8a04;outline:2px solid #ca8a04;}
-    .aufg-chip.gewaehlt.zust-chip {background:#bfdbfe;border-color:#2563eb;outline:2px solid #2563eb;}
-    .aufg-chip.inaktiv-chip{opacity:.55;cursor:not-allowed;pointer-events:none;}
-    .aufg-chip-check{width:20px;height:20px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;margin-left:auto;}
+    .aufg-chip.gewaehlt.zust-chip{background:#bfdbfe;border-color:#2563eb;outline:2px solid #2563eb;}
+    .aufg-chip.inaktiv-chip{opacity:.5;cursor:not-allowed;pointer-events:none;}
+    .aufg-chip-check{width:20px;height:20px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;margin-left:auto;}
     .aufg-chip.gewaehlt .aufg-chip-check{background:var(--rot);border-color:var(--rot);color:white;}
-    .aufg-chip-warn{font-size:0.58rem;color:var(--rot);font-weight:700;display:block;margin-top:1px;}
-    .aufg-chip-belegt{font-size:0.6rem;color:var(--grau);font-weight:600;display:block;}
+    .aufg-chip-warn{font-size:.58rem;color:var(--rot);font-weight:700;display:block;margin-top:1px;}
+    .aufg-chip-belegt{font-size:.6rem;color:var(--grau);font-weight:600;display:block;}
 
     /* Checkliste-Modal */
     .check-modal-liste{display:flex;flex-direction:column;gap:6px;}
@@ -182,60 +186,101 @@
     .check-modal-item.gewaehlt{border-color:#ca8a04;background:#fef08a;outline:2px solid #ca8a04;}
     .check-modal-item.fixiert{opacity:.6;cursor:default;}
     .check-modal-item img{width:44px;height:44px;object-fit:contain;border-radius:6px;flex-shrink:0;}
-    .check-modal-label{font-size:0.88rem;font-weight:800;flex:1;}
-    .check-modal-cb{width:22px;height:22px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.75rem;}
+    .check-modal-label{font-size:.88rem;font-weight:800;flex:1;}
+    .check-modal-cb{width:22px;height:22px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;}
     .check-modal-item.gewaehlt .check-modal-cb{background:var(--gruen);border-color:var(--gruen);color:white;}
-    .check-modal-hinweis{font-size:0.65rem;color:#92400e;font-weight:700;}
+    .check-modal-hinweis{font-size:.65rem;color:#92400e;font-weight:700;}
+    /* Block-Warnung im Checkliste-Modal (Feature 2) */
+    .check-block-warn{background:#fef2f2;border:2px solid var(--rot);border-radius:10px;padding:12px;margin-top:12px;}
+    .check-block-warn-titel{font-size:.78rem;font-weight:800;color:var(--rot);margin-bottom:10px;}
+    .block-aufgabe-zeile{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--hell);}
+    .block-aufgabe-zeile:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+    .block-aufgabe-img{width:36px;height:36px;object-fit:contain;border-radius:6px;flex-shrink:0;background:var(--check-bg);outline:2px solid var(--check-rand);}
+    .block-aufgabe-label{font-size:.78rem;font-weight:800;flex:1;}
+    .block-person-select{padding:4px 8px;border:1.5px solid var(--hell);border-radius:6px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;}
+    .joker-label{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:var(--grau);margin-top:4px;cursor:pointer;}
+    .joker-label input{accent-color:var(--gelb);cursor:pointer;}
 
     /* Vertretungs-Modal */
-    .vert-aufgabe-block{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:12px;}
+    .vert-aufgabe-block{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px;}
     .vert-aufgabe-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
     .vert-aufgabe-kopf img{width:44px;height:44px;object-fit:contain;border-radius:8px;background:var(--check-bg);padding:4px;outline:2px solid var(--check-rand);}
-    .vert-aufgabe-label{font-size:0.9rem;font-weight:800;}
-    .vert-entfaellt-label{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid var(--hell);background:white;cursor:pointer;margin-bottom:6px;font-size:0.82rem;font-weight:700;}
+    .vert-aufgabe-label{font-size:.9rem;font-weight:800;}
+    .vert-entfaellt-label{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid var(--hell);background:white;cursor:pointer;margin-bottom:6px;font-size:.82rem;font-weight:700;}
     .vert-entfaellt-label input{width:18px;height:18px;accent-color:var(--gelb);cursor:pointer;flex-shrink:0;}
     .vert-person-liste{display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:200px;overflow-y:auto;}
-    .vert-person-label{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;border:2px solid var(--hell);background:white;cursor:pointer;font-size:0.78rem;font-weight:700;transition:border-color .15s;}
+    .vert-person-label{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;border:2px solid var(--hell);background:white;cursor:pointer;font-size:.78rem;font-weight:700;transition:border-color .15s;}
     .vert-person-label:hover{border-color:var(--rot);}
     .vert-person-label input{width:16px;height:16px;accent-color:var(--rot);cursor:pointer;flex-shrink:0;}
-    .vert-trenn{height:1px;background:var(--hell);margin:12px 0 10px;}
+    .vert-trenn{height:1px;background:var(--hell);margin:10px 0;}
 
-    footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:0.78rem;font-weight:600;margin-top:auto;}
+    /* Neuzuweisung-Modal (Feature 1) */
+    .neuzuw-block{background:#fff7ed;border:2px solid #f97316;border-radius:10px;padding:12px;margin-bottom:10px;}
+    .neuzuw-kopf{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .neuzuw-kopf img{width:36px;height:36px;object-fit:contain;border-radius:6px;background:var(--check-bg);padding:3px;outline:2px solid var(--check-rand);}
+    .neuzuw-label{font-size:.82rem;font-weight:800;flex:1;}
+    .neuzuw-person-liste{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px;max-height:180px;overflow-y:auto;}
+    .neuzuw-person-label{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:7px;border:2px solid var(--hell);background:white;cursor:pointer;font-size:.75rem;font-weight:700;}
+    .neuzuw-person-label:hover{border-color:var(--rot);}
+    .neuzuw-person-label input{accent-color:var(--rot);cursor:pointer;flex-shrink:0;}
+    .neuzuw-loeschen-label{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;border:2px solid #f97316;background:#fff7ed;cursor:pointer;font-size:.75rem;font-weight:700;color:#c2410c;}
+    .neuzuw-loeschen-label input{accent-color:var(--gelb);cursor:pointer;flex-shrink:0;}
+
+    /* Wann-Modal (Feature 7) */
+    .wann-tage-grid{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+    .wann-tag-label{display:flex;align-items:center;gap:4px;padding:6px 12px;border:2px solid var(--hell);border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:800;transition:all .15s;}
+    .wann-tag-label:hover{border-color:var(--rot);}
+    .wann-tag-label input{display:none;}
+    .wann-tag-label.aktiv{background:var(--rot);color:white;border-color:var(--rot);}
+    .wann-uhrzeit-wrap{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+    .wann-uhrzeit-input{padding:8px 12px;border:2px solid var(--hell);border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;color:var(--text);width:140px;}
+    .wann-uhrzeit-input:focus{outline:none;border-color:var(--rot);}
+
+    footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:.78rem;font-weight:600;margin-top:auto;}
   </style>
 </head>
 <body>
 
-<header>
-  <img src="header.jpg" alt="Studjo" onerror="this.style.display='none'">
-</header>
+<header><img src="header.jpg" alt="Studjo" onerror="this.style.display='none'"></header>
 
+<!-- Banner mit Uhr (Feature 6) -->
 <div class="banner">
   <div class="banner-links">
     <div class="kw" id="banner-kw"></div>
     <h1 id="banner-name">Gruppen&middot;Checkpoint</h1>
   </div>
-  <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
+  <div class="banner-clock">
+    <div class="clock-time" id="clock-time">00:00</div>
+    <div class="clock-date" id="clock-date">&nbsp;</div>
+  </div>
+  <div class="banner-rechts">
+    <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
+  </div>
 </div>
 
 <div class="edit-leiste" id="edit-leiste">
-  <span style="flex:1">&#9998; <strong>Zust&auml;ndigkeiten:</strong> Symbole ziehen &middot; Namen antippen</span>
+  <span style="flex:1">&#9998; <strong>Zust&auml;ndigkeiten:</strong> Symbole gedr&uuml;ckt halten und ziehen &middot; Namen antippen zum Zuweisen</span>
   <button class="btn-leiste-dunkel" onclick="resetZuordnung()">&#8617; Zur&uuml;cksetzen</button>
 </div>
 
-<!-- ══ Modal: Namen ══ -->
+<!-- ═══ Modals ═══ -->
+<!-- Namen -->
 <div class="modal-overlay" id="namen-modal" onclick="modalAK(event,'namen-modal')">
   <div class="modal-box">
     <div class="modal-kopf"><h2>&#128100; Namen bearbeiten</h2><button class="modal-schliessen" onclick="schM('namen-modal')">&#10005;</button></div>
-    <div class="namen-felder" id="namen-felder"></div>
+    <div class="namen-modal-controls">
+      <button class="btn-alpha-sort" onclick="sortNamenAlpha()">A&#8211;Z sortieren</button>
+      <span style="font-size:.72rem;color:var(--grau)">&#8660; Zeilen verschiebbar</span>
+    </div>
+    <div class="namen-sort-liste" id="namen-felder"></div>
     <div class="modal-btns">
-      <button class="btn-modal-reset" onclick="resetNamen()">&#8617; Standard</button>
       <button class="btn-modal-secondary" onclick="schM('namen-modal')">Abbrechen</button>
       <button class="btn-modal-primary" onclick="speichereNamenAusModal()">&#128190; Speichern</button>
     </div>
   </div>
 </div>
 
-<!-- ══ Modal: Leitung ══ -->
+<!-- Leitung -->
 <div class="modal-overlay" id="leitung-modal" onclick="modalAK(event,'leitung-modal')">
   <div class="modal-box">
     <div class="modal-kopf"><h2>&#11088; Leitung bearbeiten</h2><button class="modal-schliessen" onclick="schM('leitung-modal')">&#10005;</button></div>
@@ -248,7 +293,7 @@
   </div>
 </div>
 
-<!-- ══ Modal: Aufgaben zuweisen ══ -->
+<!-- Aufgaben zuweisen -->
 <div class="modal-overlay" id="aufgaben-modal" onclick="modalAK(event,'aufgaben-modal')">
   <div class="modal-box">
     <div class="modal-kopf"><h2>&#128203; Aufgaben zuweisen</h2><button class="modal-schliessen" onclick="schM('aufgaben-modal')">&#10005;</button></div>
@@ -260,21 +305,35 @@
   </div>
 </div>
 
-<!-- ══ Modal: Checkliste ══ -->
-<div class="modal-overlay" id="checkliste-modal" onclick="modalAK(event,'checkliste-modal')">
+<!-- Neuzuweisung (Feature 1) -->
+<div class="modal-overlay" id="neuzuw-modal" onclick="modalAK(event,'neuzuw-modal')">
   <div class="modal-box">
-    <div class="modal-kopf"><h2>&#9989; Tages-Checkliste anpassen</h2><button class="modal-schliessen" onclick="schM('checkliste-modal')">&#10005;</button></div>
-    <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">Aufgaben antippen um sie ein-/auszublenden. <strong>Kontrolle Checkpoint</strong> ist immer aktiv.</p>
-    <div class="check-modal-liste" id="check-modal-liste"></div>
+    <div class="modal-kopf"><h2>&#9888; Aufgabe neu zuweisen</h2><button class="modal-schliessen" onclick="schM('neuzuw-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">Diese Pflichtaufgabe ist noch aktiv. Bitte w&auml;hlen:</p>
+    <div id="neuzuw-inhalt"></div>
     <div class="modal-btns">
-      <button class="btn-modal-reset" onclick="resetAktiveChecks()">&#8617; Alle aktivieren</button>
-      <button class="btn-modal-secondary" onclick="schM('checkliste-modal')">Abbrechen</button>
-      <button class="btn-modal-primary" onclick="speichereChecklisteAusModal()">&#128190; Speichern</button>
+      <button class="btn-modal-secondary" onclick="schM('neuzuw-modal')">Sp&auml;ter entscheiden</button>
+      <button class="btn-modal-primary" onclick="speichereNeuzuweisungAusModal()">&#128190; Speichern</button>
     </div>
   </div>
 </div>
 
-<!-- ══ Modal: Vertretung (bei Abwesenheit mit check-Aufgabe) ══ -->
+<!-- Checkliste anpassen -->
+<div class="modal-overlay" id="checkliste-modal" onclick="modalAK(event,'checkliste-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#9989; Tages-Checkliste anpassen</h2><button class="modal-schliessen" onclick="schM('checkliste-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">Aufgaben antippen zum Ein-/Ausblenden. <strong>Kontrolle Checkpoint</strong> ist immer aktiv.</p>
+    <div class="check-modal-liste" id="check-modal-liste"></div>
+    <div id="check-block-warn-container"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="resetAktiveChecks()">&#8617; Alle aktivieren</button>
+      <button class="btn-modal-secondary" onclick="schM('checkliste-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="versucheChecklisteSpeichern()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vertretung (Abwesenheit) -->
 <div class="modal-overlay" id="vertretung-modal" onclick="modalAK(event,'vertretung-modal')">
   <div class="modal-box">
     <div class="modal-kopf"><h2>&#9888; Aufgaben vertreten</h2><button class="modal-schliessen" onclick="schM('vertretung-modal')">&#10005;</button></div>
@@ -287,9 +346,26 @@
   </div>
 </div>
 
-<!-- ══ Grid ══ -->
-<div class="grid">
+<!-- Wann-Modal (Feature 7) -->
+<div class="modal-overlay" id="wann-modal" onclick="modalAK(event,'wann-modal')">
+  <div class="modal-box" style="width:min(420px,96vw)">
+    <div class="modal-kopf"><h2>&#9200; Zeitangabe bearbeiten</h2><button class="modal-schliessen" onclick="schM('wann-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="wann-modal-titel"></p>
+    <div class="wann-tage-grid" id="wann-tage"></div>
+    <div class="wann-uhrzeit-wrap">
+      <label style="font-size:.78rem;font-weight:800;">Uhrzeit:</label>
+      <input type="time" class="wann-uhrzeit-input" id="wann-uhrzeit">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="loescheWann()">&#8617; Zeitangabe l&ouml;schen</button>
+      <button class="btn-modal-secondary" onclick="schM('wann-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereWannAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
 
+<!-- ═══ Grid ═══ -->
+<div class="grid">
   <div class="col-wrap">
     <div class="col-header">
       <button class="col-btn" onclick="oeffneNamenModal()">&#128100; Namen</button>
@@ -303,21 +379,12 @@
     <div class="col-header">
       <button class="col-btn" onclick="oeffneLeitungModal()">&#11088; Leitung</button>
       <span class="col-btn-sep">|</span>
-      <span class="col-btn" style="cursor:default;opacity:.5">&#128197; Infos &amp; Termine</span>
+      <span class="col-btn" style="cursor:default;opacity:.5">&#128197; Termine</span>
     </div>
     <div class="mitte">
-      <div class="info-box">
-        <div class="info-titel">&#11088; Leitung der Gruppe</div>
-        <div id="leitung-anzeige"></div>
-      </div>
-      <div class="termine-box">
-        <div class="info-titel">&#128197; Termine</div>
-        <div id="termine-anzeige"></div>
-      </div>
-      <div class="wichtig-box">
-        <div class="info-titel">&#9888;&#65039; Diese Woche wichtig</div>
-        <div id="wichtig-anzeige"></div>
-      </div>
+      <div class="info-box"><div class="info-titel">&#11088; Leitung der Gruppe</div><div id="leitung-anzeige"></div></div>
+      <div class="termine-box"><div class="info-titel">&#128197; Termine</div><div id="termine-anzeige"></div></div>
+      <div class="wichtig-box"><div class="info-titel">&#9888;&#65039; Diese Woche wichtig</div><div id="wichtig-anzeige"></div></div>
     </div>
   </div>
 
@@ -327,117 +394,93 @@
     </div>
     <div class="check-tabelle" id="check-tabelle"></div>
   </div>
-
 </div>
 
 <footer>&copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen&middot;Checkpoint</footer>
 
 <script src="sortable.min.js"></script>
 <script>
-/* ═══════════════════════════════════════════════════
-   KONFIGURATION
-   ═══════════════════════════════════════════════════ */
-var GRUPPE = {
-  name:  "Gruppe Freisenberg",
-  woche: "KW 31 | 28.07.\u201301.08.2025",
-  wichtig: "Roter Hubwagen defekt! Bitte NICHT benutzen.",
-  zustaendigkeiten: [
-    {personId:1, aufgabeId:"fegen",               typ:"checkliste"},
-    {personId:2, aufgabeId:"muell",               typ:"checkliste"},
-    {personId:3, aufgabeId:"tische",              typ:"checkliste"},
-    {personId:4, aufgabeId:"geschirr",            typ:"checkliste"},
-    {personId:5, aufgabeId:"fenster",             typ:"checkliste"},
-    {personId:6, aufgabeId:"strom",               typ:"checkliste"},
-    {personId:7, aufgabeId:"tuerklinken",         typ:"checkliste"},
-    {personId:8, aufgabeId:"versandvorbereitung", typ:"checkliste"},
-    {personId:9, aufgabeId:"sicherheit",          typ:"checkliste"},
-    {personId:10,aufgabeId:"arbeitsvorbereitung", typ:"checkliste"},
-    {personId:11,aufgabeId:"checkpoint",          typ:"checkliste"},
-    {personId:14,aufgabeId:"essensmarken",        typ:"checkliste"},
-    {personId:1, aufgabeId:"betriebsmittel",      typ:"allgemein"},
-    {personId:2, aufgabeId:"botengaenge",         typ:"allgemein"},
-    {personId:12,aufgabeId:"botengaenge",         typ:"allgemein"},
-    {personId:3, aufgabeId:"hubwagen",            typ:"allgemein"},
-    {personId:5, aufgabeId:"qualitaet",           typ:"allgemein"},
-    {personId:13,aufgabeId:"diensttelefon",       typ:"allgemein"},
-    {personId:7, aufgabeId:"materialbeschaffung", typ:"allgemein"},
-    {personId:15,aufgabeId:"mentor",              typ:"allgemein"}
+/* ═══ KONFIGURATION ═══ */
+var GRUPPE={
+  name:"Gruppe Freisenberg",woche:"KW 31 | 28.07.\u201301.08.2025",
+  wichtig:"Roter Hubwagen defekt! Bitte NICHT benutzen.",
+  zustaendigkeiten:[
+    {personId:1,aufgabeId:"fegen",typ:"checkliste"},{personId:2,aufgabeId:"muell",typ:"checkliste"},
+    {personId:3,aufgabeId:"tische",typ:"checkliste"},{personId:4,aufgabeId:"geschirr",typ:"checkliste"},
+    {personId:5,aufgabeId:"fenster",typ:"checkliste"},{personId:6,aufgabeId:"strom",typ:"checkliste"},
+    {personId:7,aufgabeId:"tuerklinken",typ:"checkliste"},{personId:8,aufgabeId:"versandvorbereitung",typ:"checkliste"},
+    {personId:9,aufgabeId:"sicherheit",typ:"checkliste"},{personId:10,aufgabeId:"arbeitsvorbereitung",typ:"checkliste"},
+    {personId:11,aufgabeId:"checkpoint",typ:"checkliste"},{personId:14,aufgabeId:"essensmarken",typ:"checkliste"},
+    {personId:1,aufgabeId:"betriebsmittel",typ:"allgemein"},{personId:2,aufgabeId:"botengaenge",typ:"allgemein"},
+    {personId:12,aufgabeId:"botengaenge",typ:"allgemein"},{personId:3,aufgabeId:"hubwagen",typ:"allgemein"},
+    {personId:5,aufgabeId:"qualitaet",typ:"allgemein"},{personId:13,aufgabeId:"diensttelefon",typ:"allgemein"},
+    {personId:7,aufgabeId:"materialbeschaffung",typ:"allgemein"},{personId:15,aufgabeId:"mentor",typ:"allgemein"}
   ]
 };
-var ZUORDNUNG_DEFAULT = JSON.parse(JSON.stringify(GRUPPE.zustaendigkeiten));
+var ZUORDNUNG_DEFAULT=JSON.parse(JSON.stringify(GRUPPE.zustaendigkeiten));
 
-var MITARBEITENDE = [
-  {id:1, name:"Anna B."},{id:2, name:"Thomas K."},{id:3, name:"Maria S."},
-  {id:4, name:"Klaus H."},{id:5, name:"Sandra M."},{id:6, name:"Peter W."},
-  {id:7, name:"Nicole F."},{id:8, name:"Stefan R."},{id:9, name:"Monika L."},
-  {id:10,name:"Michael G."},{id:11,name:"Christine D."},{id:12,name:"Andreas N."},
-  {id:13,name:"Sabine T."},{id:14,name:"Markus E."},{id:15,name:"Ursula C."},
-  {id:16,name:"Frank J."}
+var MITARBEITENDE=[
+  {id:1,name:"Anna B."},{id:2,name:"Thomas K."},{id:3,name:"Maria S."},{id:4,name:"Klaus H."},
+  {id:5,name:"Sandra M."},{id:6,name:"Peter W."},{id:7,name:"Nicole F."},{id:8,name:"Stefan R."},
+  {id:9,name:"Monika L."},{id:10,name:"Michael G."},{id:11,name:"Christine D."},{id:12,name:"Andreas N."},
+  {id:13,name:"Sabine T."},{id:14,name:"Markus E."},{id:15,name:"Ursula C."},{id:16,name:"Frank J."}
 ];
-
-var AUFGABEN = {
-  checkpoint:          {label:"Kontrolle Checkpoint",     foto:"check-checkpoint.jpg",          typ:"checkliste"},
-  arbeitsvorbereitung: {label:"Arbeit vorbereiten",       foto:"check-arbeitsvorbereitung.jpg", typ:"checkliste"},
-  sicherheit:          {label:"Arbeitssicherheit pr\u00fcfen",foto:"check-sicherheit.jpg",      typ:"checkliste"},
-  essensmarken:        {label:"Essensmarken zuordnen",    foto:"check-essensmarken.jpg",        typ:"checkliste"},
-  fegen:               {label:"Boden fegen",              foto:"check-fegen.jpg",               typ:"checkliste"},
-  fenster:             {label:"Fenster schlie\u00dfen",   foto:"check-fenster.jpg",             typ:"checkliste"},
-  geschirr:            {label:"Geschirr wegr\u00e4umen",  foto:"check-geschirr.jpg",            typ:"checkliste"},
-  muell:               {label:"M\u00fcll entsorgen",      foto:"check-muell.jpg",               typ:"checkliste"},
-  strom:               {label:"Strom ausschalten",        foto:"check-strom.jpg",               typ:"checkliste"},
-  tische:              {label:"Tische wischen",           foto:"check-tische.jpg",              typ:"checkliste"},
-  tuerklinken:         {label:"T\u00fcrklinken desinfizieren",foto:"check-tuerklinken.jpg",     typ:"checkliste"},
-  versandvorbereitung: {label:"Versand vorbereiten",      foto:"check-versandvorbereitung.jpg", typ:"checkliste"},
-  betriebsmittel:      {label:"Betriebsmittel pr\u00fcfen",foto:"zust-betriebsmittel.jpg",      typ:"allgemein"},
-  botengaenge:         {label:"Boteng\u00e4nge",          foto:"zust-botengaenge.jpg",          typ:"allgemein"},
-  diensttelefon:       {label:"Dienst-Telefon",           foto:"zust-diensttelefon.jpg",        typ:"allgemein"},
-  hubwagen:            {label:"Hubwagen fahren",          foto:"zust-hubwagen.jpg",             typ:"allgemein"},
-  materialbeschaffung: {label:"Materialbeschaffung",      foto:"zust-materialbeschaffung.jpg",  typ:"allgemein"},
-  mentor:              {label:"Mentor / Pate",            foto:"zust-mentor.jpg",               typ:"allgemein"},
-  qualitaet:           {label:"Qualit\u00e4t pr\u00fcfen",foto:"zust-qualitaet.jpg",            typ:"allgemein"}
+var AUFGABEN={
+  checkpoint:{label:"Kontrolle Checkpoint",foto:"check-checkpoint.jpg",typ:"checkliste"},
+  arbeitsvorbereitung:{label:"Arbeit vorbereiten",foto:"check-arbeitsvorbereitung.jpg",typ:"checkliste"},
+  sicherheit:{label:"Arbeitssicherheit pr\u00fcfen",foto:"check-sicherheit.jpg",typ:"checkliste"},
+  essensmarken:{label:"Essensmarken zuordnen",foto:"check-essensmarken.jpg",typ:"checkliste"},
+  fegen:{label:"Boden fegen",foto:"check-fegen.jpg",typ:"checkliste"},
+  fenster:{label:"Fenster schlie\u00dfen",foto:"check-fenster.jpg",typ:"checkliste"},
+  geschirr:{label:"Geschirr wegr\u00e4umen",foto:"check-geschirr.jpg",typ:"checkliste"},
+  muell:{label:"M\u00fcll entsorgen",foto:"check-muell.jpg",typ:"checkliste"},
+  strom:{label:"Strom ausschalten",foto:"check-strom.jpg",typ:"checkliste"},
+  tische:{label:"Tische wischen",foto:"check-tische.jpg",typ:"checkliste"},
+  tuerklinken:{label:"T\u00fcrklinken desinfizieren",foto:"check-tuerklinken.jpg",typ:"checkliste"},
+  versandvorbereitung:{label:"Versand vorbereiten",foto:"check-versandvorbereitung.jpg",typ:"checkliste"},
+  betriebsmittel:{label:"Betriebsmittel pr\u00fcfen",foto:"zust-betriebsmittel.jpg",typ:"allgemein"},
+  botengaenge:{label:"Boteng\u00e4nge",foto:"zust-botengaenge.jpg",typ:"allgemein"},
+  diensttelefon:{label:"Dienst-Telefon",foto:"zust-diensttelefon.jpg",typ:"allgemein"},
+  hubwagen:{label:"Hubwagen fahren",foto:"zust-hubwagen.jpg",typ:"allgemein"},
+  materialbeschaffung:{label:"Materialbeschaffung",foto:"zust-materialbeschaffung.jpg",typ:"allgemein"},
+  mentor:{label:"Mentor / Pate",foto:"zust-mentor.jpg",typ:"allgemein"},
+  qualitaet:{label:"Qualit\u00e4t pr\u00fcfen",foto:"zust-qualitaet.jpg",typ:"allgemein"}
 };
-
-function sortierteCheckIds() {
-  var alle = Object.keys(AUFGABEN).filter(function(id){return AUFGABEN[id].typ==='checkliste';});
-  var rest = alle.filter(function(id){return id!=='checkpoint';})
-                 .sort(function(a,b){return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de');});
+function sortierteCheckIds(){
+  var rest=Object.keys(AUFGABEN).filter(function(id){return AUFGABEN[id].typ==='checkliste'&&id!=='checkpoint';})
+           .sort(function(a,b){return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de');});
   return ['checkpoint'].concat(rest);
 }
-function sortierteZustIds() {
+function sortierteZustIds(){
   return Object.keys(AUFGABEN).filter(function(id){return AUFGABEN[id].typ==='allgemein';})
-               .sort(function(a,b){return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de');});
+         .sort(function(a,b){return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de');});
 }
 
-/* ═══════════════════════════════════════════════════
-   STORAGE KEYS
-   ═══════════════════════════════════════════════════ */
-var STATE_KEY='checkpoint-state-v3', ASSIGN_KEY='checkpoint-assign-v3',
-    NAMEN_KEY='checkpoint-namen-v2', CHECKS_KEY='checkpoint-checks-v2',
-    LEITUNG_KEY='checkpoint-leitung-v1', TERMINE_KEY='checkpoint-termine-v1',
-    WICHTIG_KEY='checkpoint-wichtig-v1';
+/* ═══ STORAGE ═══ */
+var STATE_KEY='chk-state-v4',ASSIGN_KEY='chk-assign-v3',NAMEN_KEY='chk-namen-v2',
+    CHECKS_KEY='chk-checks-v2',LEITUNG_KEY='chk-leitung-v1',TERMINE_KEY='chk-termine-v1',
+    WICHTIG_KEY='chk-wichtig-v1',ZEITEN_KEY='chk-zeiten-v1';
 
 function heute(){return new Date().toISOString().slice(0,10);}
 function ladeLS(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
 function speichereState(){localStorage.setItem(STATE_KEY,JSON.stringify(STATE));}
 
-/* STATE */
 var raw=ladeLS(STATE_KEY);
 var STATE=(raw&&raw.datum===heute())?raw:{datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
 if(!STATE.vertretungen)STATE.vertretungen={};
 
-function tagesReset(manuell){
-  if(manuell&&!confirm('Tages-Reset: Abwesenheiten und erledigte Aufgaben zur\u00fccksetzen?'))return;
+function tagesReset(m){
+  if(m&&!confirm('Tages-Reset?'))return;
   STATE={datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('abwesend');});
-  renderCheckliste(); updateBadges();
+  renderCheckliste();
 }
 
-/* Zuordnungen */
 function ladeZuordnung(){
   var s=ladeLS(ASSIGN_KEY);
   if(s&&Array.isArray(s)){
-    s=s.map(function(z){if(z.aufgabeId==='essensmarken'){z.typ='checkliste';}return z;});
+    s=s.map(function(z){if(z.aufgabeId==='essensmarken')z.typ='checkliste';return z;});
     GRUPPE.zustaendigkeiten=s;
   }
 }
@@ -445,38 +488,38 @@ function speichereZuordnung(){localStorage.setItem(ASSIGN_KEY,JSON.stringify(GRU
 function resetZuordnung(){
   if(!confirm('Alle Zuordnungen zur\u00fccksetzen?'))return;
   GRUPPE.zustaendigkeiten=JSON.parse(JSON.stringify(ZUORDNUNG_DEFAULT));
-  localStorage.removeItem(ASSIGN_KEY);
-  renderNamen();initSortable();renderCheckliste();updateBadges();
+  localStorage.removeItem(ASSIGN_KEY);renderNamen();initSortable();renderCheckliste();
 }
 
-/* Namen */
 var NAMEN_DEFAULT=MITARBEITENDE.map(function(p){return{id:p.id,name:p.name};});
 function ladeNamen(){
   var s=ladeLS(NAMEN_KEY);if(!s||!Array.isArray(s))return;
-  s.forEach(function(d){var p=MITARBEITENDE.find(function(p){return p.id===d.id;});if(p&&d.name)p.name=d.name;});
+  var ordered=[];
+  s.forEach(function(d){
+    var p=MITARBEITENDE.find(function(p){return p.id===d.id;});
+    if(p){if(d.name)p.name=d.name;ordered.push(p);}
+  });
+  if(ordered.length===MITARBEITENDE.length){
+    MITARBEITENDE.splice(0,MITARBEITENDE.length);
+    ordered.forEach(function(p){MITARBEITENDE.push(p);});
+  }
 }
 
-/* Aktive Checks */
 var AKTIVE_CHECKS=sortierteCheckIds();
 function ladeAktiveChecks(){var s=ladeLS(CHECKS_KEY);if(s&&Array.isArray(s))AKTIVE_CHECKS=s;}
 function speichereAktiveChecks(){localStorage.setItem(CHECKS_KEY,JSON.stringify(AKTIVE_CHECKS));}
 
-/* Leitung */
 var LEITUNG={namen:['','',''],aktiv:0};
 function ladeLeitung(){var s=ladeLS(LEITUNG_KEY);if(s)LEITUNG=s;}
 function speichereLeitung(){localStorage.setItem(LEITUNG_KEY,JSON.stringify(LEITUNG));}
 
-/* Termine */
-var TERMINE={
-  frei:[{datum:'',text:''},{datum:'',text:''}],
-  pflicht:[
-    {id:'fruehrunde',       label:'Fr\u00fchrunde',       icon:'&#9200;', datum:'',uhrzeit:''},
-    {id:'gruppenstunde',    label:'Gruppenstunde',        icon:'&#128101;',datum:'',uhrzeit:''},
-    {id:'dienstbesprechung',label:'Dienstbesprechung',    icon:'&#128203;',datum:'',uhrzeit:''},
-    {id:'geburtstag',       label:'Geburtstagsfeier',     icon:'&#127874;',datum:'',uhrzeit:''},
-    {id:'ausflug',          label:'Gruppenausflug',       icon:'&#128652;',datum:'',uhrzeit:''}
-  ]
-};
+var TERMINE={frei:[{datum:'',text:''},{datum:'',text:''}],pflicht:[
+  {id:'fruehrunde',label:'Fr\u00fchrunde',icon:'&#9200;',datum:'',uhrzeit:''},
+  {id:'gruppenstunde',label:'Gruppenstunde',icon:'&#128101;',datum:'',uhrzeit:''},
+  {id:'dienstbesprechung',label:'Dienstbesprechung',icon:'&#128203;',datum:'',uhrzeit:''},
+  {id:'geburtstag',label:'Geburtstagsfeier',icon:'&#127874;',datum:'',uhrzeit:''},
+  {id:'ausflug',label:'Gruppenausflug',icon:'&#128652;',datum:'',uhrzeit:''}
+]};
 function ladeTermine(){
   var s=ladeLS(TERMINE_KEY);if(!s)return;
   if(s.frei&&Array.isArray(s.frei))TERMINE.frei=s.frei;
@@ -487,30 +530,34 @@ function ladeTermine(){
 }
 function speichereTermine(){localStorage.setItem(TERMINE_KEY,JSON.stringify(TERMINE));}
 
-/* Wichtig */
 var WICHTIG_KAT=['Produktion','Qualifizierung','Unterweisung','Neue Mitarbeitende','Ausfall','Ver\u00e4nderung','Motto der Woche','Sonstiges'];
 var WICHTIG=[{kategorie:'',text:''},{kategorie:'',text:''}];
 function ladeWichtig(){var s=ladeLS(WICHTIG_KEY);if(s&&Array.isArray(s))WICHTIG=s;}
 function speichereWichtig(){localStorage.setItem(WICHTIG_KEY,JSON.stringify(WICHTIG));}
 
-/* Alles laden */
-ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();
+var ZEITEN={};
+function ladeZeiten(){var s=ladeLS(ZEITEN_KEY);if(s)ZEITEN=s;}
+function speichereZeiten(){localStorage.setItem(ZEITEN_KEY,JSON.stringify(ZEITEN));}
 
-/* ═══════════════════════════════════════════════════
-   HILFSFUNKTIONEN
-   ═══════════════════════════════════════════════════ */
-/* Liefert zuständige Person für check-Aufgabe (mit Vertretungs-Override) */
-function getZustaendigePerson(aufgabeId){
-  var vert=STATE.vertretungen[aufgabeId];
-  if(vert==='entfaellt')return null;
-  if(vert)return MITARBEITENDE.find(function(p){return p.id===vert;})||null;
-  var z=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===aufgabeId&&z.typ==='checkliste';});
+ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();
+
+/* ═══ HILFSFUNKTIONEN ═══ */
+function getZustaendigePerson(id){
+  var v=STATE.vertretungen[id];
+  if(v==='entfaellt')return null;
+  if(v)return MITARBEITENDE.find(function(p){return p.id===v;})||null;
+  var z=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
   return z?MITARBEITENDE.find(function(p){return p.id===z.personId;})||null:null;
 }
+function formatWann(id){
+  var z=ZEITEN[id];if(!z)return '';
+  var parts=[];
+  if(z.tage&&z.tage.length)parts.push(z.tage.join(', '));
+  if(z.uhrzeit)parts.push(z.uhrzeit+' Uhr');
+  return parts.join(' | ');
+}
 
-/* ═══════════════════════════════════════════════════
-   RENDER
-   ═══════════════════════════════════════════════════ */
+/* ═══ RENDER ═══ */
 function renderNamen(){
   var html='';
   MITARBEITENDE.forEach(function(p){
@@ -519,43 +566,35 @@ function renderNamen(){
     var icons='';
     zust.forEach(function(z){
       var a=AUFGABEN[z.aufgabeId];if(!a)return;
-      /* Feautre 2: check-Aufgabe nur zeigen wenn in AKTIVE_CHECKS */
       if(z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)===-1)return;
-      var badge='';
-      if(z.typ==='checkliste'){
-        var erl=STATE.erledigt.indexOf(z.aufgabeId)!==-1;
-        badge='<div class="aufg-badge'+(erl?' erledigt':'')+'" id="badge-'+z.aufgabeId+'">'+(erl?'&#10003;':'!')+'</div>';
-      }
-      icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'">'
-            +'<img src="'+a.foto+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'
-            +badge+'</div>';
+      var erl=STATE.erledigt.indexOf(z.aufgabeId)!==-1;
+      var badge=z.typ==='checkliste'?'<div class="aufg-badge'+(erl?' erledigt':'')+'" id="badge-'+z.aufgabeId+'">'+(erl?'&#10003;':'!')+'</div>':'';
+      icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'" onclick="event.stopPropagation()">'
+            +'<img src="'+a.foto+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'">'
          +'<div class="person-name">'+p.name+'</div>'
-         +'<div class="aufgaben-icons">'+icons+'</div>'
-         +'</div>';
+         +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
   document.getElementById('namen-tabelle').innerHTML=html;
 }
 
-/* Badges nach Checklisten-Änderung aktualisieren (ohne Re-Render der ganzen Namenstabelle) */
 function updateBadges(){
   sortierteCheckIds().forEach(function(id){
-    var badge=document.getElementById('badge-'+id);if(!badge)return;
+    var b=document.getElementById('badge-'+id);if(!b)return;
     var erl=STATE.erledigt.indexOf(id)!==-1;
-    badge.innerHTML=erl?'&#10003;':'!';
-    badge.className='aufg-badge'+(erl?' erledigt':'');
+    b.innerHTML=erl?'&#10003;':'!';
+    b.className='aufg-badge'+(erl?' erledigt':'');
   });
 }
 
 function renderLeitung(){
   var labels=['Gruppenleitung','Vertretung 1','Vertretung 2'],html='';
   for(var i=0;i<3;i++){
-    var akt=LEITUNG.aktiv===i;
-    var name=LEITUNG.namen[i]||'';
-    html+='<div class="leitung-zeile'+(akt?' aktiv':'')+'"><div class="leitung-symbol">'+(akt?'&#10003;':'&#9675;')+'</div>'
-         +'<div><div class="leitung-name'+(name?'':' leer')+'">'+(name||'(nicht eingetragen)')+'</div>'
+    var ak=LEITUNG.aktiv===i,nm=LEITUNG.namen[i]||'';
+    html+='<div class="leitung-zeile'+(ak?' aktiv':'')+'"><div class="leitung-symbol">'+(ak?'&#10003;':'&#9675;')+'</div>'
+         +'<div><div class="leitung-name'+(nm?'':' leer')+'">'+(nm||'(nicht eingetragen)')+'</div>'
          +'<div class="leitung-rolle">'+labels[i]+'</div></div></div>';
   }
   document.getElementById('leitung-anzeige').innerHTML=html;
@@ -565,28 +604,39 @@ function renderTermine(){
   var html='';
   for(var i=0;i<2;i++){
     var f=TERMINE.frei[i];
-    html+='<div class="termin-frei-zeile">'
+    html+='<div class="termin-frei-zeile" data-frei-idx="'+i+'">'
          +'<input type="date" class="termin-input" data-frei-idx="'+i+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)">'
-         +'<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin eintragen\u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
+         +'<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin \u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
          +'</div>';
   }
   html+='<div class="termin-trenner">&mdash; Regelm&auml;&szlig;ige Termine &mdash;</div>';
   TERMINE.pflicht.forEach(function(p){
-    var dtVal=p.datum?(p.datum+(p.uhrzeit?'T'+p.uhrzeit:'')):'';
-    html+='<div class="termin-pflicht-zeile">'
-         +'<input type="datetime-local" class="termin-input" data-pflicht-id="'+p.id+'" value="'+dtVal+'" onchange="terminPflichtSp(this)">'
+    var dt=p.datum?(p.datum+(p.uhrzeit?'T'+p.uhrzeit:'')):'';
+    html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
+         +'<input type="datetime-local" class="termin-input" data-pflicht-id="'+p.id+'" value="'+dt+'" onchange="terminPflichtSp(this)">'
          +'<div class="termin-icon-zelle">'+p.icon+'</div>'
          +'<div class="termin-pflicht-label">'+p.label+'</div></div>';
   });
   document.getElementById('termine-anzeige').innerHTML=html;
+  checkTerminDatumHeute();
 }
-function terminFreiSp(el){var idx=parseInt(el.dataset.freiIdx);TERMINE.frei[idx][el.dataset.feld]=el.value;speichereTermine();}
+function terminFreiSp(el){var i=parseInt(el.dataset.freiIdx);TERMINE.frei[i][el.dataset.feld]=el.value;speichereTermine();checkTerminDatumHeute();}
 function terminPflichtSp(el){
   var p=TERMINE.pflicht.find(function(p){return p.id===el.dataset.pflichtId;});if(!p)return;
-  var v=el.value;
-  if(v&&v.indexOf('T')!==-1){var pts=v.split('T');p.datum=pts[0];p.uhrzeit=pts[1];}
+  var v=el.value;if(v&&v.indexOf('T')!==-1){var pts=v.split('T');p.datum=pts[0];p.uhrzeit=pts[1];}
   else{p.datum=v;p.uhrzeit='';}
-  speichereTermine();
+  speichereTermine();checkTerminDatumHeute();
+}
+/* Feature 8: Datumsabgleich */
+function checkTerminDatumHeute(){
+  var td=heute();
+  document.querySelectorAll('.termin-frei-zeile,.termin-pflicht-zeile').forEach(function(r){r.classList.remove('termin-heute');});
+  TERMINE.frei.forEach(function(f,i){
+    if(f.datum===td){var rows=document.querySelectorAll('.termin-frei-zeile');if(rows[i])rows[i].classList.add('termin-heute');}
+  });
+  TERMINE.pflicht.forEach(function(p){
+    if(p.datum===td){var el=document.querySelector('[data-pflicht-id-row="'+p.id+'"]');if(el)el.classList.add('termin-heute');}
+  });
 }
 
 function renderWichtig(){
@@ -594,21 +644,14 @@ function renderWichtig(){
   for(var i=0;i<2;i++){
     var w=WICHTIG[i];
     var opts=WICHTIG_KAT.map(function(k){return '<option value="'+k+'"'+(w.kategorie===k?' selected':'')+'>'+k+'</option>';}).join('');
-    html+='<div class="wichtig-zeile">'
-         +'<select class="wichtig-select" data-idx="'+i+'" onchange="wichtigSp(this)"><option value="">&#8211; Kategorie &#8211;</option>'+opts+'</select>'
-         +'<input type="text" class="wichtig-textin" data-idx="'+i+'" value="'+(w.text||'')+'" placeholder="Eintragen\u2026" maxlength="80"'
-         +' onchange="wichtigSp(this)" onblur="wichtigSp(this)">'
-         +'</div>';
+    html+='<div class="wichtig-zeile"><select class="wichtig-select" data-idx="'+i+'" onchange="wichtigSp(this)"><option value="">&#8211; Kategorie &#8211;</option>'+opts+'</select>'
+         +'<input type="text" class="wichtig-textin" data-idx="'+i+'" value="'+(w.text||'')+'" placeholder="Eintragen\u2026" maxlength="80" onchange="wichtigSp(this)" onblur="wichtigSp(this)"></div>';
   }
   document.getElementById('wichtig-anzeige').innerHTML=html;
 }
-function wichtigSp(el){
-  var idx=parseInt(el.dataset.idx);
-  if(el.tagName==='SELECT')WICHTIG[idx].kategorie=el.value;
-  else WICHTIG[idx].text=el.value;
-  speichereWichtig();
-}
+function wichtigSp(el){var i=parseInt(el.dataset.idx);if(el.tagName==='SELECT')WICHTIG[i].kategorie=el.value;else WICHTIG[i].text=el.value;speichereWichtig();}
 
+/* Feature 4+7: Checkliste mit 3 Zeilen */
 function renderCheckliste(){
   var ids=sortierteCheckIds().filter(function(id){return AKTIVE_CHECKS.indexOf(id)!==-1;});
   var html='';
@@ -620,22 +663,22 @@ function renderCheckliste(){
     var rowKl=erl?'erledigt':abw?'warnung':'';
     var togKl=abw&&!erl?'warnung':'';
     var sym=erl?'&#10003;':abw?'&#9888;':'&#10007;';
-    var tipp=erl?'R\u00fckg\u00e4ngig':abw?(person.name+' abwesend'):'Als erledigt markieren';
     var warn=abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':'';
-    var persText=person?(' &mdash; '+person.name):'';
+    var wann=formatWann(id);
+    var wannZeile=wann?'<div class="check-wann-anzeige">'+wann+'</div>':'';
+    var persZeile=person?'<div class="check-person-zeile">&#128100; '+person.name+'</div>':'';
     html+='<div class="check-row '+rowKl+'" id="cr-'+id+'">'
-         +'<button class="check-toggle '+togKl+'" onclick="toggleErledigt(\''+id+'\')" title="'+tipp+'">'+sym+'</button>'
+         +'<button class="check-toggle '+togKl+'" onclick="toggleErledigt(\''+id+'\')" title="'+(erl?'R\u00fckg\u00e4ngig':a.label)+'">' +sym+'</button>'
          +'<img src="'+a.foto+'" alt="'+a.label+'" class="check-symbol">'
-         +'<div class="check-label">'+a.label+persText+warn+'</div>'
+         +'<div class="check-label-wrap">'+wannZeile+'<div class="check-aufgabe-name">'+a.label+'</div>'+persZeile+warn+'</div>'
+         +'<button class="check-wann-btn" onclick="oeffneWannModal(\''+id+'\')" title="Zeitangabe bearbeiten">&#9200;</button>'
          +'</div>';
   });
   document.getElementById('check-tabelle').innerHTML=html;
   updateBadges();
 }
 
-/* ═══════════════════════════════════════════════════
-   EVENTS
-   ═══════════════════════════════════════════════════ */
+/* ═══ EVENTS ═══ */
 function toggleAbwesend(personId){
   if(editModus){oeffneAufgabenModal(personId);return;}
   var idx=STATE.abwesend.indexOf(personId);
@@ -643,61 +686,81 @@ function toggleAbwesend(personId){
   speichereState();
   var row=document.querySelector('.namen-row[data-person-id="'+personId+'"]');
   if(row)row.classList.toggle('abwesend',STATE.abwesend.indexOf(personId)!==-1);
-
-  /* Feature 4: wenn abwesend + hat check-Aufgaben → Vertretungs-Popup */
   if(STATE.abwesend.indexOf(personId)!==-1){
-    var checkZust=GRUPPE.zustaendigkeiten.filter(function(z){
-      return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;
-    });
-    if(checkZust.length>0){
-      oeffneVertretungsModal(personId,checkZust);
-      return;
-    }
+    var cz=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;});
+    if(cz.length>0){oeffneVertretungsModal(personId,cz);return;}
   } else {
-    /* wieder anwesend: Vertretungen dieser Person entfernen */
     GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste';})
       .forEach(function(z){delete STATE.vertretungen[z.aufgabeId];});
     speichereState();
   }
   renderCheckliste();
 }
-
 function toggleErledigt(id){
   var idx=STATE.erledigt.indexOf(id);
   if(idx===-1)STATE.erledigt.push(id);else STATE.erledigt.splice(idx,1);
   speichereState();renderCheckliste();
 }
 
-/* ═══════════════════════════════════════════════════
-   MODAL HELPERS
-   ═══════════════════════════════════════════════════ */
-function schM(id){document.getElementById(id).classList.remove('sichtbar');}
+/* ═══ MODALS ═══ */
+function schM(id){
+  document.getElementById(id).classList.remove('sichtbar');
+  if(id==='aufgaben-modal'&&editModus){setTimeout(initSortable,100);}
+}
 function modalAK(e,id){if(e.target===document.getElementById(id))schM(id);}
 
-/* Namen */
+/* Namen (Feature 3: 1-spaltig + sortable, kein Standard) */
+var namenSortable=null;
 function oeffneNamenModal(){
   var html='';
-  MITARBEITENDE.forEach(function(p){
-    html+='<label class="namen-feld"><span class="namen-nr">'+p.id+'.</span>'
-         +'<input class="namen-input" type="text" value="'+p.name+'" data-person-id="'+p.id+'" maxlength="20" placeholder="Vorname N."'
-         +' onkeydown="if(event.key===\'Enter\')speichereNamenAusModal()"></label>';
+  MITARBEITENDE.forEach(function(p,idx){
+    html+='<div class="namen-sort-item" data-person-id="'+p.id+'">'
+         +'<div class="namen-drag-handle">&#8661;</div>'
+         +'<span class="namen-nr">'+(idx+1)+'.</span>'
+         +'<input class="namen-input" type="text" value="'+p.name+'" data-person-id="'+p.id+'" maxlength="20" placeholder="Vorname N.">'
+         +'</div>';
   });
   document.getElementById('namen-felder').innerHTML=html;
   document.getElementById('namen-modal').classList.add('sichtbar');
+  if(typeof Sortable!=='undefined'){
+    if(namenSortable)namenSortable.destroy();
+    namenSortable=new Sortable(document.getElementById('namen-felder'),{
+      animation:150,handle:'.namen-drag-handle',
+      onEnd:function(){updateNamenNummern();}
+    });
+  }
   setTimeout(function(){var f=document.querySelector('.namen-input');if(f)f.focus();},80);
 }
-function speichereNamenAusModal(){
-  document.querySelectorAll('.namen-input').forEach(function(input){
-    var p=MITARBEITENDE.find(function(p){return p.id===parseInt(input.dataset.personId);});
-    if(p&&input.value.trim())p.name=input.value.trim();
-  });
-  localStorage.setItem(NAMEN_KEY,JSON.stringify(MITARBEITENDE.map(function(p){return{id:p.id,name:p.name};})));
-  schM('namen-modal');renderNamen();initSortable();renderCheckliste();
+function updateNamenNummern(){
+  document.querySelectorAll('.namen-sort-item .namen-nr').forEach(function(el,i){el.textContent=(i+1)+'.';});
 }
-function resetNamen(){
-  if(!confirm('Namen zur\u00fccksetzen?'))return;
-  NAMEN_DEFAULT.forEach(function(d){var p=MITARBEITENDE.find(function(p){return p.id===d.id;});if(p)p.name=d.name;});
-  localStorage.removeItem(NAMEN_KEY);
+function sortNamenAlpha(){
+  var items=Array.from(document.querySelectorAll('.namen-sort-item'));
+  items.sort(function(a,b){
+    var va=a.querySelector('.namen-input').value;
+    var vb=b.querySelector('.namen-input').value;
+    var la=va.split(' ').pop().replace('.','');
+    var lb=vb.split(' ').pop().replace('.','');
+    return la.localeCompare(lb,'de');
+  });
+  var c=document.getElementById('namen-felder');
+  items.forEach(function(item){c.appendChild(item);});
+  updateNamenNummern();
+}
+function speichereNamenAusModal(){
+  var items=document.querySelectorAll('.namen-sort-item');
+  var ordered=[];
+  items.forEach(function(item){
+    var id=parseInt(item.dataset.personId);
+    var p=MITARBEITENDE.find(function(p){return p.id===id;});
+    var inp=item.querySelector('.namen-input');
+    if(p){if(inp&&inp.value.trim())p.name=inp.value.trim();ordered.push(p);}
+  });
+  if(ordered.length===MITARBEITENDE.length){
+    MITARBEITENDE.splice(0,MITARBEITENDE.length);
+    ordered.forEach(function(p){MITARBEITENDE.push(p);});
+  }
+  localStorage.setItem(NAMEN_KEY,JSON.stringify(MITARBEITENDE.map(function(p){return{id:p.id,name:p.name};})));
   schM('namen-modal');renderNamen();initSortable();renderCheckliste();
 }
 
@@ -705,59 +768,49 @@ function resetNamen(){
 function oeffneLeitungModal(){
   var labels=['Gruppenleitung','Vertretung 1','Vertretung 2'],html='';
   for(var i=0;i<3;i++){
-    var akt=LEITUNG.aktiv===i;
-    html+='<div class="leitung-modal-zeile'+(akt?' aktiv':'')+'" id="lmz-'+i+'">'
-         +'<input type="radio" name="leitung-aktiv" class="leitung-radio" value="'+i+'"'+(akt?' checked':'')+' onchange="leitungRadioCh()">'
+    var ak=LEITUNG.aktiv===i;
+    html+='<div class="leitung-modal-zeile'+(ak?' aktiv':'')+'" id="lmz-'+i+'">'
+         +'<input type="radio" name="leit-aktiv" class="leitung-radio" value="'+i+'"'+(ak?' checked':'')+' onchange="leitRadCh()">'
          +'<div class="leitung-modal-info"><div class="leitung-modal-rolle">'+labels[i]+'</div>'
-         +'<input class="leitung-modal-input" type="text" value="'+(LEITUNG.namen[i]||'')+'" data-leitung-idx="'+i+'" placeholder="Name eintragen \u2026"></div></div>';
+         +'<input class="leitung-modal-input" type="text" value="'+(LEITUNG.namen[i]||'')+'" data-idx="'+i+'" placeholder="Name \u2026"></div></div>';
   }
   document.getElementById('leitung-modal-inhalt').innerHTML=html;
   document.getElementById('leitung-modal').classList.add('sichtbar');
 }
-function leitungRadioCh(){
+function leitRadCh(){
   for(var i=0;i<3;i++){var z=document.getElementById('lmz-'+i);if(z)z.classList.remove('aktiv');}
-  var c=document.querySelector('input[name="leitung-aktiv"]:checked');
+  var c=document.querySelector('input[name="leit-aktiv"]:checked');
   if(c){var z=document.getElementById('lmz-'+c.value);if(z)z.classList.add('aktiv');}
 }
 function speichereLeitungAusModal(){
-  var c=document.querySelector('input[name="leitung-aktiv"]:checked');
-  LEITUNG.aktiv=c?parseInt(c.value):0;
-  document.querySelectorAll('[data-leitung-idx]').forEach(function(input){
-    LEITUNG.namen[parseInt(input.dataset.leitungIdx)]=input.value.trim();
-  });
+  var c=document.querySelector('input[name="leit-aktiv"]:checked');LEITUNG.aktiv=c?parseInt(c.value):0;
+  document.querySelectorAll('.leitung-modal-input[data-idx]').forEach(function(inp){LEITUNG.namen[parseInt(inp.dataset.idx)]=inp.value.trim();});
   speichereLeitung();schM('leitung-modal');renderLeitung();
 }
 
-/* Aufgaben-Zuweisung (Feature 1: 2-spaltig; Feature 2: inaktiv-Warnung) */
+/* Aufgaben-Zuweisung */
 var aufgabenModalPersonId=null;
 function oeffneAufgabenModal(personId){
   aufgabenModalPersonId=personId;
   var person=MITARBEITENDE.find(function(p){return p.id===personId;});
   var aktuell=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId;}).map(function(z){return z.aufgabeId;});
-  var checkIds=sortierteCheckIds();
-  var zustIds=sortierteZustIds();
-
   function chip(id,kl){
-    var a=AUFGABEN[id];var gew=aktuell.indexOf(id)!==-1;
-    var inaktiv=(a.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(id)===-1);
+    var a=AUFGABEN[id],gew=aktuell.indexOf(id)!==-1;
+    var inaktiv=a.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(id)===-1;
     var and=a.typ==='checkliste'?GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.personId!==personId;}):null;
     var andP=and?MITARBEITENDE.find(function(p){return p.id===and.personId;}):null;
-    var hint=andP&&!gew?'<span class="aufg-chip-belegt">aktuell: '+andP.name+'</span>':'';
-    var warnTxt=inaktiv?'<span class="aufg-chip-warn">&#9888; Zuerst in Checkliste aktivieren</span>':'';
-    var disStr=inaktiv?' inaktiv-chip':'';
-    return '<button class="aufg-chip '+kl+(gew?' gewaehlt':'')+disStr+'" data-aufgabe-id="'+id+'" onclick="chipToggle(this)">'
-           +'<img src="'+a.foto+'" alt="'+a.label+'"><span>'+a.label+hint+warnTxt+'</span>'
-           +'<div class="aufg-chip-check">'+(gew?'&#10003;':'')+'</div></button>';
+    return '<button class="aufg-chip '+kl+(gew?' gewaehlt':'')+(inaktiv?' inaktiv-chip':'')+'" data-aufgabe-id="'+id+'" onclick="chipToggle(this)">'
+          +'<img src="'+a.foto+'" alt="'+a.label+'"><span>'+a.label
+          +(andP&&!gew?'<span class="aufg-chip-belegt">aktuell: '+andP.name+'</span>':'')
+          +(inaktiv?'<span class="aufg-chip-warn">&#9888; Zuerst in Checkliste aktivieren</span>':'')
+          +'</span><div class="aufg-chip-check">'+(gew?'&#10003;':'')+'</div></button>';
   }
-
-  var html='<div class="aufg-modal-person"><img src="portrait.jpg" alt="'+person.name+'" onerror="this.style.background=\'#e2e8f0\'"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
-           +'<div class="aufg-modal-cols">'
-           +'<div><div class="aufg-col-titel gelb">&#128203; Checklisten-Aufgaben</div>'
-           +'<div class="aufg-col-chips">'+checkIds.map(function(id){return chip(id,'check-chip');}).join('')+'</div></div>'
-           +'<div><div class="aufg-col-titel blau">&#9881; Allgemeine Zust&auml;ndigkeiten</div>'
-           +'<div class="aufg-col-chips">'+zustIds.map(function(id){return chip(id,'zust-chip');}).join('')+'</div></div>'
-           +'</div>';
-  document.getElementById('aufgaben-modal-inhalt').innerHTML=html;
+  document.getElementById('aufgaben-modal-inhalt').innerHTML=
+    '<div class="aufg-modal-person"><img src="portrait.jpg" alt="'+person.name+'" onerror="this.style.background=\'#e2e8f0\'"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
+   +'<div class="aufg-modal-cols">'
+   +'<div><div class="aufg-col-titel gelb">&#128203; Checklisten-Aufgaben</div><div class="aufg-col-chips">'+sortierteCheckIds().map(function(id){return chip(id,'check-chip');}).join('')+'</div></div>'
+   +'<div><div class="aufg-col-titel blau">&#9881; Allgemeine Zust&auml;ndigkeiten</div><div class="aufg-col-chips">'+sortierteZustIds().map(function(id){return chip(id,'zust-chip');}).join('')+'</div></div>'
+   +'</div>';
   document.getElementById('aufgaben-modal').classList.add('sichtbar');
 }
 function chipToggle(btn){
@@ -765,108 +818,217 @@ function chipToggle(btn){
   btn.classList.toggle('gewaehlt');
   btn.querySelector('.aufg-chip-check').innerHTML=btn.classList.contains('gewaehlt')?'&#10003;':'';
 }
+
+/* Feature 1: Deaktivierung check-Aufgabe → Neuzuweisung */
+var neuzuwQueue=[];
 function speichereAufgabenAusModal(){
   var personId=aufgabenModalPersonId;
+  var alt=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste';}).map(function(z){return z.aufgabeId;});
   var neu=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId!==personId;});
   document.querySelectorAll('.aufg-chip.gewaehlt:not(.inaktiv-chip)').forEach(function(chip){
-    var id=chip.dataset.aufgabeId;var a=AUFGABEN[id];
+    var id=chip.dataset.aufgabeId,a=AUFGABEN[id];
     if(a.typ==='checkliste'){var idx=neu.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});if(idx!==-1)neu.splice(idx,1);}
     neu.push({personId:personId,aufgabeId:id,typ:a.typ});
   });
   GRUPPE.zustaendigkeiten=neu;speichereZuordnung();
-  schM('aufgaben-modal');renderNamen();initSortable();renderCheckliste();
+  schM('aufgaben-modal');renderNamen();initSortable();
+
+  /* Prüfe: aktive Check-Aufgaben ohne zuständige Person → Neuzuweisung */
+  neuzuwQueue=[];
+  AKTIVE_CHECKS.forEach(function(id){
+    var hat=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
+    if(!hat)neuzuwQueue.push(id);
+  });
+  if(neuzuwQueue.length>0){oeffneNeuzuweisungModal();}
+  else{renderCheckliste();}
 }
 
-/* Checkliste konfigurieren */
+function oeffneNeuzuweisungModal(){
+  var html='';
+  neuzuwQueue.forEach(function(id){
+    var a=AUFGABEN[id];
+    html+='<div class="neuzuw-block">'
+         +'<div class="neuzuw-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="neuzuw-label">'+a.label+'</span></div>'
+         +'<div class="neuzuw-person-liste">'
+         +MITARBEITENDE.map(function(p){
+           return '<label class="neuzuw-person-label"><input type="radio" name="neuzuw-'+id+'" value="'+p.id+'">'+p.name+'</label>';
+         }).join('')
+         +'</div>'
+         +'<label class="neuzuw-loeschen-label"><input type="radio" name="neuzuw-'+id+'" value="loeschen"> &#128465; Aufgabe aus Checkliste entfernen</label>'
+         +'</div>';
+  });
+  document.getElementById('neuzuw-inhalt').innerHTML=html;
+  document.getElementById('neuzuw-modal').classList.add('sichtbar');
+}
+function speichereNeuzuweisungAusModal(){
+  neuzuwQueue.forEach(function(id){
+    var radio=document.querySelector('input[name="neuzuw-'+id+'"]:checked');
+    if(!radio)return;
+    if(radio.value==='loeschen'){
+      var idx=AKTIVE_CHECKS.indexOf(id);if(idx!==-1)AKTIVE_CHECKS.splice(idx,1);
+      speichereAktiveChecks();
+    } else {
+      var pId=parseInt(radio.value);
+      var existing=GRUPPE.zustaendigkeiten.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
+      if(existing!==-1)GRUPPE.zustaendigkeiten.splice(existing,1);
+      GRUPPE.zustaendigkeiten.push({personId:pId,aufgabeId:id,typ:'checkliste'});
+      speichereZuordnung();
+    }
+  });
+  schM('neuzuw-modal');renderNamen();initSortable();renderCheckliste();
+}
+
+/* Feature 2: Checkliste-Modal mit Pflicht-Zuweisung */
+var AKTIVE_CHECKS_VOR_SAVE=[];
 function oeffneChecklisteModal(){
-  var ids=sortierteCheckIds();var html='';
+  AKTIVE_CHECKS_VOR_SAVE=AKTIVE_CHECKS.slice();
+  var ids=sortierteCheckIds(),html='';
   ids.forEach(function(id){
-    var a=AUFGABEN[id];var aktiv=AKTIVE_CHECKS.indexOf(id)!==-1;var fix=id==='checkpoint';
-    html+='<button class="check-modal-item'+(aktiv?' gewaehlt':'')+(fix?' fixiert':'')+'"'
-         +' data-check-id="'+id+'" data-fixiert="'+fix+'" onclick="checkModalClick(this)">'
-         +'<img src="'+a.foto+'" alt="'+a.label+'">'
-         +'<span class="check-modal-label">'+a.label+(fix?' <span class="check-modal-hinweis">(immer aktiv)</span>':'')+'</span>'
+    var a=AUFGABEN[id],aktiv=AKTIVE_CHECKS.indexOf(id)!==-1,fix=id==='checkpoint';
+    html+='<button class="check-modal-item'+(aktiv?' gewaehlt':'')+(fix?' fixiert':'')+'" data-check-id="'+id+'" data-fixiert="'+fix+'" onclick="checkModalClick(this)">'
+         +'<img src="'+a.foto+'" alt="'+a.label+'"><span class="check-modal-label">'+a.label+(fix?' <span class="check-modal-hinweis">(immer aktiv)</span>':'')+'</span>'
          +'<div class="check-modal-cb">'+(aktiv?'&#10003;':'')+'</div></button>';
   });
   document.getElementById('check-modal-liste').innerHTML=html;
+  document.getElementById('check-block-warn-container').innerHTML='';
   document.getElementById('checkliste-modal').classList.add('sichtbar');
 }
 function checkModalClick(btn){
   if(btn.dataset.fixiert==='true')return;
   btn.classList.toggle('gewaehlt');
   btn.querySelector('.check-modal-cb').innerHTML=btn.classList.contains('gewaehlt')?'&#10003;':'';
+  document.getElementById('check-block-warn-container').innerHTML='';
 }
-function speichereChecklisteAusModal(){
-  AKTIVE_CHECKS=['checkpoint'];
-  document.querySelectorAll('.check-modal-item.gewaehlt').forEach(function(btn){if(btn.dataset.fixiert!=='true')AKTIVE_CHECKS.push(btn.dataset.checkId);});
-  AKTIVE_CHECKS=sortierteCheckIds().filter(function(id){return AKTIVE_CHECKS.indexOf(id)!==-1;});
+function versucheChecklisteSpeichern(){
+  var ausgewaehlt=['checkpoint'];
+  document.querySelectorAll('.check-modal-item.gewaehlt').forEach(function(btn){if(btn.dataset.fixiert!=='true')ausgewaehlt.push(btn.dataset.checkId);});
+  var neuAktiv=ausgewaehlt.filter(function(id){return AKTIVE_CHECKS_VOR_SAVE.indexOf(id)===-1;});
+  var ohneTraeger=neuAktiv.filter(function(id){return !GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});});
+  if(ohneTraeger.length===0){speichereChecklisteEndgueltig(ausgewaehlt);return;}
+  /* Warnung einblenden */
+  var warnHtml='<div class="check-block-warn"><div class="check-block-warn-titel">&#9888; Folgende neue Aufgaben haben noch keine zust&auml;ndige Person:</div>';
+  ohneTraeger.forEach(function(id){
+    var a=AUFGABEN[id];
+    warnHtml+='<div class="block-aufgabe-zeile">'
+             +'<img src="'+a.foto+'" alt="'+a.label+'" class="block-aufgabe-img">'
+             +'<span class="block-aufgabe-label">'+a.label+'</span>'
+             +'<select class="block-person-select" data-aufgabe-id="'+id+'">'
+             +'<option value="">&#8211; Person w&auml;hlen &#8211;</option>'
+             +MITARBEITENDE.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('')
+             +'</select></div>'
+             +'<label class="joker-label"><input type="checkbox" data-joker-id="'+id+'"> Vergebe ich nachtr&auml;glich</label>';
+  });
+  warnHtml+='</div>';
+  document.getElementById('check-block-warn-container').innerHTML=warnHtml;
+  /* Beachten: zweiter Klick auf Speichern speichert mit den gewählten Personen */
+  var btn=document.querySelector('#checkliste-modal .btn-modal-primary');
+  btn.onclick=function(){erzwingeChecklisteSpeichern(ausgewaehlt,ohneTraeger);};
+}
+function erzwingeChecklisteSpeichern(ausgewaehlt,ohneTraeger){
+  ohneTraeger.forEach(function(id){
+    var joker=document.querySelector('input[data-joker-id="'+id+'"]');
+    if(joker&&joker.checked)return;
+    var sel=document.querySelector('select[data-aufgabe-id="'+id+'"]');
+    if(sel&&sel.value){
+      var existing=GRUPPE.zustaendigkeiten.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
+      if(existing!==-1)GRUPPE.zustaendigkeiten.splice(existing,1);
+      GRUPPE.zustaendigkeiten.push({personId:parseInt(sel.value),aufgabeId:id,typ:'checkliste'});
+      speichereZuordnung();
+    }
+  });
+  speichereChecklisteEndgueltig(ausgewaehlt);
+  /* Button zurücksetzen */
+  document.querySelector('#checkliste-modal .btn-modal-primary').onclick=versucheChecklisteSpeichern;
+}
+function speichereChecklisteEndgueltig(ausgewaehlt){
+  AKTIVE_CHECKS=sortierteCheckIds().filter(function(id){return ausgewaehlt.indexOf(id)!==-1;});
   speichereAktiveChecks();schM('checkliste-modal');renderNamen();renderCheckliste();
 }
 function resetAktiveChecks(){
   AKTIVE_CHECKS=sortierteCheckIds();speichereAktiveChecks();schM('checkliste-modal');renderNamen();renderCheckliste();
 }
 
-/* ═══════════════════════════════════════════════════
-   Feature 4: Vertretungs-Modal
-   ═══════════════════════════════════════════════════ */
-var vertretungsPersonId=null,vertretungsZust=[];
-
+/* Vertretung */
+var vertPersonId=null,vertZust=[];
 function oeffneVertretungsModal(personId,checkZust){
-  vertretungsPersonId=personId;
-  vertretungsZust=checkZust;
+  vertPersonId=personId;vertZust=checkZust;
   var person=MITARBEITENDE.find(function(p){return p.id===personId;});
-  document.getElementById('vert-beschreibung').innerHTML=
-    '<strong>'+person.name+'</strong> ist heute abwesend und hat Check-Aufgaben.<br>Bitte eine Vertretung w&auml;hlen:';
-
+  document.getElementById('vert-beschreibung').innerHTML='<strong>'+person.name+'</strong> ist abwesend. Bitte Vertretung f&uuml;r Check-Aufgaben w&auml;hlen:';
   var html='';
   checkZust.forEach(function(z,zi){
     var a=AUFGABEN[z.aufgabeId];if(!a)return;
-    var aktVert=STATE.vertretungen[z.aufgabeId];
+    var av=STATE.vertretungen[z.aufgabeId];
     if(zi>0)html+='<div class="vert-trenn"></div>';
-    html+='<div class="vert-aufgabe-block">'
-         +'<div class="vert-aufgabe-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="vert-aufgabe-label">'+a.label+'</span></div>'
-         +'<label class="vert-entfaellt-label">'
-         +'<input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(aktVert==='entfaellt'?' checked':'')+' onchange="vertEntfaelltCh(this,\''+z.aufgabeId+'\')">'
-         +'Diese Aufgabe entf&auml;llt heute</label>'
-         +'<div class="vert-person-liste">'
-         +MITARBEITENDE.filter(function(p){return p.id!==personId;}).map(function(p){
-           var checked=aktVert===p.id;
-           return '<label class="vert-person-label"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(checked?' checked':'')+'>'+p.name+'</label>';
-         }).join('')
-         +'</div></div>';
+    html+='<div class="vert-aufgabe-block"><div class="vert-aufgabe-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="vert-aufgabe-label">'+a.label+'</span></div>'
+         +'<label class="vert-entfaellt-label"><input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(av==='entfaellt'?' checked':'')+' onchange="vertEntfCh(this,\''+z.aufgabeId+'\')"> Diese Aufgabe entf&auml;llt heute</label>'
+         +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).map(function(p){
+           return '<label class="vert-person-label"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(av===p.id?' checked':'')+'>'+p.name+'</label>';
+         }).join('')+'</div></div>';
   });
   document.getElementById('vert-inhalt').innerHTML=html;
   document.getElementById('vertretung-modal').classList.add('sichtbar');
 }
-
-function vertEntfaelltCh(cb,aufgabeId){
-  /* Wenn "entfällt" gecheckt → Radios deaktivieren */
-  var radios=document.querySelectorAll('input[name="vert-'+aufgabeId+'"]');
+function vertEntfCh(cb,id){
+  var radios=document.querySelectorAll('input[name="vert-'+id+'"]');
   radios.forEach(function(r){r.disabled=cb.checked;if(cb.checked)r.checked=false;});
 }
-
 function speichereVertretungAusModal(){
-  vertretungsZust.forEach(function(z){
-    var entfCb=document.querySelector('input[name="entf-'+z.aufgabeId+'"]');
-    if(entfCb&&entfCb.checked){STATE.vertretungen[z.aufgabeId]='entfaellt';return;}
-    var radio=document.querySelector('input[name="vert-'+z.aufgabeId+'"]:checked');
-    if(radio)STATE.vertretungen[z.aufgabeId]=parseInt(radio.value);
-    else delete STATE.vertretungen[z.aufgabeId];
+  vertZust.forEach(function(z){
+    var ec=document.querySelector('input[name="entf-'+z.aufgabeId+'"]');
+    if(ec&&ec.checked){STATE.vertretungen[z.aufgabeId]='entfaellt';return;}
+    var r=document.querySelector('input[name="vert-'+z.aufgabeId+'"]:checked');
+    if(r)STATE.vertretungen[z.aufgabeId]=parseInt(r.value);else delete STATE.vertretungen[z.aufgabeId];
   });
   speichereState();schM('vertretung-modal');renderCheckliste();
 }
 
-/* ═══════════════════════════════════════════════════
-   DRAG & DROP
-   ═══════════════════════════════════════════════════ */
+/* Feature 7: Wann-Modal */
+var wannModalId=null;
+function oeffneWannModal(id){
+  wannModalId=id;
+  var a=AUFGABEN[id];
+  document.getElementById('wann-modal-titel').textContent=a.label;
+  var z=ZEITEN[id]||{tage:[],uhrzeit:''};
+  var TAGE=['Mo','Di','Mi','Do','Fr'];
+  document.getElementById('wann-tage').innerHTML=TAGE.map(function(t){
+    var aktiv=z.tage&&z.tage.indexOf(t)!==-1;
+    return '<label class="wann-tag-label'+(aktiv?' aktiv':'')+'" onclick="wannTagToggle(this)">'
+          +'<input type="checkbox"'+(aktiv?' checked':'')+' value="'+t+'">'+t+'</label>';
+  }).join('');
+  document.getElementById('wann-uhrzeit').value=z.uhrzeit||'';
+  document.getElementById('wann-modal').classList.add('sichtbar');
+}
+function wannTagToggle(label){
+  label.classList.toggle('aktiv');
+  var cb=label.querySelector('input[type="checkbox"]');
+  if(cb)cb.checked=!cb.checked;
+}
+function speichereWannAusModal(){
+  var tage=[];
+  document.querySelectorAll('#wann-tage .wann-tag-label.aktiv input').forEach(function(cb){tage.push(cb.value);});
+  var uhrzeit=document.getElementById('wann-uhrzeit').value;
+  ZEITEN[wannModalId]={tage:tage,uhrzeit:uhrzeit};
+  speichereZeiten();schM('wann-modal');renderCheckliste();
+}
+function loescheWann(){
+  delete ZEITEN[wannModalId];
+  speichereZeiten();schM('wann-modal');renderCheckliste();
+}
+
+/* ═══ DRAG & DROP (Feature 5: Fix) ═══ */
 var editModus=false,sortableInstances=[];
 function initSortable(){
   if(typeof Sortable==='undefined')return;
-  sortableInstances.forEach(function(s){s.destroy();});sortableInstances=[];
+  sortableInstances.forEach(function(s){try{s.destroy();}catch(e){}});
+  sortableInstances=[];
   document.querySelectorAll('.aufgaben-icons').forEach(function(el){
     sortableInstances.push(new Sortable(el,{
-      group:'aufgaben',animation:150,disabled:true,delay:150,delayOnTouchOnly:true,
-      onEnd:function(){
+      group:'aufgaben',animation:150,disabled:!editModus,
+      delay:300,delayOnTouchOnly:false,
+      forceFallback:false,
+      onStart:function(evt){evt.item.style.opacity='0.7';},
+      onEnd:function(evt){
+        evt.item.style.opacity='';
         var neu=[];
         document.querySelectorAll('.namen-row[data-person-id]').forEach(function(row){
           var pId=parseInt(row.dataset.personId);
@@ -889,13 +1051,25 @@ function toggleEditModus(){
   sortableInstances.forEach(function(s){s.option('disabled',!editModus);});
 }
 
-/* ═══════════════════════════════════════════════════
-   INIT
-   ═══════════════════════════════════════════════════ */
+/* ═══ UHRZEIT (Feature 6) ═══ */
+var WOCHENTAGE=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+var MONATE=['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+function updateClock(){
+  var now=new Date();
+  var h=now.getHours().toString().padStart(2,'0');
+  var m=now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('clock-time').textContent=h+':'+m;
+  document.getElementById('clock-date').textContent=WOCHENTAGE[now.getDay()]+', den '+now.getDate()+'. '+MONATE[now.getMonth()]+' '+now.getFullYear();
+  checkTerminDatumHeute();
+}
+setInterval(updateClock,30000);
+
+/* ═══ INIT ═══ */
 document.getElementById('banner-name').textContent=GRUPPE.name;
 document.getElementById('banner-kw').textContent=GRUPPE.woche;
 document.getElementById('jahr').textContent=new Date().getFullYear();
-renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
+updateClock();
+renderNamen();renderLeitung();renderTermine();renderWichtig();renderCheckliste();initSortable();
 </script>
 </body>
 </html>
