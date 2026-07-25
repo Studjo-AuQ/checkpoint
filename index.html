@@ -63,6 +63,10 @@
     body.edit-modus .aufgaben-icons{min-width:var(--ROW);min-height:var(--ROW);}
     .aufg-badge{position:absolute;bottom:5px;right:5px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;border:2px solid white;background:var(--rot);color:white;z-index:2;pointer-events:none;}
     .aufg-badge.erledigt{background:var(--gruen);}
+    /* Vertretungs-Icon: orangefarbener Rahmen */
+    .aufg-icon-wrap.aufg-vert .aufg-icon-img{background:#fff7ed;outline:3px solid #f97316;outline-offset:-3px;}
+    body.edit-modus .aufg-icon-wrap.aufg-vert .aufg-icon-img{outline:3px dashed #f97316;outline-offset:-3px;}
+    .aufg-badge.vert{background:#f97316;}
 
     /* ── Mitte ── */
     .mitte{display:flex;flex-direction:column;gap:10px;}
@@ -552,7 +556,7 @@ function getZustaendigePerson(id){
 function formatWann(id){
   var z=ZEITEN[id];if(!z)return '';
   var parts=[];
-  if(z.tage&&z.tage.length)parts.push(z.tage.join(', '));
+  if(z.tage&&z.tage.length)parts.push(z.tage.map(function(t){return t.toUpperCase();}).join(' '));
   if(z.uhrzeit)parts.push(z.uhrzeit+' Uhr');
   return parts.join(' | ');
 }
@@ -562,8 +566,18 @@ function renderNamen(){
   var html='';
   MITARBEITENDE.forEach(function(p){
     var abw=STATE.abwesend.indexOf(p.id)!==-1;
+
+    /* Permanente Zuständigkeiten dieser Person */
     var zust=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===p.id;});
+
+    /* Vertretungs-Aufgaben für heute (diese Person wurde als Ersatz gewählt) */
+    var vertIds=Object.keys(STATE.vertretungen).filter(function(id){
+      return STATE.vertretungen[id]===p.id && AKTIVE_CHECKS.indexOf(id)!==-1;
+    });
+
     var icons='';
+
+    /* Permanente Icons */
     zust.forEach(function(z){
       var a=AUFGABEN[z.aufgabeId];if(!a)return;
       if(z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)===-1)return;
@@ -572,6 +586,19 @@ function renderNamen(){
       icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'" onclick="event.stopPropagation()">'
             +'<img src="'+a.foto+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
+
+    /* Vertretungs-Icons (orange Rahmen, V-Badge) */
+    vertIds.forEach(function(id){
+      var a=AUFGABEN[id];if(!a)return;
+      /* Nicht nochmals anzeigen, wenn Person die Aufgabe sowieso permanent hat */
+      var hatPermanent=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.personId===p.id;});
+      if(hatPermanent)return;
+      var erl=STATE.erledigt.indexOf(id)!==-1;
+      var badge='<div class="aufg-badge'+(erl?' erledigt':' vert')+'" id="badge-vert-'+id+'">'+(erl?'&#10003;':'V')+'</div>';
+      icons+='<div class="aufg-icon-wrap aufg-vert" data-aufgabe-id="'+id+'" data-typ="checkliste" onclick="event.stopPropagation()">'
+            +'<img src="'+a.foto+'" alt="'+a.label+'" title="Vertretung: '+a.label+'" class="aufg-icon-img">'+badge+'</div>';
+    });
+
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'">'
          +'<div class="person-name">'+p.name+'</div>'
@@ -582,10 +609,13 @@ function renderNamen(){
 
 function updateBadges(){
   sortierteCheckIds().forEach(function(id){
-    var b=document.getElementById('badge-'+id);if(!b)return;
     var erl=STATE.erledigt.indexOf(id)!==-1;
-    b.innerHTML=erl?'&#10003;':'!';
-    b.className='aufg-badge'+(erl?' erledigt':'');
+    /* Permanentes Badge */
+    var b=document.getElementById('badge-'+id);
+    if(b){b.innerHTML=erl?'&#10003;':'!';b.className='aufg-badge'+(erl?' erledigt':'');}
+    /* Vertretungs-Badge */
+    var bv=document.getElementById('badge-vert-'+id);
+    if(bv){bv.innerHTML=erl?'&#10003;':'V';bv.className='aufg-badge'+(erl?' erledigt':' vert');}
   });
 }
 
@@ -979,33 +1009,35 @@ function speichereVertretungAusModal(){
     var r=document.querySelector('input[name="vert-'+z.aufgabeId+'"]:checked');
     if(r)STATE.vertretungen[z.aufgabeId]=parseInt(r.value);else delete STATE.vertretungen[z.aufgabeId];
   });
-  speichereState();schM('vertretung-modal');renderCheckliste();
+  speichereState();
+  schM('vertretung-modal');
+  renderNamen();       /* Icon sofort in Ersatz-Zeile einblenden */
+  initSortable();
+  renderCheckliste();
 }
 
 /* Feature 7: Wann-Modal */
 var wannModalId=null;
+var TAGE_LABELS=['Mo','Di','Mi','Do','Fr'];
 function oeffneWannModal(id){
   wannModalId=id;
   var a=AUFGABEN[id];
   document.getElementById('wann-modal-titel').textContent=a.label;
   var z=ZEITEN[id]||{tage:[],uhrzeit:''};
-  var TAGE=['Mo','Di','Mi','Do','Fr'];
-  document.getElementById('wann-tage').innerHTML=TAGE.map(function(t){
-    var aktiv=z.tage&&z.tage.indexOf(t)!==-1;
-    return '<label class="wann-tag-label'+(aktiv?' aktiv':'')+'" onclick="wannTagToggle(this)">'
-          +'<input type="checkbox"'+(aktiv?' checked':'')+' value="'+t+'">'+t+'</label>';
+  var gespeicherteTage=z.tage||[];
+  document.getElementById('wann-tage').innerHTML=TAGE_LABELS.map(function(t){
+    var aktiv=gespeicherteTage.indexOf(t)!==-1;
+    return '<label class="wann-tag-label'+(aktiv?' aktiv':'')+'">'
+          +'<input type="checkbox"'+(aktiv?' checked':'')+' value="'+t+'"'
+          +' onchange="this.closest(\'.wann-tag-label\').classList.toggle(\'aktiv\',this.checked)"'
+          +' style="display:none">'+t.toUpperCase()+'</label>';
   }).join('');
   document.getElementById('wann-uhrzeit').value=z.uhrzeit||'';
   document.getElementById('wann-modal').classList.add('sichtbar');
 }
-function wannTagToggle(label){
-  label.classList.toggle('aktiv');
-  var cb=label.querySelector('input[type="checkbox"]');
-  if(cb)cb.checked=!cb.checked;
-}
 function speichereWannAusModal(){
   var tage=[];
-  document.querySelectorAll('#wann-tage .wann-tag-label.aktiv input').forEach(function(cb){tage.push(cb.value);});
+  document.querySelectorAll('#wann-tage input[type="checkbox"]:checked').forEach(function(cb){tage.push(cb.value);});
   var uhrzeit=document.getElementById('wann-uhrzeit').value;
   ZEITEN[wannModalId]={tage:tage,uhrzeit:uhrzeit};
   speichereZeiten();schM('wann-modal');renderCheckliste();
@@ -1014,6 +1046,7 @@ function loescheWann(){
   delete ZEITEN[wannModalId];
   speichereZeiten();schM('wann-modal');renderCheckliste();
 }
+/* wannTagToggle nicht mehr benötigt – onchange auf Checkbox übernimmt die Arbeit */
 
 /* ═══ DRAG & DROP (Feature 5: Fix) ═══ */
 var editModus=false,sortableInstances=[];
