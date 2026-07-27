@@ -92,9 +92,20 @@
     .termin-input:focus{outline:none;border-color:var(--rot);background:white;}
     .termin-icon-zelle{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:var(--bg);border-radius:8px;border:1.5px solid var(--hell);}
     .termin-pflicht-label{font-size:.82rem;font-weight:800;color:var(--text);padding:5px 8px;background:var(--bg);border-radius:7px;border:1.5px solid var(--hell);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    /* Feature 8: Termin-Datum heute Highlight */
-    .termin-heute{background:#fef2f2;border-radius:8px;outline:2px solid var(--rot);outline-offset:1px;}
-    .termin-heute .termin-input,.termin-heute .termin-icon-zelle,.termin-heute .termin-pflicht-label{border-color:var(--rot)!important;}
+    /* Feature 8 updated: Termin-Datum Farbkodierung */
+    .termin-heute { background:#f0fdf4;border-radius:8px; }
+    .termin-heute .termin-input,.termin-heute .termin-icon-zelle,.termin-heute .termin-pflicht-label { border-color:#86efac!important; }
+    .termin-vergangenheit { background:#fff1f0;border-radius:8px; }
+    .termin-vergangenheit .termin-input,.termin-vergangenheit .termin-icon-zelle,.termin-vergangenheit .termin-pflicht-label { border-color:#fca5a5!important;opacity:.75; }
+    /* Vertretungs-Dauer Radio */
+    .vert-dauer-wrap{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+    .vert-dauer-label{display:flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;cursor:pointer;padding:5px 10px;border:2px solid var(--hell);border-radius:8px;background:white;transition:all .15s;}
+    .vert-dauer-label:hover{border-color:var(--rot);}
+    .vert-dauer-label input{accent-color:var(--rot);cursor:pointer;}
+    .vert-dauer-label.gewaehlt{border-color:var(--rot);background:#fef2f2;}
+    /* Check-Entfällt: roter Rahmen */
+    .check-row.check-entfaellt{outline:3px solid var(--rot);outline-offset:-2px;background:#fff5f5;}
+    .check-row.check-entfaellt .check-toggle{background:#475569;}
 
     /* Wichtig */
     .wichtig-box{background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
@@ -240,6 +251,25 @@
     .wann-uhrzeit-input{padding:8px 12px;border:2px solid var(--hell);border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;color:var(--text);width:140px;}
     .wann-uhrzeit-input:focus{outline:none;border-color:var(--rot);}
 
+    /* ── KST-Login-Overlay ── */
+    #kst-login-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(182,31,41,.97);flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+    .kst-login-box{background:white;border-radius:20px;padding:36px 40px;text-align:center;width:min(380px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .kst-login-titel{font-size:1.2rem;font-weight:900;color:var(--rot);margin-bottom:6px;}
+    .kst-login-sub{font-size:.82rem;color:var(--grau);margin-bottom:20px;}
+    .kst-input-wrap{display:flex;gap:8px;margin-bottom:8px;}
+    .kst-number-input{flex:1;padding:12px 16px;border:2px solid var(--hell);border-radius:12px;font-family:inherit;font-size:1.4rem;font-weight:900;text-align:center;letter-spacing:.15em;color:var(--text);transition:border-color .2s;}
+    .kst-number-input:focus{outline:none;border-color:var(--rot);}
+    .kst-ok-btn{background:var(--rot);color:white;border:none;border-radius:12px;padding:12px 18px;font-family:inherit;font-size:1.2rem;font-weight:900;cursor:pointer;}
+    .kst-ok-btn:hover{background:#9b1a23;}
+    .kst-fehler{font-size:.78rem;color:var(--rot);font-weight:700;min-height:18px;margin-bottom:4px;}
+    .kst-hinweis{font-size:.7rem;color:var(--grau);margin-top:10px;line-height:1.5;}
+    /* ── KST-Anzeige im Banner ── */
+    .kst-banner-wrap{display:flex;flex-direction:column;gap:2px;}
+    .kst-banner-zeile{display:flex;align-items:center;gap:6px;}
+    .kst-nr-badge{background:rgba(255,255,255,.25);border-radius:6px;padding:1px 8px;font-size:.75rem;font-weight:900;letter-spacing:.08em;color:white;}
+    .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
+    .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
+
     footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:.78rem;font-weight:600;margin-top:auto;}
   </style>
 </head>
@@ -247,11 +277,43 @@
 
 <header><img src="header.jpg" alt="Studjo" onerror="this.style.display='none'"></header>
 
-<!-- Banner mit Uhr (Feature 6) -->
+
+<!-- KST Login Overlay -->
+<div id="kst-login-overlay" style="display:none">
+  <div class="kst-login-box">
+    <div style="font-size:2.5rem;margin-bottom:8px">&#128203;</div>
+    <div class="kst-login-titel">Gruppen&middot;Checkpoint</div>
+    <div class="kst-login-sub">Bitte 5-stellige Kostenstelle eingeben:</div>
+    <div class="kst-input-wrap">
+      <input id="kst-input" class="kst-number-input" type="text" inputmode="numeric"
+             maxlength="5" placeholder="00000" autocomplete="off"
+             onkeydown="if(event.key==='Enter')kstBestaetigen()">
+      <button class="kst-ok-btn" onclick="kstBestaetigen()">&#10003;</button>
+    </div>
+    <div class="kst-fehler" id="kst-fehler"></div>
+    <div class="kst-hinweis">
+      Jede Kostenstelle hat einen eigenen Datenspeicher auf diesem Ger&auml;t.<br>
+      Mehrere Gruppen k&ouml;nnen nacheinander aufgerufen werden.
+    </div>
+  </div>
+</div>
+
+<!-- Icon-Info-Popup (erscheint beim Antippen eines Aufgaben-Symbols) -->
+<div id="aufg-info-popup" style="display:none;position:fixed;z-index:7000;background:white;border-radius:12px;padding:14px 16px;box-shadow:0 6px 24px rgba(0,0,0,.25);width:230px;pointer-events:none;">
+  <div id="aufg-info-titel" style="font-weight:900;font-size:.88rem;color:var(--text);margin-bottom:5px;"></div>
+  <div id="aufg-info-text" style="font-size:.75rem;color:var(--grau);line-height:1.55;"></div>
+  <div style="font-size:.6rem;color:var(--hell);margin-top:6px;">Antippen zum Schlie&szlig;en</div>
+</div>
+
+<!-- Banner mit Uhr -->
 <div class="banner">
-  <div class="banner-links">
-    <div class="kw" id="banner-kw"></div>
-    <h1 id="banner-name">Gruppen&middot;Checkpoint</h1>
+  <div class="kst-banner-wrap">
+    <div class="kst-banner-zeile">
+      <span class="kst-nr-badge" id="kst-anzeige-nr">&#8212;</span>
+      <button class="kst-wechseln-btn" onclick="zeigeKstEingabe()">&#8646; wechseln</button>
+    </div>
+    <h1 id="banner-name" style="font-size:1rem;font-weight:800;color:white;">Gruppen&middot;Checkpoint</h1>
+    <div style="font-size:0.78rem;opacity:.85;color:white;" id="banner-kw"></div>
   </div>
   <div class="banner-clock">
     <div class="clock-time" id="clock-time">00:00</div>
@@ -460,10 +522,92 @@ function sortierteZustIds(){
          .sort(function(a,b){return AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de');});
 }
 
-/* ═══ STORAGE ═══ */
-var STATE_KEY='chk-state-v4',ASSIGN_KEY='chk-assign-v3',NAMEN_KEY='chk-namen-v2',
-    CHECKS_KEY='chk-checks-v2',LEITUNG_KEY='chk-leitung-v1',TERMINE_KEY='chk-termine-v1',
-    WICHTIG_KEY='chk-wichtig-v1',ZEITEN_KEY='chk-zeiten-v1';
+/* Originalliste als Fallback sichern (wird bei KST-Wechsel zurückgesetzt) */
+var MITARBEITENDE_DEFAULT = MITARBEITENDE.map(function(p){return{id:p.id,name:p.name};});
+
+/* ═══ KOSTENSTELLEN-KONFIGURATION ═══
+   Trage hier alle Gruppen ein: KST-Nummer → Gruppenname
+   Unbekannte 5-stellige Nummern werden ebenfalls akzeptiert. */
+var GRUPPEN_CONFIG = {
+  '50200': 'Gruppe Freisenberg',
+  '50301': 'Gruppe Wefelshohl',
+  '50412': 'Gruppe Kerkhagen',
+  '50500': 'Gruppe Kierspie',
+  '50601': 'Gruppe Werdohl',
+  '50702': 'Gruppe Dannenbaum',
+  '50803': 'Gruppe Auf der Heide'
+  /* weitere Gruppen hier ergänzen */
+};
+
+/* ═══ AKTIVE KOSTENSTELLE ═══ */
+var AKTIVE_KST = '';
+
+/* Alle Storage-Keys dynamisch mit KST-Prefix */
+var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
+    LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='';
+
+function setzeKSTKeys(kst) {
+  AKTIVE_KST  = kst;
+  STATE_KEY   = kst + '-chk-state-v4';
+  ASSIGN_KEY  = kst + '-chk-assign-v3';
+  NAMEN_KEY   = kst + '-chk-namen-v2';
+  CHECKS_KEY  = kst + '-chk-checks-v2';
+  LEITUNG_KEY = kst + '-chk-leitung-v1';
+  TERMINE_KEY = kst + '-chk-termine-v1';
+  WICHTIG_KEY = kst + '-chk-wichtig-v1';
+  ZEITEN_KEY  = kst + '-chk-zeiten-v1';
+}
+
+function zeigeKstEingabe(){
+  document.getElementById('kst-login-overlay').style.display='flex';
+  setTimeout(function(){var f=document.getElementById('kst-input');if(f){f.value='';f.focus();}},80);
+}
+function kstBestaetigen(){
+  var kst=(document.getElementById('kst-input').value||'').trim();
+  if(!/^\d{5}$/.test(kst)){
+    document.getElementById('kst-fehler').textContent='Bitte genau 5 Ziffern eingeben.';
+    return;
+  }
+  document.getElementById('kst-fehler').textContent='';
+  wechsleKostenstelle(kst);
+}
+function wechsleKostenstelle(kst) {
+  setzeKSTKeys(kst);
+  localStorage.setItem('chk-letzte-kst', kst);
+
+  /* Alle Daten für diese KST frisch laden */
+  GRUPPE.zustaendigkeiten = JSON.parse(JSON.stringify(ZUORDNUNG_DEFAULT));
+  AKTIVE_CHECKS = sortierteCheckIds();
+  LEITUNG       = {namen:['','',''], aktiv:0};
+  TERMINE = {frei:[{datum:'',text:''},{datum:'',text:''}], pflicht:[
+    {id:'fruehrunde',label:'Fr\u00fchrunde',icon:'&#9200;',datum:'',uhrzeit:''},
+    {id:'gruppenstunde',label:'Gruppenstunde',icon:'&#128101;',datum:'',uhrzeit:''},
+    {id:'dienstbesprechung',label:'Dienstbesprechung',icon:'&#128203;',datum:'',uhrzeit:''},
+    {id:'geburtstag',label:'Geburtstagsfeier',icon:'&#127874;',datum:'',uhrzeit:''},
+    {id:'ausflug',label:'Gruppenausflug',icon:'&#128652;',datum:'',uhrzeit:''}
+  ]};
+  WICHTIG = [{kategorie:'',text:''},{kategorie:'',text:''}];
+  ZEITEN  = {};
+
+  /* Gespeicherte Daten dieser KST laden */
+  var raw = ladeLS(STATE_KEY);
+  STATE = (raw && raw.datum === heute()) ? raw : {datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
+  if (!STATE.vertretungen) STATE.vertretungen = {};
+
+  ladeZuordnung(); ladeNamen(); ladeAktiveChecks(); ladeLeitung(); ladeTermine(); ladeWichtig(); ladeZeiten();
+
+  /* Banner aktualisieren */
+  var gruppenname = GRUPPEN_CONFIG[kst] || 'Kostenstelle ' + kst;
+  document.getElementById('banner-name').textContent = gruppenname;
+  document.getElementById('kst-anzeige-nr').textContent = kst;
+  document.getElementById('kst-login-overlay').style.display = 'none';
+
+  /* Alles neu rendern */
+  MITARBEITENDE.splice(0, MITARBEITENDE.length);
+  MITARBEITENDE_DEFAULT.forEach(function(p){ MITARBEITENDE.push({id:p.id, name:p.name}); });
+  ladeNamen();
+  renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
+}
 
 function heute(){return new Date().toISOString().slice(0,10);}
 function ladeLS(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
@@ -475,10 +619,29 @@ if(!STATE.vertretungen)STATE.vertretungen={};
 
 function tagesReset(m){
   if(m&&!confirm('Tages-Reset?'))return;
-  STATE={datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
+  /* "Bis auf weiteres"-Vertretungen behalten, "Nur 1 Tag" löschen */
+  var behalte={};
+  Object.keys(STATE.vertretungen||{}).forEach(function(id){
+    var v=STATE.vertretungen[id];
+    var dauer=(typeof v==='object')?v.dauer:'1tag';
+    if(dauer==='weiteres') behalte[id]=v;
+  });
+  STATE={datum:heute(),abwesend:[],erledigt:[],vertretungen:behalte};
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('abwesend');});
-  renderCheckliste();
+  renderNamen();renderCheckliste();
+}
+
+/* Hilfsfunktionen für neue Vertretungs-Struktur {person, dauer} */
+function getVertPerson(id){
+  var v=STATE.vertretungen[id];
+  if(v===undefined||v===null)return undefined;
+  return (typeof v==='object')?v.person:v; /* Rückwärts-Kompatibilität */
+}
+function getVertDauer(id){
+  var v=STATE.vertretungen[id];
+  if(!v||typeof v!=='object')return '1tag';
+  return v.dauer||'1tag';
 }
 
 function ladeZuordnung(){
@@ -547,11 +710,17 @@ ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeW
 
 /* ═══ HILFSFUNKTIONEN ═══ */
 function getZustaendigePerson(id){
-  var v=STATE.vertretungen[id];
-  if(v==='entfaellt')return null;
-  if(v)return MITARBEITENDE.find(function(p){return p.id===v;})||null;
+  var p=getVertPerson(id);
+  if(p!==undefined){
+    if(p==='entfaellt')return null;
+    if(p)return MITARBEITENDE.find(function(m){return m.id===p;})||null;
+  }
   var z=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
-  return z?MITARBEITENDE.find(function(p){return p.id===z.personId;})||null:null;
+  return z?MITARBEITENDE.find(function(m){return m.id===z.personId;})||null:null;
+}
+function entfaelltHeute(id){
+  var p=getVertPerson(id);
+  return p==='entfaellt';
 }
 function formatWann(id){
   var z=ZEITEN[id];if(!z)return '';
@@ -559,6 +728,50 @@ function formatWann(id){
   if(z.tage&&z.tage.length)parts.push(z.tage.map(function(t){return t.toUpperCase();}).join(' '));
   if(z.uhrzeit)parts.push(z.uhrzeit+' Uhr');
   return parts.join(' | ');
+}
+
+/* ── Aufgaben-Beschreibungen für Info-Popup (Feature 6) ── */
+var AUFGABEN_INFO={
+  checkpoint:         'Kontrolle: Alle Checklisten-Aufgaben pr\u00fcfen und best\u00e4tigen, dass alles erledigt wurde.',
+  arbeitsvorbereitung:'Materialien, Werkzeuge und Arbeitsunterlagen f\u00fcr den Tag vorbereiten und bereitstellen.',
+  sicherheit:         'Arbeitssicherheit pr\u00fcfen: Fluchtwege, Sicherheitsauszeichnungen und m\u00f6gliche Gefahren kontrollieren.',
+  essensmarken:       'Essensmarken f\u00fcr alle Mitarbeitenden zuordnen und verteilen.',
+  fegen:              'Den Boden fegen, kehren und sauber halten. Schmutz und Staub beseitigen.',
+  fenster:            'Alle Fenster am Ende des Arbeitstages schlie\u00dfen und verriegeln.',
+  geschirr:           'Geschirr abr\u00e4umen, sp\u00fclen und ordentlich einr\u00e4umen.',
+  muell:              'M\u00fclleimer leeren und Abfall ordnungsgem\u00e4\u00df entsorgen und trennen.',
+  strom:              'Alle elektrischen Ger\u00e4te ausschalten und sicherstellen, dass nichts in Stand-by bleibt.',
+  tische:             'Tische abwischen, reinigen und f\u00fcr den n\u00e4chsten Tag vorbereiten.',
+  tuerklinken:        'T\u00fcrklinken, Schalter und Kontaktfl\u00e4chen mit Desinfektionsmittel reinigen.',
+  versandvorbereitung:'Versandmaterial pr\u00fcfen, Pakete kontrollieren und versandfertig machen.',
+  betriebsmittel:     'Maschinen, Werkzeuge und Betriebsmittel auf M\u00e4ngel und Vollst\u00e4ndigkeit pr\u00fcfen.',
+  botengaenge:        'Boteng\u00e4nge innerhalb und au\u00dferhalb des Geb\u00e4udes erledigen, Post und Waren transportieren.',
+  diensttelefon:      'Das Dienst-Telefon annehmen, Anrufe weiterleiten und Nachrichten aufnehmen.',
+  hubwagen:           'Den Hubwagen sachgem\u00e4\u00df bedienen und schwere Lasten sicher transportieren.',
+  materialbeschaffung:'Ben\u00f6tigtes Material und Verbrauchsmittel beschaffen, auff\u00fcllen und lagern.',
+  mentor:             'Neue Mitarbeitende oder Praktikanten einweisen, begleiten und bei Fragen unterst\u00fctzen.',
+  qualitaet:          'Die Qualit\u00e4t der Arbeitsergebnisse pr\u00fcfen und sicherstellen, dass Standards eingehalten werden.'
+};
+
+var _infoTimeout=null;
+function zeigeAufgabeInfo(id,event){
+  event.stopPropagation();
+  if(editModus)return;
+  var a=AUFGABEN[id];if(!a)return;
+  var popup=document.getElementById('aufg-info-popup');
+  document.getElementById('aufg-info-titel').textContent=a.label;
+  document.getElementById('aufg-info-text').textContent=AUFGABEN_INFO[id]||a.label;
+  /* Position: unterhalb des Icons, im sichtbaren Bereich */
+  var rect=event.currentTarget.getBoundingClientRect();
+  var left=Math.min(rect.left,window.innerWidth-250);
+  var top=rect.bottom+6;
+  if(top+120>window.innerHeight)top=rect.top-126;
+  popup.style.left=left+'px';
+  popup.style.top=top+'px';
+  popup.style.display='block';
+  popup.style.pointerEvents='auto';
+  clearTimeout(_infoTimeout);
+  _infoTimeout=setTimeout(function(){popup.style.display='none';popup.style.pointerEvents='none';},4000);
 }
 
 /* ═══ RENDER ═══ */
@@ -583,7 +796,7 @@ function renderNamen(){
       if(z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)===-1)return;
       var erl=STATE.erledigt.indexOf(z.aufgabeId)!==-1;
       var badge=z.typ==='checkliste'?'<div class="aufg-badge'+(erl?' erledigt':'')+'" id="badge-'+z.aufgabeId+'">'+(erl?'&#10003;':'!')+'</div>':'';
-      icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'" onclick="event.stopPropagation()">'
+      icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'" onclick="zeigeAufgabeInfo(\''+z.aufgabeId+'\',event)">'
             +'<img src="'+a.foto+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
 
@@ -595,7 +808,7 @@ function renderNamen(){
       if(hatPermanent)return;
       var erl=STATE.erledigt.indexOf(id)!==-1;
       var badge='<div class="aufg-badge'+(erl?' erledigt':' vert')+'" id="badge-vert-'+id+'">'+(erl?'&#10003;':'V')+'</div>';
-      icons+='<div class="aufg-icon-wrap aufg-vert" data-aufgabe-id="'+id+'" data-typ="checkliste" onclick="event.stopPropagation()">'
+      icons+='<div class="aufg-icon-wrap aufg-vert" data-aufgabe-id="'+id+'" data-typ="checkliste" onclick="zeigeAufgabeInfo(\''+id+'\',event)">'
             +'<img src="'+a.foto+'" alt="'+a.label+'" title="Vertretung: '+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
 
@@ -660,12 +873,24 @@ function terminPflichtSp(el){
 /* Feature 8: Datumsabgleich */
 function checkTerminDatumHeute(){
   var td=heute();
-  document.querySelectorAll('.termin-frei-zeile,.termin-pflicht-zeile').forEach(function(r){r.classList.remove('termin-heute');});
+  document.querySelectorAll('.termin-frei-zeile,.termin-pflicht-zeile').forEach(function(r){
+    r.classList.remove('termin-heute','termin-vergangenheit');
+  });
+  function klasseF(datum){
+    if(!datum)return '';
+    if(datum===td)return 'termin-heute';
+    if(datum<td) return 'termin-vergangenheit';
+    return ''; /* Zukunft: keine Klasse */
+  }
   TERMINE.frei.forEach(function(f,i){
-    if(f.datum===td){var rows=document.querySelectorAll('.termin-frei-zeile');if(rows[i])rows[i].classList.add('termin-heute');}
+    var kl=klasseF(f.datum);
+    var rows=document.querySelectorAll('.termin-frei-zeile');
+    if(rows[i]&&kl)rows[i].classList.add(kl);
   });
   TERMINE.pflicht.forEach(function(p){
-    if(p.datum===td){var el=document.querySelector('[data-pflicht-id-row="'+p.id+'"]');if(el)el.classList.add('termin-heute');}
+    var kl=klasseF(p.datum);
+    var el=document.querySelector('[data-pflicht-id-row="'+p.id+'"]');
+    if(el&&kl)el.classList.add(kl);
   });
 }
 
@@ -688,17 +913,20 @@ function renderCheckliste(){
   ids.forEach(function(id){
     var a=AUFGABEN[id];
     var erl=STATE.erledigt.indexOf(id)!==-1;
+    var enf=!erl&&entfaelltHeute(id);        /* Aufgabe entfällt heute */
     var person=getZustaendigePerson(id);
-    var abw=!erl&&person&&STATE.abwesend.indexOf(person.id)!==-1;
-    var rowKl=erl?'erledigt':abw?'warnung':'';
+    var abw=!erl&&!enf&&person&&STATE.abwesend.indexOf(person.id)!==-1;
+    var rowKl=erl?'erledigt':abw?'warnung':enf?'check-entfaellt':'';
     var togKl=abw&&!erl?'warnung':'';
-    var sym=erl?'&#10003;':abw?'&#9888;':'&#10007;';
-    var warn=abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':'';
+    var sym=erl?'&#10003;':abw?'&#9888;':enf?'&#8722;':'&#10007;';
+    var warn=abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':
+             enf?'<div class="check-warnung" style="color:var(--rot)">&#9888; Entf&auml;llt heute</div>':'';
     var wann=formatWann(id);
     var wannZeile=wann?'<div class="check-wann-anzeige">'+wann+'</div>':'';
-    var persZeile=person?'<div class="check-person-zeile">&#128100; '+person.name+'</div>':'';
+    var persName=person?person.name:'&#8212;';
+    var persZeile='<div class="check-person-zeile">&#128100; '+persName+'</div>';
     html+='<div class="check-row '+rowKl+'" id="cr-'+id+'">'
-         +'<button class="check-toggle '+togKl+'" onclick="toggleErledigt(\''+id+'\')" title="'+(erl?'R\u00fckg\u00e4ngig':a.label)+'">' +sym+'</button>'
+         +'<button class="check-toggle '+togKl+'" onclick="toggleErledigt(\''+id+'\')" title="'+(erl?'R\u00fckg\u00e4ngig':a.label)+'">'+sym+'</button>'
          +'<img src="'+a.foto+'" alt="'+a.label+'" class="check-symbol">'
          +'<div class="check-label-wrap">'+wannZeile+'<div class="check-aufgabe-name">'+a.label+'</div>'+persZeile+warn+'</div>'
          +'<button class="check-wann-btn" onclick="oeffneWannModal(\''+id+'\')" title="Zeitangabe bearbeiten">&#9200;</button>'
@@ -716,15 +944,31 @@ function toggleAbwesend(personId){
   speichereState();
   var row=document.querySelector('.namen-row[data-person-id="'+personId+'"]');
   if(row)row.classList.toggle('abwesend',STATE.abwesend.indexOf(personId)!==-1);
+
   if(STATE.abwesend.indexOf(personId)!==-1){
-    var cz=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;});
+    /* Permanente Check-Aufgaben dieser Person */
+    var cz=GRUPPE.zustaendigkeiten.filter(function(z){
+      return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;
+    }).map(function(z){return{aufgabeId:z.aufgabeId};});
+
+    /* Vertretungs-Aufgaben (V-Badge) dieser Person – falls auch abwesend */
+    Object.keys(STATE.vertretungen).forEach(function(id){
+      if(getVertPerson(id)===personId&&AKTIVE_CHECKS.indexOf(id)!==-1){
+        if(!cz.find(function(t){return t.aufgabeId===id;}))
+          cz.push({aufgabeId:id});
+      }
+    });
+
     if(cz.length>0){oeffneVertretungsModal(personId,cz);return;}
   } else {
+    /* Wieder anwesend: nur "1tag"-Vertretungen entfernen */
     GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste';})
-      .forEach(function(z){delete STATE.vertretungen[z.aufgabeId];});
+      .forEach(function(z){
+        if(getVertDauer(z.aufgabeId)==='1tag') delete STATE.vertretungen[z.aufgabeId];
+      });
     speichereState();
   }
-  renderCheckliste();
+  renderNamen(); renderCheckliste();
 }
 function toggleErledigt(id){
   var idx=STATE.erledigt.indexOf(id);
@@ -983,20 +1227,34 @@ var vertPersonId=null,vertZust=[];
 function oeffneVertretungsModal(personId,checkZust){
   vertPersonId=personId;vertZust=checkZust;
   var person=MITARBEITENDE.find(function(p){return p.id===personId;});
-  document.getElementById('vert-beschreibung').innerHTML='<strong>'+person.name+'</strong> ist abwesend. Bitte Vertretung f&uuml;r Check-Aufgaben w&auml;hlen:';
+  document.getElementById('vert-beschreibung').innerHTML=
+    '<strong>'+person.name+'</strong> ist abwesend. Bitte Vertretung und Dauer w&auml;hlen:';
   var html='';
   checkZust.forEach(function(z,zi){
     var a=AUFGABEN[z.aufgabeId];if(!a)return;
     var av=STATE.vertretungen[z.aufgabeId];
+    var avPerson=getVertPerson(z.aufgabeId);
+    var avDauer=getVertDauer(z.aufgabeId);
     if(zi>0)html+='<div class="vert-trenn"></div>';
     html+='<div class="vert-aufgabe-block"><div class="vert-aufgabe-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="vert-aufgabe-label">'+a.label+'</span></div>'
-         +'<label class="vert-entfaellt-label"><input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(av==='entfaellt'?' checked':'')+' onchange="vertEntfCh(this,\''+z.aufgabeId+'\')"> Diese Aufgabe entf&auml;llt heute</label>'
+         /* Dauer-Auswahl */
+         +'<div class="vert-dauer-wrap">'
+         +'<label class="vert-dauer-label'+(avDauer==='1tag'?' gewaehlt':'')+'"><input type="radio" name="dauer-'+z.aufgabeId+'" value="1tag"'+(avDauer!=='weiteres'?' checked':'')+' onchange="vertDauerCh(this)"> Nur f\u00fcr 1 Tag</label>'
+         +'<label class="vert-dauer-label'+(avDauer==='weiteres'?' gewaehlt':'')+'"><input type="radio" name="dauer-'+z.aufgabeId+'" value="weiteres"'+(avDauer==='weiteres'?' checked':'')+' onchange="vertDauerCh(this)"> Bis auf weiteres</label>'
+         +'</div>'
+         +'<label class="vert-entfaellt-label"><input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(avPerson==='entfaellt'?' checked':'')+' onchange="vertEntfCh(this,\''+z.aufgabeId+'\')"> Diese Aufgabe entf&auml;llt heute</label>'
          +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).map(function(p){
-           return '<label class="vert-person-label"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(av===p.id?' checked':'')+'>'+p.name+'</label>';
+           return '<label class="vert-person-label"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(avPerson===p.id?' checked':'')+'>'+p.name+'</label>';
          }).join('')+'</div></div>';
   });
   document.getElementById('vert-inhalt').innerHTML=html;
   document.getElementById('vertretung-modal').classList.add('sichtbar');
+}
+function vertDauerCh(radio){
+  var wrap=radio.closest('.vert-dauer-wrap');
+  if(!wrap)return;
+  wrap.querySelectorAll('.vert-dauer-label').forEach(function(l){l.classList.remove('gewaehlt');});
+  if(radio.checked)radio.closest('.vert-dauer-label').classList.add('gewaehlt');
 }
 function vertEntfCh(cb,id){
   var radios=document.querySelectorAll('input[name="vert-'+id+'"]');
@@ -1005,15 +1263,18 @@ function vertEntfCh(cb,id){
 function speichereVertretungAusModal(){
   vertZust.forEach(function(z){
     var ec=document.querySelector('input[name="entf-'+z.aufgabeId+'"]');
-    if(ec&&ec.checked){STATE.vertretungen[z.aufgabeId]='entfaellt';return;}
+    if(ec&&ec.checked){
+      STATE.vertretungen[z.aufgabeId]={person:'entfaellt',dauer:'1tag'};return;
+    }
     var r=document.querySelector('input[name="vert-'+z.aufgabeId+'"]:checked');
-    if(r)STATE.vertretungen[z.aufgabeId]=parseInt(r.value);else delete STATE.vertretungen[z.aufgabeId];
+    var dauerEl=document.querySelector('input[name="dauer-'+z.aufgabeId+'"]:checked');
+    var dauer=dauerEl?dauerEl.value:'1tag';
+    if(r){STATE.vertretungen[z.aufgabeId]={person:parseInt(r.value),dauer:dauer};}
+    else{delete STATE.vertretungen[z.aufgabeId];}
   });
   speichereState();
   schM('vertretung-modal');
-  renderNamen();       /* Icon sofort in Ersatz-Zeile einblenden */
-  initSortable();
-  renderCheckliste();
+  renderNamen();initSortable();renderCheckliste();
 }
 
 /* Feature 7: Wann-Modal */
@@ -1098,11 +1359,29 @@ function updateClock(){
 setInterval(updateClock,30000);
 
 /* ═══ INIT ═══ */
-document.getElementById('banner-name').textContent=GRUPPE.name;
 document.getElementById('banner-kw').textContent=GRUPPE.woche;
 document.getElementById('jahr').textContent=new Date().getFullYear();
 updateClock();
-renderNamen();renderLeitung();renderTermine();renderWichtig();renderCheckliste();initSortable();
+
+/* Icon-Info-Popup bei Klick außerhalb schließen */
+document.addEventListener('click',function(e){
+  var popup=document.getElementById('aufg-info-popup');
+  if(popup&&popup.style.display!=='none'){
+    popup.style.display='none';popup.style.pointerEvents='none';
+    clearTimeout(_infoTimeout);
+  }
+});
+
+/* Gespeicherte KST laden oder Login zeigen */
+var gespeicherteKST=localStorage.getItem('chk-letzte-kst');
+if(gespeicherteKST&&/^\d{5}$/.test(gespeicherteKST)){
+  wechsleKostenstelle(gespeicherteKST);
+} else {
+  document.getElementById('kst-login-overlay').style.display='flex';
+  document.getElementById('banner-name').textContent='Gruppen\u00b7Checkpoint';
+  document.getElementById('kst-anzeige-nr').textContent='\u2014';
+  setTimeout(function(){var f=document.getElementById('kst-input');if(f)f.focus();},200);
+}
 </script>
 </body>
 </html>
