@@ -842,7 +842,7 @@ function renderNamen(){
 
     /* Vertretungs-Aufgaben für heute (diese Person wurde als Ersatz gewählt) */
     var vertIds=Object.keys(STATE.vertretungen).filter(function(id){
-      return STATE.vertretungen[id]===p.id && AKTIVE_CHECKS.indexOf(id)!==-1;
+      return getVertPerson(id)===p.id && AKTIVE_CHECKS.indexOf(id)!==-1;
     });
 
     var icons='';
