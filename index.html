@@ -270,6 +270,14 @@
     .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
     .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
+    /* ── Arbeit-Notiz Spalte ── */
+    .arbeit-btn{width:34px;height:var(--ROW);background:var(--bg);border:none;border-left:1px solid var(--hell);cursor:pointer;font-size:.95rem;color:var(--grau);transition:background .15s;flex-shrink:0;}
+    .arbeit-btn:hover{background:var(--hell);}
+    .arbeit-btn.hat-notiz{color:var(--rot);background:#fff7ed;}
+    /* Termin-Pflicht: zwei Zeilen für date+time */
+    .termin-pflicht-dt{display:flex;flex-direction:column;gap:2px;}
+    .termin-pflicht-dt .termin-input{padding:3px 6px;font-size:.68rem;}
+
     footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:.78rem;font-weight:600;margin-top:auto;}
   </style>
 </head>
@@ -430,6 +438,33 @@
   </div>
 </div>
 
+<!-- ═══ Arbeit-Notiz Modal ═══ -->
+<div class="modal-overlay" id="arbeit-modal" onclick="modalAK(event,'arbeit-modal')">
+  <div class="modal-box" style="width:min(460px,96vw)">
+    <div class="modal-kopf">
+      <h2>&#128188; Arbeitsinhalt</h2>
+      <button class="modal-schliessen" onclick="schM('arbeit-modal')">&#10005;</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="arbeit-modal-name"></p>
+    <div class="vert-dauer-wrap" style="margin-bottom:14px;">
+      <label class="vert-dauer-label gewaehlt" id="arbeit-dauer-1tag-label">
+        <input type="radio" name="arbeit-dauer" value="1tag" checked onchange="arbeitDauerCh(this)"> Nur für 1 Tag
+      </label>
+      <label class="vert-dauer-label" id="arbeit-dauer-weit-label">
+        <input type="radio" name="arbeit-dauer" value="weiteres" onchange="arbeitDauerCh(this)"> Bis auf weiteres
+      </label>
+    </div>
+    <textarea id="arbeit-textarea" rows="5"
+      style="width:100%;padding:10px;border:2px solid var(--hell);border-radius:10px;font-family:inherit;font-size:.88rem;resize:vertical;"
+      placeholder="Arbeitsinhalt für diese Person eintragen …"></textarea>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="loescheArbeitNotiz()">&#8617; Löschen</button>
+      <button class="btn-modal-secondary" onclick="schM('arbeit-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereArbeitNotiz()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ Grid ═══ -->
 <div class="grid">
   <div class="col-wrap">
@@ -556,6 +591,7 @@ function setzeKSTKeys(kst) {
   TERMINE_KEY = kst + '-chk-termine-v1';
   WICHTIG_KEY = kst + '-chk-wichtig-v1';
   ZEITEN_KEY  = kst + '-chk-zeiten-v1';
+  setzeArbeitKey(kst);
 }
 
 function zeigeKstEingabe(){
@@ -594,7 +630,7 @@ function wechsleKostenstelle(kst) {
   STATE = (raw && raw.datum === heute()) ? raw : {datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
   if (!STATE.vertretungen) STATE.vertretungen = {};
 
-  ladeZuordnung(); ladeNamen(); ladeAktiveChecks(); ladeLeitung(); ladeTermine(); ladeWichtig(); ladeZeiten();
+  ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();
 
   /* Banner aktualisieren */
   var gruppenname = GRUPPEN_CONFIG[kst] || 'Kostenstelle ' + kst;
@@ -627,6 +663,11 @@ function tagesReset(m){
     if(dauer==='weiteres') behalte[id]=v;
   });
   STATE={datum:heute(),abwesend:[],erledigt:[],vertretungen:behalte};
+  /* Arbeitsnotizen: nur "1tag" löschen */
+  Object.keys(ARBEITSNOTIZEN).forEach(function(id){
+    if(!ARBEITSNOTIZEN[id]||ARBEITSNOTIZEN[id].dauer!=='weiteres') delete ARBEITSNOTIZEN[id];
+  });
+  speichereArbeitsnotizen();
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('abwesend');});
   renderNamen();renderCheckliste();
@@ -636,7 +677,9 @@ function tagesReset(m){
 function getVertPerson(id){
   var v=STATE.vertretungen[id];
   if(v===undefined||v===null)return undefined;
-  return (typeof v==='object')?v.person:v; /* Rückwärts-Kompatibilität */
+  var p=(typeof v==='object')?v.person:v;
+  /* Sicherstellen: Person-ID immer als Zahl, 'entfaellt' bleibt String */
+  return (typeof p==='number'||p==='entfaellt')?p:(p?parseInt(p):undefined);
 }
 function getVertDauer(id){
   var v=STATE.vertretungen[id];
@@ -706,7 +749,13 @@ var ZEITEN={};
 function ladeZeiten(){var s=ladeLS(ZEITEN_KEY);if(s)ZEITEN=s;}
 function speichereZeiten(){localStorage.setItem(ZEITEN_KEY,JSON.stringify(ZEITEN));}
 
-ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();
+var ARBEIT_KEY='';
+var ARBEITSNOTIZEN={};
+function setzeArbeitKey(kst){ARBEIT_KEY=kst+'-chk-arbeit-v1';}
+function ladeArbeitsnotizen(){var s=ladeLS(ARBEIT_KEY);if(s)ARBEITSNOTIZEN=s;}
+function speichereArbeitsnotizen(){localStorage.setItem(ARBEIT_KEY,JSON.stringify(ARBEITSNOTIZEN));}
+
+ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();
 
 /* ═══ HILFSFUNKTIONEN ═══ */
 function getZustaendigePerson(id){
@@ -721,6 +770,14 @@ function getZustaendigePerson(id){
 function entfaelltHeute(id){
   var p=getVertPerson(id);
   return p==='entfaellt';
+}
+/* Vertretung offen: Person abwesend, aber noch keine Entscheidung */
+function vertretungAusstehend(id){
+  var z=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
+  if(!z)return false;
+  var person=MITARBEITENDE.find(function(p){return p.id===z.personId;});
+  if(!person||STATE.abwesend.indexOf(person.id)===-1)return false;
+  return STATE.vertretungen[id]===undefined||STATE.vertretungen[id]===null;
 }
 function formatWann(id){
   var z=ZEITEN[id];if(!z)return '';
@@ -812,9 +869,13 @@ function renderNamen(){
             +'<img src="'+a.foto+'" alt="'+a.label+'" title="Vertretung: '+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
 
-    html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'
-         +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'">'
-         +'<div class="person-name">'+p.name+'</div>'
+    var notiz=ARBEITSNOTIZEN[p.id];
+    var hatNotiz=notiz&&notiz.text;
+    var arbBtn='<button class="arbeit-btn'+(hatNotiz?' hat-notiz':'')+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+(hatNotiz?notiz.text.slice(0,40):'Arbeitsinhalt')+'">💼</button>';
+    html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'  
+         +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'">'  
+         +'<div class="person-name">'+p.name+'</div>'  
+         +arbBtn  
          +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
   document.getElementById('namen-tabelle').innerHTML=html;
@@ -854,9 +915,11 @@ function renderTermine(){
   }
   html+='<div class="termin-trenner">&mdash; Regelm&auml;&szlig;ige Termine &mdash;</div>';
   TERMINE.pflicht.forEach(function(p){
-    var dt=p.datum?(p.datum+(p.uhrzeit?'T'+p.uhrzeit:'')):'';
     html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
-         +'<input type="datetime-local" class="termin-input" data-pflicht-id="'+p.id+'" value="'+dt+'" onchange="terminPflichtSp(this)">'
+         +'<div class="termin-pflicht-dt">'
+         +'<input type="date" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)" style="margin-bottom:2px">'
+         +'<input type="time" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
+         +'</div>'
          +'<div class="termin-icon-zelle">'+p.icon+'</div>'
          +'<div class="termin-pflicht-label">'+p.label+'</div></div>';
   });
@@ -866,8 +929,8 @@ function renderTermine(){
 function terminFreiSp(el){var i=parseInt(el.dataset.freiIdx);TERMINE.frei[i][el.dataset.feld]=el.value;speichereTermine();checkTerminDatumHeute();}
 function terminPflichtSp(el){
   var p=TERMINE.pflicht.find(function(p){return p.id===el.dataset.pflichtId;});if(!p)return;
-  var v=el.value;if(v&&v.indexOf('T')!==-1){var pts=v.split('T');p.datum=pts[0];p.uhrzeit=pts[1];}
-  else{p.datum=v;p.uhrzeit='';}
+  var feld=el.dataset.feld||'datum';
+  p[feld]=el.value;
   speichereTermine();checkTerminDatumHeute();
 }
 /* Feature 8: Datumsabgleich */
@@ -913,14 +976,16 @@ function renderCheckliste(){
   ids.forEach(function(id){
     var a=AUFGABEN[id];
     var erl=STATE.erledigt.indexOf(id)!==-1;
-    var enf=!erl&&entfaelltHeute(id);        /* Aufgabe entfällt heute */
+    var enf=!erl&&entfaelltHeute(id);
+    var aus=!erl&&!enf&&vertretungAusstehend(id);
     var person=getZustaendigePerson(id);
-    var abw=!erl&&!enf&&person&&STATE.abwesend.indexOf(person.id)!==-1;
-    var rowKl=erl?'erledigt':abw?'warnung':enf?'check-entfaellt':'';
+    var abw=!erl&&!enf&&!aus&&person&&STATE.abwesend.indexOf(person.id)!==-1;
+    var rowKl=erl?'erledigt':abw?'warnung':(enf||aus)?'check-entfaellt':'';
     var togKl=abw&&!erl?'warnung':'';
-    var sym=erl?'&#10003;':abw?'&#9888;':enf?'&#8722;':'&#10007;';
+    var sym=erl?'&#10003;':abw?'&#9888;':(enf||aus)?'&#8722;':'&#10007;';
     var warn=abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':
-             enf?'<div class="check-warnung" style="color:var(--rot)">&#9888; Entf&auml;llt heute</div>':'';
+             enf?'<div class="check-warnung" style="color:var(--rot)">&#9888; Entf&auml;llt heute</div>':
+             aus?'<div class="check-warnung" style="color:var(--rot)">&#9888; Vertretung noch offen</div>':'';
     var wann=formatWann(id);
     var wannZeile=wann?'<div class="check-wann-anzeige">'+wann+'</div>':'';
     var persName=person?person.name:'&#8212;';
@@ -1309,6 +1374,45 @@ function loescheWann(){
 }
 /* wannTagToggle nicht mehr benötigt – onchange auf Checkbox übernimmt die Arbeit */
 
+/* ═══ ARBEIT-NOTIZ ═══ */
+var arbeitModalPersonId=null;
+function oeffneArbeitModal(personId,e){
+  e.stopPropagation();
+  arbeitModalPersonId=personId;
+  var p=MITARBEITENDE.find(function(m){return m.id===personId;});
+  document.getElementById('arbeit-modal-name').textContent='Arbeitsinhalt für: '+(p?p.name:'');
+  var notiz=ARBEITSNOTIZEN[personId]||{text:'',dauer:'1tag'};
+  document.getElementById('arbeit-textarea').value=notiz.text||'';
+  /* Dauer Radio */
+  var ist1tag=notiz.dauer!=='weiteres';
+  document.querySelector('input[name="arbeit-dauer"][value="1tag"]').checked=ist1tag;
+  document.querySelector('input[name="arbeit-dauer"][value="weiteres"]').checked=!ist1tag;
+  document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',ist1tag);
+  document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',!ist1tag);
+  document.getElementById('arbeit-modal').classList.add('sichtbar');
+  setTimeout(function(){document.getElementById('arbeit-textarea').focus();},80);
+}
+function arbeitDauerCh(radio){
+  document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',radio.value==='1tag');
+  document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',radio.value==='weiteres');
+}
+function speichereArbeitNotiz(){
+  var text=document.getElementById('arbeit-textarea').value.trim();
+  var dauerEl=document.querySelector('input[name="arbeit-dauer"]:checked');
+  var dauer=dauerEl?dauerEl.value:'1tag';
+  if(text){ARBEITSNOTIZEN[arbeitModalPersonId]={text:text,dauer:dauer};}
+  else{delete ARBEITSNOTIZEN[arbeitModalPersonId];}
+  speichereArbeitsnotizen();
+  schM('arbeit-modal');
+  renderNamen();
+}
+function loescheArbeitNotiz(){
+  delete ARBEITSNOTIZEN[arbeitModalPersonId];
+  speichereArbeitsnotizen();
+  schM('arbeit-modal');
+  renderNamen();
+}
+
 /* ═══ DRAG & DROP (Feature 5: Fix) ═══ */
 var editModus=false,sortableInstances=[];
 function initSortable(){
@@ -1348,18 +1452,39 @@ function toggleEditModus(){
 /* ═══ UHRZEIT (Feature 6) ═══ */
 var WOCHENTAGE=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 var MONATE=['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+function getKW(d){
+  var dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var day=dt.getUTCDay()||7;
+  dt.setUTCDate(dt.getUTCDate()+4-day);
+  var jan1=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  return Math.ceil((((dt-jan1)/86400000)+1)/7);
+}
+function formatDatum2(d){
+  return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear().toString().slice(-2);
+}
+function berechneKWZeile(){
+  var now=new Date();
+  var dayOfWeek=now.getDay(); /* 0=So,1=Mo,...,6=Sa */
+  var diffMo=(dayOfWeek===0)?-6:1-dayOfWeek;
+  var mo=new Date(now);mo.setDate(now.getDate()+diffMo);
+  var fr=new Date(mo);fr.setDate(mo.getDate()+4);
+  return 'KW '+getKW(now)+' | '+formatDatum2(mo)+' – '+formatDatum2(fr);
+}
 function updateClock(){
   var now=new Date();
   var h=now.getHours().toString().padStart(2,'0');
   var m=now.getMinutes().toString().padStart(2,'0');
   document.getElementById('clock-time').textContent=h+':'+m;
   document.getElementById('clock-date').textContent=WOCHENTAGE[now.getDay()]+', den '+now.getDate()+'. '+MONATE[now.getMonth()]+' '+now.getFullYear();
+  /* KW-Zeile automatisch */
+  var kwEl=document.getElementById('banner-kw');
+  if(kwEl)kwEl.textContent=berechneKWZeile();
   checkTerminDatumHeute();
 }
 setInterval(updateClock,30000);
 
 /* ═══ INIT ═══ */
-document.getElementById('banner-kw').textContent=GRUPPE.woche;
+/* banner-kw wird von updateClock() gesetzt */
 document.getElementById('jahr').textContent=new Date().getFullYear();
 updateClock();
 
