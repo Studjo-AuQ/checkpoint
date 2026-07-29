@@ -126,7 +126,11 @@
     .check-row.erledigt .check-toggle{background:var(--gruen);}
     .check-row.warnung  .check-toggle{background:var(--gelb);font-size:1.7rem;}
     .check-symbol{width:var(--ROW);object-fit:contain;flex-shrink:0;border-right:1px solid var(--hell);padding:6px;background:var(--check-bg);outline:3px solid var(--check-rand);outline-offset:-3px;align-self:center;}
-    .check-label-wrap{padding:8px 10px;flex:1;display:flex;flex-direction:column;justify-content:center;line-height:1.3;}
+    .check-label-wrap{padding:8px 10px;flex:1;display:flex;flex-direction:column;justify-content:center;line-height:1.3;cursor:pointer;border-radius:6px;transition:background .12s;}
+    .check-label-wrap:hover{background:rgba(0,0,0,.04);}
+    /* Drag-auf-Person */
+    body.edit-modus .aufgaben-icons{flex:1;}
+    .namen-row.drag-hl{background:#fefce8 !important;outline:2px dashed #f59e0b;outline-offset:-2px;}
     .check-wann-anzeige{font-size:.6rem;color:var(--grau);font-weight:700;margin-bottom:2px;}
     .check-aufgabe-name{font-size:.95rem;font-weight:800;color:var(--text);}
     .check-row.erledigt .check-aufgabe-name{color:var(--gruen);}
@@ -313,6 +317,15 @@
   <div style="font-size:.6rem;color:var(--hell);margin-top:6px;">Antippen zum Schlie&szlig;en</div>
 </div>
 
+<!-- Check-Person-Picker Popup (Feature 4 neu) -->
+<div id="check-person-picker" style="display:none;position:fixed;z-index:7500;background:white;border-radius:14px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,.22);width:220px;border:2px solid var(--hell);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <span style="font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--grau);">Person wechseln</span>
+    <button onclick="schliesseCheckPicker()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--grau);line-height:1;">&#10005;</button>
+  </div>
+  <div id="check-person-picker-inhalt"></div>
+</div>
+
 <!-- Banner mit Uhr -->
 <div class="banner">
   <div class="kst-banner-wrap">
@@ -333,7 +346,7 @@
 </div>
 
 <div class="edit-leiste" id="edit-leiste">
-  <span style="flex:1">&#9998; <strong>Zust&auml;ndigkeiten:</strong> Symbole gedr&uuml;ckt halten und ziehen &middot; Namen antippen zum Zuweisen</span>
+  <span style="flex:1">&#9998; <strong>Zust&auml;ndigkeiten:</strong> Symbol auf andere Person ziehen &middot; oder Namen antippen</span>
   <button class="btn-leiste-dunkel" onclick="resetZuordnung()">&#8617; Zur&uuml;cksetzen</button>
 </div>
 
@@ -490,8 +503,9 @@
   </div>
 
   <div class="col-wrap">
-    <div class="col-header">
+    <div class="col-header" style="justify-content:space-between;flex-wrap:nowrap;">
       <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
+      <span id="fortschritt-anzeige" style="font-size:.6rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
     </div>
     <div class="check-tabelle" id="check-tabelle"></div>
   </div>
@@ -872,9 +886,9 @@ function renderNamen(){
     var notiz=ARBEITSNOTIZEN[p.id];
     var hatNotiz=notiz&&notiz.text;
     var arbBtn='<button class="arbeit-btn'+(hatNotiz?' hat-notiz':'')+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+(hatNotiz?notiz.text.slice(0,40):'Arbeitsinhalt')+'">💼</button>';
-    html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'  
-         +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'">'  
-         +'<div class="person-name">'+p.name+'</div>'  
+    html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'
+         +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
+         +'<div class="person-name" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'+p.name+'</div>'
          +arbBtn  
          +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
@@ -993,12 +1007,13 @@ function renderCheckliste(){
     html+='<div class="check-row '+rowKl+'" id="cr-'+id+'">'
          +'<button class="check-toggle '+togKl+'" onclick="toggleErledigt(\''+id+'\')" title="'+(erl?'R\u00fckg\u00e4ngig':a.label)+'">'+sym+'</button>'
          +'<img src="'+a.foto+'" alt="'+a.label+'" class="check-symbol">'
-         +'<div class="check-label-wrap">'+wannZeile+'<div class="check-aufgabe-name">'+a.label+'</div>'+persZeile+warn+'</div>'
+         +'<div class="check-label-wrap" onclick="oeffneCheckPersonPicker(\''+id+'\',event)" title="Person wechseln">'+wannZeile+'<div class="check-aufgabe-name">'+a.label+'</div>'+persZeile+warn+'</div>'
          +'<button class="check-wann-btn" onclick="oeffneWannModal(\''+id+'\')" title="Zeitangabe bearbeiten">&#9200;</button>'
          +'</div>';
   });
   document.getElementById('check-tabelle').innerHTML=html;
   updateBadges();
+  renderFortschritt();
 }
 
 /* ═══ EVENTS ═══ */
@@ -1045,6 +1060,8 @@ function toggleErledigt(id){
 function schM(id){
   document.getElementById(id).classList.remove('sichtbar');
   if(id==='aufgaben-modal'&&editModus){setTimeout(initSortable,100);}
+  /* Feature 3: Warn-Rahmen sofort sichtbar nach "Später entscheiden" oder Backdrop-Klick */
+  if(id==='vertretung-modal'){renderNamen();renderCheckliste();}
 }
 function modalAK(e,id){if(e.target===document.getElementById(id))schM(id);}
 
@@ -1413,8 +1430,10 @@ function loescheArbeitNotiz(){
   renderNamen();
 }
 
-/* ═══ DRAG & DROP (Feature 5: Fix) ═══ */
+/* ═══ DRAG & DROP ═══ */
 var editModus=false,sortableInstances=[];
+var _dragAufgabeId=null,_dragSrcPersonId=null,_rowDropHandled=false;
+
 function initSortable(){
   if(typeof Sortable==='undefined')return;
   sortableInstances.forEach(function(s){try{s.destroy();}catch(e){}});
@@ -1424,9 +1443,18 @@ function initSortable(){
       group:'aufgaben',animation:150,disabled:!editModus,
       delay:300,delayOnTouchOnly:false,
       forceFallback:false,
-      onStart:function(evt){evt.item.style.opacity='0.7';},
+      onStart:function(evt){
+        evt.item.style.opacity='0.7';
+        _dragAufgabeId=evt.item.dataset.aufgabeId;
+        var row=evt.item.closest('.namen-row');
+        _dragSrcPersonId=row?parseInt(row.dataset.personId):null;
+      },
       onEnd:function(evt){
         evt.item.style.opacity='';
+        /* Wenn rowDrop() den Drop bereits verarbeitet hat, nichts tun */
+        if(_rowDropHandled){_rowDropHandled=false;_dragAufgabeId=null;_dragSrcPersonId=null;return;}
+        _dragAufgabeId=null;_dragSrcPersonId=null;
+        document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('drag-hl');});
         var neu=[];
         document.querySelectorAll('.namen-row[data-person-id]').forEach(function(row){
           var pId=parseInt(row.dataset.personId);
@@ -1439,6 +1467,36 @@ function initSortable(){
     }));
   });
 }
+
+/* Symbol direkt auf Portrait oder Namen ziehen → Zuweisung */
+function rowDragOver(e,personId){
+  if(!editModus||!_dragAufgabeId)return;
+  e.preventDefault();
+  document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('drag-hl');});
+  var row=document.querySelector('.namen-row[data-person-id="'+personId+'"]');
+  if(row)row.classList.add('drag-hl');
+}
+function rowDragLeave(e){/* Highlight bleibt bis zum nächsten dragover */}
+function rowDrop(e,personId){
+  if(!editModus||!_dragAufgabeId)return;
+  e.preventDefault();e.stopPropagation();
+  document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('drag-hl');});
+  if(personId===_dragSrcPersonId){_dragAufgabeId=null;_dragSrcPersonId=null;return;}
+  var id=_dragAufgabeId,a=AUFGABEN[id];
+  if(!a){_dragAufgabeId=null;return;}
+  /* Aus Quelle entfernen */
+  var qi=GRUPPE.zustaendigkeiten.findIndex(function(z){return z.aufgabeId===id&&z.personId===_dragSrcPersonId;});
+  if(qi!==-1)GRUPPE.zustaendigkeiten.splice(qi,1);
+  /* Bei Checkliste: sicherstellen nur ein Träger pro Aufgabe */
+  if(a.typ==='checkliste'){
+    var xi=GRUPPE.zustaendigkeiten.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
+    if(xi!==-1)GRUPPE.zustaendigkeiten.splice(xi,1);
+  }
+  GRUPPE.zustaendigkeiten.push({personId:personId,aufgabeId:id,typ:a.typ});
+  speichereZuordnung();
+  _rowDropHandled=true;_dragAufgabeId=null;_dragSrcPersonId=null;
+  renderNamen();initSortable();renderCheckliste();
+}
 function toggleEditModus(){
   editModus=!editModus;
   var btn=document.getElementById('btn-edit');
@@ -1447,6 +1505,59 @@ function toggleEditModus(){
   btn.innerHTML=editModus?'&#10003; Fertig':'&#9998; Zust&auml;ndigkeiten';
   document.getElementById('edit-leiste').classList.toggle('sichtbar',editModus);
   sortableInstances.forEach(function(s){s.option('disabled',!editModus);});
+}
+
+/* Feature 2: Tagesfortschritt */
+function renderFortschritt(){
+  var ids=AKTIVE_CHECKS,gesamt=ids.length;
+  var erl=STATE.erledigt.filter(function(id){return ids.indexOf(id)!==-1;}).length;
+  var pct=gesamt>0?Math.round(erl/gesamt*100):0;
+  var b=8,voll=Math.round(pct/100*b),bar='';
+  for(var i=0;i<b;i++)bar+=i<voll?'\u2588':'\u2591';
+  var el=document.getElementById('fortschritt-anzeige');if(!el)return;
+  el.textContent=erl+'/'+gesamt+'\u2002'+bar+'\u2002'+pct+'%';
+  el.style.color=pct===100?'var(--gruen)':pct>=50?'var(--gelb)':'var(--grau)';
+}
+
+/* Feature 4: Check-Person-Picker */
+var _checkPickerId=null;
+function oeffneCheckPersonPicker(id,event){
+  event.stopPropagation();
+  _checkPickerId=id;
+  var a=AUFGABEN[id],cur=getZustaendigePerson(id);
+  var html='<div style="font-size:.7rem;font-weight:900;color:var(--rot);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--hell);">'+a.label+'</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto;">';
+  MITARBEITENDE.forEach(function(p){
+    var ist=cur&&cur.id===p.id;
+    html+='<button onclick="weiseCheckPersonZu('+p.id+')" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(ist?'var(--rot)':'var(--hell)')+';background:'+(ist?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
+         +p.name+(ist?' <span style="color:var(--rot);">\u2713</span>':'')+'</button>';
+  });
+  html+='</div>';
+  document.getElementById('check-person-picker-inhalt').innerHTML=html;
+  var popup=document.getElementById('check-person-picker');
+  var rect=event.currentTarget.getBoundingClientRect();
+  var left=rect.right+6;
+  if(left+224>window.innerWidth)left=rect.left-230;
+  var top=rect.top;
+  if(top+310>window.innerHeight)top=window.innerHeight-316;
+  popup.style.left=Math.max(left,8)+'px';
+  popup.style.top=Math.max(top,8)+'px';
+  popup.style.display='block';
+}
+function weiseCheckPersonZu(personId){
+  var id=_checkPickerId;if(!id)return;
+  var ex=GRUPPE.zustaendigkeiten.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
+  if(ex!==-1)GRUPPE.zustaendigkeiten.splice(ex,1);
+  delete STATE.vertretungen[id];
+  GRUPPE.zustaendigkeiten.push({personId:personId,aufgabeId:id,typ:'checkliste'});
+  speichereZuordnung();speichereState();
+  schliesseCheckPicker();
+  renderNamen();initSortable();renderCheckliste();
+}
+function schliesseCheckPicker(){
+  var el=document.getElementById('check-person-picker');
+  if(el)el.style.display='none';
+  _checkPickerId=null;
 }
 
 /* ═══ UHRZEIT (Feature 6) ═══ */
@@ -1488,12 +1599,16 @@ setInterval(updateClock,30000);
 document.getElementById('jahr').textContent=new Date().getFullYear();
 updateClock();
 
-/* Icon-Info-Popup bei Klick außerhalb schließen */
+/* Popups bei Klick außerhalb schließen */
 document.addEventListener('click',function(e){
   var popup=document.getElementById('aufg-info-popup');
   if(popup&&popup.style.display!=='none'){
     popup.style.display='none';popup.style.pointerEvents='none';
     clearTimeout(_infoTimeout);
+  }
+  var picker=document.getElementById('check-person-picker');
+  if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)){
+    schliesseCheckPicker();
   }
 });
 
