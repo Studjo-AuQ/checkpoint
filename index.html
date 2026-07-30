@@ -190,19 +190,20 @@
         <input type="radio" name="arbeit-dauer" value="weiteres" onchange="arbeitDauerCh(this)"> Bis auf weiteres
       </label>
     </div>
-    <!-- Auslastungs-Auswahl (Feature 5) -->
-    <div style="display:flex;gap:5px;margin-bottom:12px;">
-      <label class="auslast-label auslast-gut" id="auslast-gut-label" onclick="auslastKlick(this)" style="flex:1;text-align:center;">
-        <input type="radio" name="arbeit-auslastung" value="gut" style="display:none;">
-        &#10003;&nbsp;Gut&nbsp;ausgelastet
+    <!-- Auslastungs-Auswahl – gleiche Struktur wie Dauer-Radios oben -->
+    <input type="hidden" id="arbeit-auslastung-val" value="">
+    <div class="vert-dauer-wrap" style="margin-bottom:12px;">
+      <label class="vert-dauer-label" id="auslast-gut-label">
+        <input type="radio" name="arbeit-auslastung" value="gut" onchange="auslastCh(this)">
+        &#10003; Gut ausgelastet
       </label>
-      <label class="auslast-label auslast-bald" id="auslast-bald-label" onclick="auslastKlick(this)" style="flex:1;text-align:center;">
-        <input type="radio" name="arbeit-auslastung" value="bald" style="display:none;">
-        &#9888;&nbsp;Läuft&nbsp;bald&nbsp;aus
+      <label class="vert-dauer-label" id="auslast-bald-label">
+        <input type="radio" name="arbeit-auslastung" value="bald" onchange="auslastCh(this)">
+        &#9888; Läuft bald aus
       </label>
-      <label class="auslast-label auslast-keine" id="auslast-keine-label" onclick="auslastKlick(this)" style="flex:1;text-align:center;">
-        <input type="radio" name="arbeit-auslastung" value="keine" style="display:none;">
-        &#10007;&nbsp;Keine&nbsp;Arbeit
+      <label class="vert-dauer-label" id="auslast-keine-label">
+        <input type="radio" name="arbeit-auslastung" value="keine" onchange="auslastCh(this)">
+        &#10007; Keine Arbeit
       </label>
     </div>
     <textarea id="arbeit-textarea" rows="5"

@@ -351,7 +351,8 @@ function istFaelligJetzt(id){
   var jetzt=new Date();
   var h=jetzt.getHours(),m=jetzt.getMinutes();
   var wt=jetzt.getDay(); /* 0=So,5=Fr */
-  var zeitStr=(a.wann&&a.wann.zeit)?a.wann.zeit:(wt===5?'14:30':'15:00');
+  var _zt=ZEITEN[id]||{};
+  var zeitStr=_zt.uhrzeit?_zt.uhrzeit:(wt===5?'14:30':'15:00');
   var tp=zeitStr.split(':');
   var fh=parseInt(tp[0]),fm=parseInt(tp[1]||0);
   return h>fh||(h===fh&&m>=fm);
@@ -1073,10 +1074,15 @@ function oeffneArbeitModal(personId,e){
   document.querySelector('input[name="arbeit-dauer"][value="weiteres"]').checked=!ist1tag;
   document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',ist1tag);
   document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',!ist1tag);
-  /* Auslastung Radio */
+  /* Auslastung Radio – Zustand wiederherstellen */
   var ausl=notiz.auslastung||'';
+  var avEl=document.getElementById('arbeit-auslastung-val');
+  if(avEl)avEl.value=ausl;
   document.querySelectorAll('input[name="arbeit-auslastung"]').forEach(function(r){r.checked=r.value===ausl;});
-  document.querySelectorAll('.auslast-label').forEach(function(l){l.classList.toggle('gewaehlt',l.querySelector('input').value===ausl);});
+  ['gut','bald','keine'].forEach(function(v){
+    var el=document.getElementById('auslast-'+v+'-label');
+    if(el)el.classList.toggle('gewaehlt',v===ausl);
+  });
   document.getElementById('arbeit-modal').classList.add('sichtbar');
   setTimeout(function(){document.getElementById('arbeit-textarea').focus();},80);
 }
@@ -1084,24 +1090,22 @@ function arbeitDauerCh(radio){
   document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',radio.value==='1tag');
   document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',radio.value==='weiteres');
 }
-function auslastKlick(label){
-  var val=label.querySelector('input').value;
-  /* Toggle: nochmals klicken = abwählen */
-  var current=document.querySelector('input[name="arbeit-auslastung"]:checked');
-  if(current&&current.value===val){
-    current.checked=false;
-    document.querySelectorAll('.auslast-label').forEach(function(l){l.classList.remove('gewaehlt');});
-  } else {
-    document.querySelectorAll('input[name="arbeit-auslastung"]').forEach(function(r){r.checked=r.value===val;});
-    document.querySelectorAll('.auslast-label').forEach(function(l){l.classList.toggle('gewaehlt',l.querySelector('input').value===val);});
-  }
+function auslastCh(radio){
+  /* Setzt Hidden-Input + visuelles gewaehlt-Klasse */
+  var val=radio.checked?radio.value:'';
+  var avEl=document.getElementById('arbeit-auslastung-val');
+  if(avEl)avEl.value=val;
+  ['gut','bald','keine'].forEach(function(v){
+    var el=document.getElementById('auslast-'+v+'-label');
+    if(el)el.classList.toggle('gewaehlt',v===val);
+  });
 }
 function speichereArbeitNotiz(){
   var text=document.getElementById('arbeit-textarea').value.trim();
   var dauerEl=document.querySelector('input[name="arbeit-dauer"]:checked');
   var dauer=dauerEl?dauerEl.value:'1tag';
-  var auslEl=document.querySelector('input[name="arbeit-auslastung"]:checked');
-  var ausl=auslEl?auslEl.value:'';
+  var avEl=document.getElementById('arbeit-auslastung-val');
+  var ausl=avEl?avEl.value:'';
   if(text||ausl){ARBEITSNOTIZEN[arbeitModalPersonId]={text:text,dauer:dauer,auslastung:ausl};}
   else{delete ARBEITSNOTIZEN[arbeitModalPersonId];}
   speichereArbeitsnotizen();
@@ -1461,15 +1465,16 @@ function sprachText(s){
       var erl=STATE.erledigt.indexOf(id)!==-1;
       var pers=getZustaendigePerson(id);
       var enf=entfaelltHeute(id),aus=vertretungAusstehend(id);
-      /* Wann-Info – kompaktes Format wie "Donnerstag 9 Uhr" */
+      /* Wann-Info aus ZEITEN[id] (korrekte Quelle) */
       var wannTxt='';
-      if(a.wann){
+      var _wz=ZEITEN[id]||{};
+      if(_wz.tage||_wz.uhrzeit){
         var tgN={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag'};
-        var tage=a.wann.tage&&a.wann.tage.length?a.wann.tage.map(function(t){return tgN[t]||t;}).join(' und '):'';
-        var zeit=a.wann.zeit?uhrzeitSprache(a.wann.zeit):'';
-        if(tage&&zeit)wannTxt=tage+', '+zeit+', ';
-        else if(tage)wannTxt=tage+', ';
-        else if(zeit)wannTxt=zeit+', ';
+        var _tage=(_wz.tage&&_wz.tage.length)?_wz.tage.map(function(t){return tgN[t]||t;}).join(' und '):'';
+        var _zeit=_wz.uhrzeit?uhrzeitSprache(_wz.uhrzeit):'';
+        if(_tage&&_zeit)wannTxt=_tage+', '+_zeit+', ';
+        else if(_tage)wannTxt=_tage+', ';
+        else if(_zeit)wannTxt=_zeit+', ';
       }
       var txt=a.label+', '+wannTxt+'zuständig: '+(pers?pers.name:'nicht zugewiesen')+'.';
       txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':' Noch offen.';

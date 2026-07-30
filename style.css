@@ -331,3 +331,20 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 .arbeit-btn.auslast-gut {background:#16a34a !important;color:white !important;}
 .arbeit-btn.auslast-bald{background:#d97706 !important;color:white !important;}
 .arbeit-btn.auslast-keine{background:#dc2626 !important;color:white !important;}
+
+/* ── Auslastungs-Buttons (echte Buttons, kein Radio) ── */
+.auslast-btn{padding:9px 6px;border-radius:9px;border:2px solid var(--hell);cursor:pointer;font-size:.76rem;font-weight:800;font-family:inherit;transition:all .15s;background:white;}
+.auslast-btn.auslast-gut {border-color:#86efac;color:#166534;background:#f0fdf4;}
+.auslast-btn.auslast-bald{border-color:#fcd34d;color:#92400e;background:#fffbeb;}
+.auslast-btn.auslast-keine{border-color:#fca5a5;color:#991b1b;background:#fef2f2;}
+.auslast-btn.gewaehlt.auslast-gut {background:#16a34a;color:white;border-color:#16a34a;}
+.auslast-btn.gewaehlt.auslast-bald{background:#d97706;color:white;border-color:#d97706;}
+.auslast-btn.gewaehlt.auslast-keine{background:#dc2626;color:white;border-color:#dc2626;}
+
+/* ── Auslastungs-Labels: Farben per ID (überschreibt roten Standard) ── */
+#auslast-gut-label                 { border-color:#86efac; color:#166534; background:#f0fdf4; }
+#auslast-bald-label                { border-color:#fcd34d; color:#92400e; background:#fffbeb; }
+#auslast-keine-label               { border-color:#fca5a5; color:#991b1b; background:#fef2f2; }
+#auslast-gut-label.gewaehlt        { background:#16a34a !important; color:white !important; border-color:#16a34a !important; }
+#auslast-bald-label.gewaehlt       { background:#d97706 !important; color:white !important; border-color:#d97706 !important; }
+#auslast-keine-label.gewaehlt      { background:#dc2626 !important; color:white !important; border-color:#dc2626 !important; }
