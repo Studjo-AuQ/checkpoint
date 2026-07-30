@@ -216,7 +216,7 @@
     <div class="col-header">
       <button class="col-btn" onclick="oeffneLeitungModal()">&#11088; Leitung</button>
       <span class="col-btn-sep">|</span>
-      <span class="col-btn" style="cursor:default;opacity:.5">&#128197; Termine</span>
+      <button class="col-btn" onclick="oeffneNaechstenTermin(event)" title="Nächsten Termin anzeigen">&#128197; Termine</button>
     </div>
     <div class="mitte">
       <div class="info-box"><div class="info-titel">&#11088; Leitung der Gruppe</div><div id="leitung-anzeige"></div></div>
@@ -235,6 +235,27 @@
 </div>
 
 <footer>&copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen&middot;Checkpoint</footer>
+
+<!-- ── Abwesenheits-Modal (Feature 2) ── -->
+<div class="modal-overlay" id="abwesend-modal" onclick="if(event.target===this)schM('abwesend-modal')">
+  <div class="modal-box" style="max-width:360px;">
+    <div id="abwesend-modal-body"></div>
+  </div>
+</div>
+
+<!-- ── Termin-Popup (Feature 4) ── -->
+<div id="termin-naechster-popup" style="display:none;position:fixed;z-index:7600;background:white;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);width:286px;border:2px solid var(--hell);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <strong style="font-size:.88rem;">&#128197; N&auml;chster Termin</strong>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button onclick="vorlesenTerminPopup()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+        <img src="zuhoeren.jpg" alt="Vorlesen" style="width:20px;height:20px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128065;'">
+      </button>
+      <button onclick="schliesseTerminPopup()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--grau);line-height:1;">&#10005;</button>
+    </div>
+  </div>
+  <div id="termin-popup-inhalt"></div>
+</div>
 
 <!-- ── a11y-Leiste (muss VOR app.js stehen, damit DOM-Elemente bekannt sind) ── -->
 <div class="a11y-bar" id="a11y-bar" role="toolbar" aria-label="Barrierefreiheit">

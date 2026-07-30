@@ -151,8 +151,15 @@ function ladeLS(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){retu
 function speichereState(){localStorage.setItem(STATE_KEY,JSON.stringify(STATE));}
 
 var raw=ladeLS(STATE_KEY);
-var STATE=(raw&&raw.datum===heute())?raw:{datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
+var STATE=(raw&&raw.datum===heute())?raw:{datum:heute(),abwesend:[],abwesendWeiteres:[],erledigt:[],vertretungen:{}};
 if(!STATE.vertretungen)STATE.vertretungen={};
+if(!STATE.abwesendWeiteres)STATE.abwesendWeiteres=[];
+/* "Bis auf weiteres"-Abwesende aus letztem Tag wiederherstellen */
+if(STATE.abwesendWeiteres.length){
+  STATE.abwesendWeiteres.forEach(function(id){
+    if(STATE.abwesend.indexOf(id)===-1)STATE.abwesend.push(id);
+  });
+}
 
 function tagesReset(m){
   if(m&&!confirm('Tages-Reset?'))return;
@@ -163,7 +170,7 @@ function tagesReset(m){
     var dauer=(typeof v==='object')?v.dauer:'1tag';
     if(dauer==='weiteres') behalte[id]=v;
   });
-  STATE={datum:heute(),abwesend:[],erledigt:[],vertretungen:behalte};
+  STATE={datum:heute(),abwesend:(STATE.abwesendWeiteres||[]).slice(),abwesendWeiteres:(STATE.abwesendWeiteres||[]).slice(),erledigt:[],vertretungen:behalte};
   /* Arbeitsnotizen: nur "1tag" löschen */
   Object.keys(ARBEITSNOTIZEN).forEach(function(id){
     if(!ARBEITSNOTIZEN[id]||ARBEITSNOTIZEN[id].dauer!=='weiteres') delete ARBEITSNOTIZEN[id];
@@ -241,6 +248,67 @@ function ladeTermine(){
   });
 }
 function speichereTermine(){localStorage.setItem(TERMINE_KEY,JSON.stringify(TERMINE));}
+
+/* ═══ TERMIN-POPUP (Feature 4) ═══ */
+function oeffneNaechstenTermin(event){
+  event.stopPropagation();
+  var h=heute(); /* YYYY-MM-DD */
+  var alle=[];
+  TERMINE.frei.forEach(function(t){
+    if(t.datum&&t.datum>=h&&(t.text||'').trim())
+      alle.push({datum:t.datum,label:'',text:t.text.trim(),uhrzeit:''});
+  });
+  TERMINE.pflicht.forEach(function(t){
+    if(t.datum&&t.datum>=h)
+      alle.push({datum:t.datum,label:t.label,text:'',uhrzeit:t.uhrzeit||''});
+  });
+  alle.sort(function(a,b){return a.datum.localeCompare(b.datum)||a.uhrzeit.localeCompare(b.uhrzeit);});
+
+  var popup=document.getElementById('termin-naechster-popup');
+  if(!popup)return;
+  var vorleseText='';
+
+  if(alle.length===0){
+    document.getElementById('termin-popup-inhalt').innerHTML=
+      '<p style="color:var(--grau);font-size:.85rem;margin:0;">Keine zukünftigen Termine eingetragen.</p>';
+  } else {
+    var t=alle[0];
+    var ddmm=t.datum.split('-').reverse().join('.');
+    vorleseText=(t.label?t.label+': ':'')+(t.text||t.label)+'. Am '+isoDatumSprache(t.datum)
+                +(t.uhrzeit?' um '+uhrzeitSprache(t.uhrzeit):'')+'.'||'';
+    var html='<div style="background:#f0f9ff;border-radius:10px;padding:12px 14px;">';
+    html+='<div style="font-size:.78rem;font-weight:900;color:var(--grau);">&#128197; '+ddmm+'</div>';
+    if(t.uhrzeit)html+='<div style="font-size:.78rem;color:var(--grau);">&#9200; '+t.uhrzeit+' Uhr</div>';
+    if(t.label)html+='<div style="font-size:.72rem;color:var(--grau);margin-top:2px;">'+t.label+'</div>';
+    if(t.text)html+='<div style="font-size:.9rem;font-weight:800;margin-top:4px;">'+t.text+'</div>';
+    html+='</div>';
+    if(alle.length>1)html+='<div style="font-size:.7rem;color:var(--grau);margin-top:6px;">&#43; '
+         +(alle.length-1)+' weitere Termin'+(alle.length-1>1?'e':'')+'</div>';
+    document.getElementById('termin-popup-inhalt').innerHTML=html;
+  }
+  popup.dataset.vorleseText=vorleseText;
+
+  var rect=event.currentTarget.getBoundingClientRect();
+  var left=rect.left;
+  if(left+290>window.innerWidth)left=window.innerWidth-298;
+  popup.style.left=Math.max(left,6)+'px';
+  popup.style.top=(rect.bottom+6)+'px';
+  popup.style.display='block';
+}
+function schliesseTerminPopup(){
+  var p=document.getElementById('termin-naechster-popup');
+  if(p)p.style.display='none';
+}
+function vorlesenTerminPopup(){
+  var popup=document.getElementById('termin-naechster-popup');
+  if(!popup||!window.speechSynthesis)return;
+  var text=popup.dataset.vorleseText||'';
+  if(!text)return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang='de-DE';u.rate=0.88;
+  window.speechSynthesis.speak(u);
+}
 
 var WICHTIG_KAT=['Produktion','Qualifizierung','Unterweisung','Neue Mitarbeitende','Ausfall','Ver\u00e4nderung','Motto der Woche','Sonstiges'];
 var WICHTIG=[{kategorie:'',text:''},{kategorie:'',text:''}];
@@ -379,9 +447,9 @@ function renderNamen(){
     var notiz=ARBEITSNOTIZEN[p.id];
     var hatNotiz=notiz&&notiz.text;
     var arbBtn='<button class="arbeit-btn'+(hatNotiz?' hat-notiz':'')+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+(hatNotiz?notiz.text.slice(0,40):'Arbeitsinhalt')+'">💼</button>';
-    html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'" onclick="toggleAbwesend('+p.id+')">'
-         +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
-         +'<div class="person-name" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'+p.name+'</div>'
+    html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
+         +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
+         +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'+p.name+'</div>'
          +arbBtn  
          +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
@@ -510,9 +578,9 @@ function renderCheckliste(){
 }
 
 /* ═══ EVENTS ═══ */
+/* Feature 2: Abwesenheits-Modal (immer Popup, mit Dauer-Wahl) */
 function toggleAbwesend(personId){
   if(editModus){
-    /* Klick-Zuweisung: Wenn ein Icon ausgewählt ist → an diese Person zuweisen */
     if(_selectedAufgabe){
       var selId=_selectedAufgabe.aufgabeId,selSrc=_selectedAufgabe.personId;
       _selectedAufgabe=null;
@@ -532,36 +600,60 @@ function toggleAbwesend(personId){
     }
     oeffneAufgabenModal(personId);return;
   }
-  var idx=STATE.abwesend.indexOf(personId);
-  if(idx===-1)STATE.abwesend.push(personId);else STATE.abwesend.splice(idx,1);
-  speichereState();
-  var row=document.querySelector('.namen-row[data-person-id="'+personId+'"]');
-  if(row)row.classList.toggle('abwesend',STATE.abwesend.indexOf(personId)!==-1);
-
-  if(STATE.abwesend.indexOf(personId)!==-1){
-    /* Permanente Check-Aufgaben dieser Person */
-    var cz=GRUPPE.zustaendigkeiten.filter(function(z){
-      return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;
-    }).map(function(z){return{aufgabeId:z.aufgabeId};});
-
-    /* Vertretungs-Aufgaben (V-Badge) dieser Person – falls auch abwesend */
-    Object.keys(STATE.vertretungen).forEach(function(id){
-      if(getVertPerson(id)===personId&&AKTIVE_CHECKS.indexOf(id)!==-1){
-        if(!cz.find(function(t){return t.aufgabeId===id;}))
-          cz.push({aufgabeId:id});
-      }
-    });
-
-    if(cz.length>0){oeffneVertretungsModal(personId,cz);return;}
+  oeffneAbwesenheitsModal(personId);
+}
+function oeffneAbwesenheitsModal(personId){
+  var p=MITARBEITENDE.find(function(m){return m.id===personId;});if(!p)return;
+  var istAbw=STATE.abwesend.indexOf(personId)!==-1;
+  var istW=(STATE.abwesendWeiteres||[]).indexOf(personId)!==-1;
+  var html='<div class="modal-kopf"><h2>&#128100; '+p.name+'</h2>'
+           +'<button class="modal-schliessen" onclick="schM('abwesend-modal')">&#10005;</button></div>';
+  if(istAbw){
+    html+='<p style="font-size:.82rem;color:var(--grau);margin:4px 0 16px;">'
+         +'Abwesend '+(istW?'<strong>bis auf weiteres</strong>':'<strong>nur heute</strong>')+'</p>';
+    html+='<div class="modal-btns">'
+         +'<button class="btn-modal-secondary" onclick="schM('abwesend-modal')">Abbrechen</button>'
+         +'<button class="btn-modal-primary" onclick="setzeAnwesend('+personId+')">&#10003; Wieder anwesend</button>'
+         +'</div>';
   } else {
-    /* Wieder anwesend: nur "1tag"-Vertretungen entfernen */
-    GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste';})
-      .forEach(function(z){
-        if(getVertDauer(z.aufgabeId)==='1tag') delete STATE.vertretungen[z.aufgabeId];
-      });
-    speichereState();
+    html+='<p style="font-size:.85rem;margin:4px 0 14px;">Wie lange ist <strong>'+p.name+'</strong> abwesend?</p>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">'
+         +'<button class="btn-abw-option" onclick="setzeAbwesend('+personId+','1tag')">'
+         +'&#9728; Nur heute &ndash; 1 Tag<br><small>Morgen automatisch wieder anwesend</small></button>'
+         +'<button class="btn-abw-option btn-abw-weiteres" onclick="setzeAbwesend('+personId+','weiteres')">'
+         +'&#9899; Bis auf weiteres<br><small>Bleibt abwesend bis manuell geändert</small></button>'
+         +'</div>'
+         +'<div class="modal-btns"><button class="btn-modal-secondary" onclick="schM('abwesend-modal')">Abbrechen</button></div>';
   }
-  renderNamen(); renderCheckliste();
+  document.getElementById('abwesend-modal-body').innerHTML=html;
+  document.getElementById('abwesend-modal').classList.add('sichtbar');
+}
+function setzeAbwesend(personId,dauer){
+  if(STATE.abwesend.indexOf(personId)===-1)STATE.abwesend.push(personId);
+  if(dauer==='weiteres'){
+    if(!STATE.abwesendWeiteres)STATE.abwesendWeiteres=[];
+    if(STATE.abwesendWeiteres.indexOf(personId)===-1)STATE.abwesendWeiteres.push(personId);
+  }
+  speichereState();
+  schM('abwesend-modal');
+  var cz=GRUPPE.zustaendigkeiten.filter(function(z){
+    return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;
+  }).map(function(z){return{aufgabeId:z.aufgabeId};});
+  Object.keys(STATE.vertretungen).forEach(function(id){
+    if(getVertPerson(id)===personId&&AKTIVE_CHECKS.indexOf(id)!==-1)
+      if(!cz.find(function(t){return t.aufgabeId===id;}))cz.push({aufgabeId:id});
+  });
+  if(cz.length>0){oeffneVertretungsModal(personId,cz);return;}
+  renderNamen();renderCheckliste();
+}
+function setzeAnwesend(personId){
+  var i=STATE.abwesend.indexOf(personId);if(i!==-1)STATE.abwesend.splice(i,1);
+  if(STATE.abwesendWeiteres){var w=STATE.abwesendWeiteres.indexOf(personId);if(w!==-1)STATE.abwesendWeiteres.splice(w,1);}
+  GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste';})
+    .forEach(function(z){if(getVertDauer(z.aufgabeId)==='1tag')delete STATE.vertretungen[z.aufgabeId];});
+  speichereState();
+  schM('abwesend-modal');
+  renderNamen();renderCheckliste();
 }
 function toggleErledigt(id){
   var idx=STATE.erledigt.indexOf(id);
@@ -1101,10 +1193,15 @@ function oeffneCheckPersonPicker(id,event){
   event.stopPropagation();
   _checkPickerId=id;
   var a=AUFGABEN[id],cur=getZustaendigePerson(id);
+  var enf=entfaelltHeute(id);
   var html='<div style="font-size:.7rem;font-weight:900;color:var(--rot);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--hell);">'+a.label+'</div>';
-  html+='<div style="display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto;">';
+  html+='<div style="display:flex;flex-direction:column;gap:3px;max-height:300px;overflow-y:auto;">';
+  /* Entfällt-Option immer ganz oben */
+  html+='<button onclick="weiseCheckPersonZu('entfaellt')" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(enf?'var(--rot)':'#fca5a5')+';background:'+(enf?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
+       +'\u26D4 Aufgabe entf\u00e4llt heute'+(enf?' \u2713':'')+'</button>';
+  html+='<div style="height:1px;background:var(--hell);margin:2px 0;"></div>';
   MITARBEITENDE.forEach(function(p){
-    var ist=cur&&cur.id===p.id;
+    var ist=!enf&&cur&&cur.id===p.id;
     html+='<button onclick="weiseCheckPersonZu('+p.id+')" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(ist?'var(--rot)':'var(--hell)')+';background:'+(ist?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
          +p.name+(ist?' <span style="color:var(--rot);">\u2713</span>':'')+'</button>';
   });
@@ -1115,13 +1212,21 @@ function oeffneCheckPersonPicker(id,event){
   var left=rect.right+6;
   if(left+224>window.innerWidth)left=rect.left-230;
   var top=rect.top;
-  if(top+310>window.innerHeight)top=window.innerHeight-316;
+  if(top+360>window.innerHeight)top=window.innerHeight-366;
   popup.style.left=Math.max(left,8)+'px';
   popup.style.top=Math.max(top,8)+'px';
   popup.style.display='block';
 }
 function weiseCheckPersonZu(personId){
   var id=_checkPickerId;if(!id)return;
+  if(personId==='entfaellt'){
+    /* Aufgabe entfällt heute (1 Tag) */
+    STATE.vertretungen[id]={person:'entfaellt',dauer:'1tag'};
+    speichereState();
+    schliesseCheckPicker();
+    renderNamen();initSortable();renderCheckliste();
+    return;
+  }
   var ex=GRUPPE.zustaendigkeiten.findIndex(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
   if(ex!==-1)GRUPPE.zustaendigkeiten.splice(ex,1);
   delete STATE.vertretungen[id];
@@ -1194,6 +1299,10 @@ document.addEventListener('click',function(e){
   if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)){
     schliesseCheckPicker();
   }
+  var tpop=document.getElementById('termin-naechster-popup');
+  if(tpop&&tpop.style.display!=='none'&&!tpop.contains(e.target)){
+    schliesseTerminPopup();
+  }
 });
 
 /* ═══ BARRIEREFREIHEIT (a11y) ═══ */
@@ -1242,6 +1351,48 @@ document.addEventListener('click',function(e){
   /* ── Vorlesen – Klick-auf-Bereich ── */
   var vorleseModus=false,spricht=false;
 
+  /* ── Datum / Uhrzeit → gesprochenes Deutsch ── */
+  function _z(n){
+    var e=['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn',
+           'elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
+    var z=['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'];
+    if(n<=0)return 'null';if(n<20)return e[n];
+    if(n<100){var r=n%10,t=Math.floor(n/10);return r?e[r]+'und'+z[t]:z[t];}
+    if(n<1000){var h=Math.floor(n/100);return e[h]+'hundert'+(_z(n%100)||'');}
+    if(n<10000){return _z(Math.floor(n/1000))+'tausend'+(_z(n%1000)||'');}
+    return String(n);
+  }
+  var _TAGORD=['','ersten','zweiten','dritten','vierten','fünften','sechsten','siebten','achten',
+    'neunten','zehnten','elften','zwölften','dreizehnten','vierzehnten','fünfzehnten','sechzehnten',
+    'siebzehnten','achtzehnten','neunzehnten','zwanzigsten','einundzwanzigsten','zweiundzwanzigsten',
+    'dreiundzwanzigsten','vierundzwanzigsten','fünfundzwanzigsten','sechsundzwanzigsten',
+    'siebenundzwanzigsten','achtundzwanzigsten','neunundzwanzigsten','dreißigsten','einunddreißigsten'];
+  var _MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  function datumSprache(s){
+    var m=s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if(!m)return s;
+    return (_TAGORD[parseInt(m[1])]||m[1]+'.')+' '+_MON[parseInt(m[2])-1]+' '+_z(parseInt(m[3]));
+  }
+  function uhrzeitSprache(s){
+    var m=s.match(/(\d{1,2}):(\d{2})/);
+    if(!m)return s;
+    var h=parseInt(m[1]),min=parseInt(m[2]);
+    return _z(h)+' Uhr'+(min>0?' '+_z(min):'');
+  }
+  /* ISO-Datum YYYY-MM-DD → "Einunddreißigster Juli Zweitausendsechsundzwanzig" */
+  function isoDatumSprache(iso){
+    if(!iso)return '';
+    var p=iso.split('-');
+    if(p.length!==3)return iso;
+    return datumSprache(p[2]+'.'+p[1]+'.'+p[0]);
+  }
+  function sprachText(s){
+    if(!s)return s;
+    s=s.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g,datumSprache);
+    s=s.replace(/\b(\d{1,2}):(\d{2})\b/g,uhrzeitSprache);
+    return s;
+  }
+
   /* Was wird gelesen, wenn ein Bereich angeklickt wird */
   function textFuerElement(target){
     /* Person-Zeile */
@@ -1251,8 +1402,13 @@ document.addEventListener('click',function(e){
       var p=MITARBEITENDE.find(function(m){return m.id===pId;});
       if(!p)return '';
       var abw=STATE.abwesend.indexOf(pId)!==-1;
-      var aufg=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===pId;}).map(function(z){var a=AUFGABEN[z.aufgabeId];return a?a.label:'';}).filter(Boolean);
-      return p.name+(abw?' – heute abwesend':'')+'. '+(aufg.length?'Zuständig für: '+aufg.join(', ')+'.':'Keine Aufgaben zugewiesen.');
+      var aufg=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===pId;})
+               .map(function(z){var a=AUFGABEN[z.aufgabeId];return a?a.label:'';}).filter(Boolean);
+      var notiz=ARBEITSNOTIZEN&&ARBEITSNOTIZEN[pId]&&ARBEITSNOTIZEN[pId].text?ARBEITSNOTIZEN[pId].text:'';
+      var txt=p.name+(abw?' – heute abwesend':'')+'. ';
+      txt+=aufg.length?'Zuständig für: '+aufg.join(', ')+'. ':'Keine Aufgaben. ';
+      if(notiz)txt+='Arbeitsinhalt: '+notiz+'. ';
+      return txt;
     }
     /* Checklisten-Zeile */
     var cr=target.closest('.check-row');
@@ -1262,7 +1418,16 @@ document.addEventListener('click',function(e){
       var erl=STATE.erledigt.indexOf(id)!==-1;
       var pers=getZustaendigePerson(id);
       var enf=entfaelltHeute(id),aus=vertretungAusstehend(id);
-      return a.label+'. Verantwortlich: '+(pers?pers.name:'nicht zugewiesen')+'.'+(erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':' Noch offen.');
+      /* Wann-Info */
+      var wannTxt='';
+      if(a.wann){
+        var tgN={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag'};
+        if(a.wann.tage&&a.wann.tage.length)wannTxt+='Wochentage: '+a.wann.tage.map(function(t){return tgN[t]||t;}).join(', ')+'. ';
+        if(a.wann.zeit)wannTxt+='Uhrzeit: '+uhrzeitSprache(a.wann.zeit)+'. ';
+      }
+      var txt=a.label+'. '+wannTxt+'Verantwortlich: '+(pers?pers.name:'nicht zugewiesen')+'.';
+      txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':' Noch offen.';
+      return txt;
     }
     /* Leitung-Zeile */
     var lz=target.closest('.leitung-zeile');
@@ -1275,15 +1440,20 @@ document.addEventListener('click',function(e){
     if(tz){
       var parts=[];
       var lbl=tz.querySelector('.termin-pflicht-label');if(lbl)parts.push(lbl.textContent.trim());
-      tz.querySelectorAll('input').forEach(function(i){if(i.value)parts.push(i.value);});
+      tz.querySelectorAll('input').forEach(function(inp){
+        var v=inp.value;if(!v)return;
+        if(inp.type==='date')v=isoDatumSprache(v);
+        else if(inp.type==='time')v=uhrzeitSprache(v);
+        parts.push(v);
+      });
       return parts.join(': ')||'Kein Termin eingetragen';
     }
     /* Wichtig-Zeile */
     var wz=target.closest('.wichtig-zeile');
     if(wz){
       var sel=wz.querySelector('select'),txt=wz.querySelector('input[type=text]');
-      var p=[];if(sel&&sel.value)p.push(sel.value);if(txt&&txt.value)p.push(txt.value);
-      return p.join(': ')||'Kein Eintrag';
+      var pp=[];if(sel&&sel.value)pp.push(sel.value);if(txt&&txt.value)pp.push(txt.value);
+      return pp.join(': ')||'Kein Eintrag';
     }
     /* Spalten-Header */
     var ch=target.closest('.col-header');
@@ -1293,6 +1463,7 @@ document.addEventListener('click',function(e){
 
   function vorlesenText(text,el){
     if(!window.speechSynthesis||!text)return;
+    text=sprachText(text);
     window.speechSynthesis.cancel();
     document.querySelectorAll('.a11y-liest').forEach(function(e){e.classList.remove('a11y-liest');});
     if(el)el.classList.add('a11y-liest');
