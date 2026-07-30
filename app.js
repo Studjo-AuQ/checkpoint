@@ -148,6 +148,11 @@ function wechsleKostenstelle(kst) {
 }
 
 function heute(){return new Date().toISOString().slice(0,10);}
+/* Minuten-Timer: Check auf Fälligkeit (Feature 3) */
+setInterval(function(){
+  var aktiv=document.getElementById('check-tabelle');
+  if(aktiv)renderCheckliste();
+},60000);
 function ladeLS(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
 function speichereState(){localStorage.setItem(STATE_KEY,JSON.stringify(STATE));}
 
@@ -338,6 +343,19 @@ function getZustaendigePerson(id){
   var z=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
   return z?MITARBEITENDE.find(function(m){return m.id===z.personId;})||null:null;
 }
+function istFaelligJetzt(id){
+  var a=AUFGABEN[id];if(!a)return false;
+  if(STATE.erledigt.indexOf(id)!==-1)return false;
+  if(entfaelltHeute&&entfaelltHeute(id))return false;
+  if(vertretungAusstehend&&vertretungAusstehend(id))return false;
+  var jetzt=new Date();
+  var h=jetzt.getHours(),m=jetzt.getMinutes();
+  var wt=jetzt.getDay(); /* 0=So,5=Fr */
+  var zeitStr=(a.wann&&a.wann.zeit)?a.wann.zeit:(wt===5?'14:30':'15:00');
+  var tp=zeitStr.split(':');
+  var fh=parseInt(tp[0]),fm=parseInt(tp[1]||0);
+  return h>fh||(h===fh&&m>=fm);
+}
 function entfaelltHeute(id){
   var p=getVertPerson(id);
   return p==='entfaellt';
@@ -424,6 +442,8 @@ function renderNamen(){
     zust.forEach(function(z){
       var a=AUFGABEN[z.aufgabeId];if(!a)return;
       if(z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)===-1)return;
+      /* Feature 1: Symbol ausblenden wenn Aufgabe entfällt heute */
+      if(z.typ==='checkliste'&&entfaelltHeute(z.aufgabeId))return;
       var erl=STATE.erledigt.indexOf(z.aufgabeId)!==-1;
       var badge=z.typ==='checkliste'?'<div class="aufg-badge'+(erl?' erledigt':'')+'" id="badge-'+z.aufgabeId+'">'+(erl?'&#10003;':'!')+'</div>':'';
       var clickFn=editModus?'selectIconInEditModus(\''+z.aufgabeId+'\','+p.id+',event)':'zeigeAufgabeInfo(\''+z.aufgabeId+'\',event)';
@@ -447,7 +467,10 @@ function renderNamen(){
 
     var notiz=ARBEITSNOTIZEN[p.id];
     var hatNotiz=notiz&&notiz.text;
-    var arbBtn='<button class="arbeit-btn'+(hatNotiz?' hat-notiz':'')+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+(hatNotiz?notiz.text.slice(0,40):'Arbeitsinhalt')+'">💼</button>';
+    var _auslTitles={gut:'Gut ausgelastet',bald:'Läuft bald aus',keine:'Keine/Kaum Arbeit'};
+    var _auslKl=notiz&&notiz.auslastung?' auslast-'+notiz.auslastung:(hatNotiz?' hat-notiz':'');
+    var _arbTitel=hatNotiz?(notiz.auslastung?(_auslTitles[notiz.auslastung]||notiz.text.slice(0,40)):notiz.text.slice(0,40)):'Arbeitsinhalt';
+    var arbBtn='<button class="arbeit-btn'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">&#128188;</button>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
          +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'+p.name+'</div>'
@@ -556,10 +579,12 @@ function renderCheckliste(){
     var aus=!erl&&!enf&&vertretungAusstehend(id);
     var person=getZustaendigePerson(id);
     var abw=!erl&&!enf&&!aus&&person&&STATE.abwesend.indexOf(person.id)!==-1;
-    var rowKl=erl?'erledigt':abw?'warnung':(enf||aus)?'check-entfaellt':'';
-    var togKl=abw&&!erl?'warnung':'';
-    var sym=erl?'&#10003;':abw?'&#9888;':(enf||aus)?'&#8722;':'&#10007;';
-    var warn=abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':
+    var faellig=!erl&&!enf&&!aus&&istFaelligJetzt(id);
+    var rowKl=erl?'erledigt':(enf||aus)?'check-entfaellt':faellig?'check-faellig':abw?'warnung':'';
+    var togKl=erl?'':faellig?'faellig':abw?'warnung':'';
+    var sym=erl?'&#10003;':faellig?'&#9888;':(enf||aus)?'&#8722;':abw?'&#9888;':'&#10007;';
+    var warn=faellig?'<div class="check-warnung" style="color:#b45309;">&#9888; Jetzt fällig!</div>':
+             abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':
              enf?'<div class="check-warnung" style="color:var(--rot)">&#9888; Entf&auml;llt heute</div>':
              aus?'<div class="check-warnung" style="color:var(--rot)">&#9888; Vertretung noch offen</div>':'';
     var wann=formatWann(id);
@@ -1040,7 +1065,7 @@ function oeffneArbeitModal(personId,e){
   arbeitModalPersonId=personId;
   var p=MITARBEITENDE.find(function(m){return m.id===personId;});
   document.getElementById('arbeit-modal-name').textContent='Arbeitsinhalt für: '+(p?p.name:'');
-  var notiz=ARBEITSNOTIZEN[personId]||{text:'',dauer:'1tag'};
+  var notiz=ARBEITSNOTIZEN[personId]||{text:'',dauer:'1tag',auslastung:''};
   document.getElementById('arbeit-textarea').value=notiz.text||'';
   /* Dauer Radio */
   var ist1tag=notiz.dauer!=='weiteres';
@@ -1048,6 +1073,10 @@ function oeffneArbeitModal(personId,e){
   document.querySelector('input[name="arbeit-dauer"][value="weiteres"]').checked=!ist1tag;
   document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',ist1tag);
   document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',!ist1tag);
+  /* Auslastung Radio */
+  var ausl=notiz.auslastung||'';
+  document.querySelectorAll('input[name="arbeit-auslastung"]').forEach(function(r){r.checked=r.value===ausl;});
+  document.querySelectorAll('.auslast-label').forEach(function(l){l.classList.toggle('gewaehlt',l.querySelector('input').value===ausl);});
   document.getElementById('arbeit-modal').classList.add('sichtbar');
   setTimeout(function(){document.getElementById('arbeit-textarea').focus();},80);
 }
@@ -1055,11 +1084,25 @@ function arbeitDauerCh(radio){
   document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',radio.value==='1tag');
   document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',radio.value==='weiteres');
 }
+function auslastKlick(label){
+  var val=label.querySelector('input').value;
+  /* Toggle: nochmals klicken = abwählen */
+  var current=document.querySelector('input[name="arbeit-auslastung"]:checked');
+  if(current&&current.value===val){
+    current.checked=false;
+    document.querySelectorAll('.auslast-label').forEach(function(l){l.classList.remove('gewaehlt');});
+  } else {
+    document.querySelectorAll('input[name="arbeit-auslastung"]').forEach(function(r){r.checked=r.value===val;});
+    document.querySelectorAll('.auslast-label').forEach(function(l){l.classList.toggle('gewaehlt',l.querySelector('input').value===val);});
+  }
+}
 function speichereArbeitNotiz(){
   var text=document.getElementById('arbeit-textarea').value.trim();
   var dauerEl=document.querySelector('input[name="arbeit-dauer"]:checked');
   var dauer=dauerEl?dauerEl.value:'1tag';
-  if(text){ARBEITSNOTIZEN[arbeitModalPersonId]={text:text,dauer:dauer};}
+  var auslEl=document.querySelector('input[name="arbeit-auslastung"]:checked');
+  var ausl=auslEl?auslEl.value:'';
+  if(text||ausl){ARBEITSNOTIZEN[arbeitModalPersonId]={text:text,dauer:dauer,auslastung:ausl};}
   else{delete ARBEITSNOTIZEN[arbeitModalPersonId];}
   speichereArbeitsnotizen();
   schM('arbeit-modal');
@@ -1418,14 +1461,17 @@ function sprachText(s){
       var erl=STATE.erledigt.indexOf(id)!==-1;
       var pers=getZustaendigePerson(id);
       var enf=entfaelltHeute(id),aus=vertretungAusstehend(id);
-      /* Wann-Info */
+      /* Wann-Info – kompaktes Format wie "Donnerstag 9 Uhr" */
       var wannTxt='';
       if(a.wann){
         var tgN={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag'};
-        if(a.wann.tage&&a.wann.tage.length)wannTxt+='Wochentage: '+a.wann.tage.map(function(t){return tgN[t]||t;}).join(', ')+'. ';
-        if(a.wann.zeit)wannTxt+='Uhrzeit: '+uhrzeitSprache(a.wann.zeit)+'. ';
+        var tage=a.wann.tage&&a.wann.tage.length?a.wann.tage.map(function(t){return tgN[t]||t;}).join(' und '):'';
+        var zeit=a.wann.zeit?uhrzeitSprache(a.wann.zeit):'';
+        if(tage&&zeit)wannTxt=tage+', '+zeit+', ';
+        else if(tage)wannTxt=tage+', ';
+        else if(zeit)wannTxt=zeit+', ';
       }
-      var txt=a.label+'. '+wannTxt+'Verantwortlich: '+(pers?pers.name:'nicht zugewiesen')+'.';
+      var txt=a.label+', '+wannTxt+'zuständig: '+(pers?pers.name:'nicht zugewiesen')+'.';
       txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':' Noch offen.';
       return txt;
     }

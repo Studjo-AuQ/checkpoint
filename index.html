@@ -182,12 +182,27 @@
       <button class="modal-schliessen" onclick="schM('arbeit-modal')">&#10005;</button>
     </div>
     <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="arbeit-modal-name"></p>
-    <div class="vert-dauer-wrap" style="margin-bottom:14px;">
+    <div class="vert-dauer-wrap" style="margin-bottom:12px;">
       <label class="vert-dauer-label gewaehlt" id="arbeit-dauer-1tag-label">
         <input type="radio" name="arbeit-dauer" value="1tag" checked onchange="arbeitDauerCh(this)"> Nur für 1 Tag
       </label>
       <label class="vert-dauer-label" id="arbeit-dauer-weit-label">
         <input type="radio" name="arbeit-dauer" value="weiteres" onchange="arbeitDauerCh(this)"> Bis auf weiteres
+      </label>
+    </div>
+    <!-- Auslastungs-Auswahl (Feature 5) -->
+    <div style="display:flex;gap:5px;margin-bottom:12px;">
+      <label class="auslast-label auslast-gut" id="auslast-gut-label" onclick="auslastKlick(this)" style="flex:1;text-align:center;">
+        <input type="radio" name="arbeit-auslastung" value="gut" style="display:none;">
+        &#10003;&nbsp;Gut&nbsp;ausgelastet
+      </label>
+      <label class="auslast-label auslast-bald" id="auslast-bald-label" onclick="auslastKlick(this)" style="flex:1;text-align:center;">
+        <input type="radio" name="arbeit-auslastung" value="bald" style="display:none;">
+        &#9888;&nbsp;Läuft&nbsp;bald&nbsp;aus
+      </label>
+      <label class="auslast-label auslast-keine" id="auslast-keine-label" onclick="auslastKlick(this)" style="flex:1;text-align:center;">
+        <input type="radio" name="arbeit-auslastung" value="keine" style="display:none;">
+        &#10007;&nbsp;Keine&nbsp;Arbeit
       </label>
     </div>
     <textarea id="arbeit-textarea" rows="5"
@@ -204,10 +219,15 @@
 <!-- ═══ Grid ═══ -->
 <div class="grid">
   <div class="col-wrap">
-    <div class="col-header">
-      <button class="col-btn" onclick="oeffneNamenModal()">&#128100; Namen</button>
-      <span class="col-btn-sep">|</span>
-      <button class="col-btn" id="btn-edit" onclick="toggleEditModus()">&#9998; Zust&auml;ndigkeiten</button>
+    <div class="col-header" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:stretch;height:100%;">
+        <!-- Breite Portrait(80)+Name(148) = 228px -->
+        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:flex-start;padding-left:10px;border-radius:0;">&#128100; Namen</button>
+        <!-- Arbeit-Spalte über arbeit-btn (32px) -->
+        <div style="width:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--grau);letter-spacing:.04em;text-transform:uppercase;border-left:1px solid var(--hell);border-right:1px solid var(--hell);">Arbeit</div>
+        <!-- Zuständigkeiten über den Symbolen -->
+        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:flex-start;padding-left:10px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
+      </div>
     </div>
     <div class="namen-tabelle" id="namen-tabelle"></div>
   </div>

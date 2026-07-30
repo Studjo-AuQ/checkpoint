@@ -312,3 +312,22 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 .btn-abw-option:hover{border-color:var(--rot);background:#fef2f2;}
 .btn-abw-weiteres{border-color:#f97316;color:#c2410c;}
 .btn-abw-weiteres:hover{border-color:#c2410c;background:#fff7ed;}
+
+/* ── Feature 3: Fälligkeit-Warnung ── */
+.check-row.check-faellig{background:#fffbeb !important;border:2px solid #f59e0b !important;border-radius:10px;}
+.check-toggle.faellig{background:#f59e0b !important;color:white !important;}
+.check-toggle.faellig:hover{background:#d97706 !important;}
+
+/* ── Feature 5: Auslastungs-Labels im Modal ── */
+.auslast-label{display:flex;align-items:center;justify-content:center;padding:8px 6px;border-radius:9px;border:2px solid var(--hell);cursor:pointer;font-size:.76rem;font-weight:800;transition:all .15s;user-select:none;}
+.auslast-gut {border-color:#86efac;color:#166534;background:#f0fdf4;}
+.auslast-bald{border-color:#fcd34d;color:#92400e;background:#fffbeb;}
+.auslast-keine{border-color:#fca5a5;color:#991b1b;background:#fef2f2;}
+.auslast-label.gewaehlt.auslast-gut {background:#16a34a;color:white;border-color:#16a34a;}
+.auslast-label.gewaehlt.auslast-bald{background:#d97706;color:white;border-color:#d97706;}
+.auslast-label.gewaehlt.auslast-keine{background:#dc2626;color:white;border-color:#dc2626;}
+
+/* ── Feature 5: arbeit-btn Auslastungsfarben ── */
+.arbeit-btn.auslast-gut {background:#16a34a !important;color:white !important;}
+.arbeit-btn.auslast-bald{background:#d97706 !important;color:white !important;}
+.arbeit-btn.auslast-keine{background:#dc2626 !important;color:white !important;}
