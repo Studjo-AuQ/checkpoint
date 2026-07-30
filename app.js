@@ -130,6 +130,7 @@ function wechsleKostenstelle(kst) {
   var raw = ladeLS(STATE_KEY);
   STATE = (raw && raw.datum === heute()) ? raw : {datum:heute(),abwesend:[],erledigt:[],vertretungen:{}};
   if (!STATE.vertretungen) STATE.vertretungen = {};
+  if (!STATE.abwesendWeiteres) STATE.abwesendWeiteres = [];
 
   ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();
 
@@ -607,23 +608,21 @@ function oeffneAbwesenheitsModal(personId){
   var istAbw=STATE.abwesend.indexOf(personId)!==-1;
   var istW=(STATE.abwesendWeiteres||[]).indexOf(personId)!==-1;
   var html='<div class="modal-kopf"><h2>&#128100; '+p.name+'</h2>'
-           +'<button class="modal-schliessen" onclick="schM('abwesend-modal')">&#10005;</button></div>';
+           +'<button class="modal-schliessen" onclick="schM(\'abwesend-modal\')">&#10005;</button></div>';
   if(istAbw){
     html+='<p style="font-size:.82rem;color:var(--grau);margin:4px 0 16px;">'
          +'Abwesend '+(istW?'<strong>bis auf weiteres</strong>':'<strong>nur heute</strong>')+'</p>';
     html+='<div class="modal-btns">'
-         +'<button class="btn-modal-secondary" onclick="schM('abwesend-modal')">Abbrechen</button>'
+         +'<button class="btn-modal-secondary" onclick="schM(\'abwesend-modal\')">Abbrechen</button>'
          +'<button class="btn-modal-primary" onclick="setzeAnwesend('+personId+')">&#10003; Wieder anwesend</button>'
          +'</div>';
   } else {
     html+='<p style="font-size:.85rem;margin:4px 0 14px;">Wie lange ist <strong>'+p.name+'</strong> abwesend?</p>';
     html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">'
-         +'<button class="btn-abw-option" onclick="setzeAbwesend('+personId+','1tag')">'
-         +'&#9728; Nur heute &ndash; 1 Tag<br><small>Morgen automatisch wieder anwesend</small></button>'
-         +'<button class="btn-abw-option btn-abw-weiteres" onclick="setzeAbwesend('+personId+','weiteres')">'
-         +'&#9899; Bis auf weiteres<br><small>Bleibt abwesend bis manuell geändert</small></button>'
+         +'<button class="btn-abw-option" onclick="setzeAbwesend('+personId+',\'1tag\')">'         +'&#9728; Nur heute &ndash; 1 Tag<br><small>Morgen automatisch wieder anwesend</small></button>'
+         +'<button class="btn-abw-option btn-abw-weiteres" onclick="setzeAbwesend('+personId+',\'weiteres\')">'         +'&#9899; Bis auf weiteres<br><small>Bleibt abwesend bis manuell geändert</small></button>'
          +'</div>'
-         +'<div class="modal-btns"><button class="btn-modal-secondary" onclick="schM('abwesend-modal')">Abbrechen</button></div>';
+         +'<div class="modal-btns"><button class="btn-modal-secondary" onclick="schM(\'abwesend-modal\')">Abbrechen</button></div>';
   }
   document.getElementById('abwesend-modal-body').innerHTML=html;
   document.getElementById('abwesend-modal').classList.add('sichtbar');
@@ -1197,7 +1196,7 @@ function oeffneCheckPersonPicker(id,event){
   var html='<div style="font-size:.7rem;font-weight:900;color:var(--rot);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--hell);">'+a.label+'</div>';
   html+='<div style="display:flex;flex-direction:column;gap:3px;max-height:300px;overflow-y:auto;">';
   /* Entfällt-Option immer ganz oben */
-  html+='<button onclick="weiseCheckPersonZu('entfaellt')" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(enf?'var(--rot)':'#fca5a5')+';background:'+(enf?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
+  html+='<button onclick="weiseCheckPersonZu(\'entfaellt\')" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(enf?'var(--rot)':'#fca5a5')+';background:'+(enf?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
        +'\u26D4 Aufgabe entf\u00e4llt heute'+(enf?' \u2713':'')+'</button>';
   html+='<div style="height:1px;background:var(--hell);margin:2px 0;"></div>';
   MITARBEITENDE.forEach(function(p){
@@ -1305,6 +1304,47 @@ document.addEventListener('click',function(e){
   }
 });
 
+/* ── Datum / Uhrzeit → gesprochenes Deutsch (global) ── */
+function _z(n){
+  var e=['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn',
+         'elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
+  var z=['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'];
+  if(n<=0)return 'null';if(n<20)return e[n];
+  if(n<100){var r=n%10,t=Math.floor(n/10);return r?e[r]+'und'+z[t]:z[t];}
+  if(n<1000){var h=Math.floor(n/100);return e[h]+'hundert'+(_z(n%100)||'');}
+  if(n<10000){return _z(Math.floor(n/1000))+'tausend'+(_z(n%1000)||'');}
+  return String(n);
+}
+var _TAGORD=['','ersten','zweiten','dritten','vierten','fünften','sechsten','siebten','achten',
+  'neunten','zehnten','elften','zwölften','dreizehnten','vierzehnten','fünfzehnten','sechzehnten',
+  'siebzehnten','achtzehnten','neunzehnten','zwanzigsten','einundzwanzigsten','zweiundzwanzigsten',
+  'dreiundzwanzigsten','vierundzwanzigsten','fünfundzwanzigsten','sechsundzwanzigsten',
+  'siebenundzwanzigsten','achtundzwanzigsten','neunundzwanzigsten','dreißigsten','einundreißigsten'];
+var _MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+function datumSprache(s){
+  var m=s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if(!m)return s;
+  return (_TAGORD[parseInt(m[1])]||m[1]+'.')+' '+_MON[parseInt(m[2])-1]+' '+_z(parseInt(m[3]));
+}
+function uhrzeitSprache(s){
+  var m=s.match(/(\d{1,2}):(\d{2})/);
+  if(!m)return s;
+  var h=parseInt(m[1]),min=parseInt(m[2]);
+  return _z(h)+' Uhr'+(min>0?' '+_z(min):'');
+}
+function isoDatumSprache(iso){
+  if(!iso)return '';
+  var p=iso.split('-');
+  if(p.length!==3)return iso;
+  return datumSprache(p[2]+'.'+p[1]+'.'+p[0]);
+}
+function sprachText(s){
+  if(!s)return s;
+  s=s.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g,datumSprache);
+  s=s.replace(/\b(\d{1,2}):(\d{2})\b/g,uhrzeitSprache);
+  return s;
+}
+
 /* ═══ BARRIEREFREIHEIT (a11y) ═══ */
 (function(){
   /* ── Schriftgröße ── */
@@ -1351,47 +1391,7 @@ document.addEventListener('click',function(e){
   /* ── Vorlesen – Klick-auf-Bereich ── */
   var vorleseModus=false,spricht=false;
 
-  /* ── Datum / Uhrzeit → gesprochenes Deutsch ── */
-  function _z(n){
-    var e=['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn',
-           'elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
-    var z=['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'];
-    if(n<=0)return 'null';if(n<20)return e[n];
-    if(n<100){var r=n%10,t=Math.floor(n/10);return r?e[r]+'und'+z[t]:z[t];}
-    if(n<1000){var h=Math.floor(n/100);return e[h]+'hundert'+(_z(n%100)||'');}
-    if(n<10000){return _z(Math.floor(n/1000))+'tausend'+(_z(n%1000)||'');}
-    return String(n);
-  }
-  var _TAGORD=['','ersten','zweiten','dritten','vierten','fünften','sechsten','siebten','achten',
-    'neunten','zehnten','elften','zwölften','dreizehnten','vierzehnten','fünfzehnten','sechzehnten',
-    'siebzehnten','achtzehnten','neunzehnten','zwanzigsten','einundzwanzigsten','zweiundzwanzigsten',
-    'dreiundzwanzigsten','vierundzwanzigsten','fünfundzwanzigsten','sechsundzwanzigsten',
-    'siebenundzwanzigsten','achtundzwanzigsten','neunundzwanzigsten','dreißigsten','einunddreißigsten'];
-  var _MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  function datumSprache(s){
-    var m=s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-    if(!m)return s;
-    return (_TAGORD[parseInt(m[1])]||m[1]+'.')+' '+_MON[parseInt(m[2])-1]+' '+_z(parseInt(m[3]));
-  }
-  function uhrzeitSprache(s){
-    var m=s.match(/(\d{1,2}):(\d{2})/);
-    if(!m)return s;
-    var h=parseInt(m[1]),min=parseInt(m[2]);
-    return _z(h)+' Uhr'+(min>0?' '+_z(min):'');
-  }
-  /* ISO-Datum YYYY-MM-DD → "Einunddreißigster Juli Zweitausendsechsundzwanzig" */
-  function isoDatumSprache(iso){
-    if(!iso)return '';
-    var p=iso.split('-');
-    if(p.length!==3)return iso;
-    return datumSprache(p[2]+'.'+p[1]+'.'+p[0]);
-  }
-  function sprachText(s){
-    if(!s)return s;
-    s=s.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g,datumSprache);
-    s=s.replace(/\b(\d{1,2}):(\d{2})\b/g,uhrzeitSprache);
-    return s;
-  }
+  /* Datum/Uhrzeit-Helfer → global definiert (s. oben) */
 
   /* Was wird gelesen, wenn ein Bereich angeklickt wird */
   function textFuerElement(target){
