@@ -116,8 +116,8 @@ function wechsleKostenstelle(kst) {
   GRUPPE.zustaendigkeiten = JSON.parse(JSON.stringify(ZUORDNUNG_DEFAULT));
   AKTIVE_CHECKS = sortierteCheckIds();
   LEITUNG       = {namen:['','',''], aktiv:0};
-  TERMINE = {frei:[{datum:'',text:''},{datum:'',text:''}], pflicht:[
-    {id:'fruehrunde',label:'Fr\u00fchrunde',icon:'&#9200;',datum:'',uhrzeit:''},
+  TERMINE = {frei:[{datum:'',text:'',uhrzeit:''},{datum:'',text:'',uhrzeit:''}], pflicht:[
+    {id:'fruehrunde',label:'Fr\u00fchrunde',icon:'&#9728;',datum:'',uhrzeit:''},
     {id:'gruppenstunde',label:'Gruppenstunde',icon:'&#128101;',datum:'',uhrzeit:''},
     {id:'dienstbesprechung',label:'Dienstbesprechung',icon:'&#128203;',datum:'',uhrzeit:''},
     {id:'geburtstag',label:'Geburtstagsfeier',icon:'&#127874;',datum:'',uhrzeit:''},
@@ -238,8 +238,8 @@ var LEITUNG={namen:['','',''],aktiv:0};
 function ladeLeitung(){var s=ladeLS(LEITUNG_KEY);if(s)LEITUNG=s;}
 function speichereLeitung(){localStorage.setItem(LEITUNG_KEY,JSON.stringify(LEITUNG));}
 
-var TERMINE={frei:[{datum:'',text:''},{datum:'',text:''}],pflicht:[
-  {id:'fruehrunde',label:'Fr\u00fchrunde',icon:'&#9200;',datum:'',uhrzeit:''},
+var TERMINE={frei:[{datum:'',text:'',uhrzeit:''},{datum:'',text:'',uhrzeit:''}],pflicht:[
+  {id:'fruehrunde',label:'Fr\u00fchrunde',icon:'&#9728;',datum:'',uhrzeit:''},
   {id:'gruppenstunde',label:'Gruppenstunde',icon:'&#128101;',datum:'',uhrzeit:''},
   {id:'dienstbesprechung',label:'Dienstbesprechung',icon:'&#128203;',datum:'',uhrzeit:''},
   {id:'geburtstag',label:'Geburtstagsfeier',icon:'&#127874;',datum:'',uhrzeit:''},
@@ -490,7 +490,8 @@ function renderNamen(){
     var _auslTitles={gut:'Gut ausgelastet',bald:'Läuft bald aus',keine:'Keine/Kaum Arbeit'};
     var _auslKl=notiz&&notiz.auslastung?' auslast-'+notiz.auslastung:(hatNotiz?' hat-notiz':'');
     var _arbTitel=hatNotiz?(notiz.auslastung?(_auslTitles[notiz.auslastung]||notiz.text.slice(0,40)):notiz.text.slice(0,40)):'Arbeitsinhalt';
-    var arbBtn='<button class="arbeit-btn'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">&#128188;</button>';
+    var _arbIkon=(notiz&&notiz.dauer==='weiteres')?'&#9854;':'&#128467;';
+    var arbBtn='<button class="arbeit-btn'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'+_arbIkon+'</button>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
          +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'+p.name+'</div>'
@@ -525,38 +526,64 @@ function renderLeitung(){
 
 function renderTermine(){
   var html='';
+
+  /* ── 2 Freie Termine ── */
   for(var i=0;i<2;i++){
     var f=TERMINE.frei[i];
+    var dt=formatTerminAnzeige(f.datum,f.uhrzeit||'');
     html+='<div class="termin-frei-zeile" data-frei-idx="'+i+'">'
-         +'<div class="termin-datum-wrap"><span class="termin-wt-label" id="termin-frei-wt-'+i+'">'+(f.datum?formatTerminDatum(f.datum):'')+'</span><input type="date" class="termin-input" data-frei-idx="'+i+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)"></div>'
-         +'<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin \u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
-         +'</div>';
+        +'<div class="termin-ikon-col">'
+        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tf-dat-\'+i+\'\')" title="Datum w\u00e4hlen">&#128197;</button>'
+        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tf-uhr-\'+i+\'\')" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
+        +'<input type="date" id="tf-dat-'+i+'" class="termin-hidden-inp" data-frei-idx="'+i+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)">'
+        +'<input type="time" id="tf-uhr-'+i+'" class="termin-hidden-inp" data-frei-idx="'+i+'" data-feld="uhrzeit" value="'+(f.uhrzeit||'')+'" onchange="terminFreiSp(this)">'
+        +'</div>'
+        +'<div class="termin-content-col">'
+        +(dt?'<div class="termin-dt-anzeige">'+dt+'</div>':'<div class="termin-dt-anzeige termin-dt-leer">Datum &ndash; Uhrzeit</div>')
+        +'<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin \u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
+        +'</div>'
+        +'</div>';
   }
+
   html+='<div class="termin-trenner">&mdash; Regelm&auml;&szlig;ige Termine &mdash;</div>';
+
+  /* ── Pflicht-Termine ── */
   TERMINE.pflicht.forEach(function(p){
+    var dt=formatTerminAnzeige(p.datum,p.uhrzeit||'');
     html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
-         +'<div class="termin-pflicht-dt">'
-         +'<div class="termin-datum-wrap"><span class="termin-wt-label" id="termin-pflicht-wt-'+p.id+'">'+(p.datum?formatTerminDatum(p.datum):'')+'</span><input type="date" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)" style="margin-bottom:2px"></div>'
-         +'<input type="time" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
-         +'</div>'
-         +'<div class="termin-icon-zelle">'+p.icon+'</div>'
-         +'<div class="termin-pflicht-label">'+p.label+'</div></div>';
+        +'<div class="termin-ikon-col">'
+        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tp-dat-\'+p.id+\'\')" title="Datum w\u00e4hlen">&#128197;</button>'
+        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tp-uhr-\'+p.id+\'\')" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
+        +'<input type="date" id="tp-dat-'+p.id+'" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)">'
+        +'<input type="time" id="tp-uhr-'+p.id+'" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
+        +'</div>'
+        +'<div class="termin-action-ikon">'+p.icon+'</div>'
+        +'<div class="termin-content-col">'
+        +(dt?'<div class="termin-dt-anzeige">'+dt+'</div>':'<div class="termin-dt-anzeige termin-dt-leer">&nbsp;</div>')
+        +'<div class="termin-pflicht-label">'+p.label+'</div>'
+        +'</div>'
+        +'</div>';
   });
+
   document.getElementById('termine-anzeige').innerHTML=html;
   checkTerminDatumHeute();
 }
+
 function terminFreiSp(el){
   var i=parseInt(el.dataset.freiIdx);
   TERMINE.frei[i][el.dataset.feld]=el.value;
   speichereTermine();checkTerminDatumHeute();
-  if(el.dataset.feld==='datum'){var lb=document.getElementById('termin-frei-wt-'+i);if(lb)lb.textContent=el.value?formatTerminDatum(el.value):'';}
+  var f=TERMINE.frei[i];
+  var dtEl=el.closest('.termin-frei-zeile');
+  if(dtEl){var da=dtEl.querySelector('.termin-dt-anzeige');if(da){var t=formatTerminAnzeige(f.datum,f.uhrzeit||'');da.textContent=t||'Datum – Uhrzeit';da.className='termin-dt-anzeige'+(t?'':' termin-dt-leer');}}
 }
 function terminPflichtSp(el){
   var p=TERMINE.pflicht.find(function(p){return p.id===el.dataset.pflichtId;});if(!p)return;
   var feld=el.dataset.feld||'datum';
   p[feld]=el.value;
   speichereTermine();checkTerminDatumHeute();
-  if(feld==='datum'){var lb=document.getElementById('termin-pflicht-wt-'+p.id);if(lb)lb.textContent=el.value?formatTerminDatum(el.value):'';}
+  var row=el.closest('.termin-pflicht-zeile');
+  if(row){var da=row.querySelector('.termin-dt-anzeige');if(da){var t=formatTerminAnzeige(p.datum,p.uhrzeit||'');da.textContent=t||'';da.className='termin-dt-anzeige'+(t?'':' termin-dt-leer');}}
 }
 /* Feature 8: Datumsabgleich */
 function checkTerminDatumHeute(){
@@ -688,10 +715,12 @@ function setzeAbwesend(personId,dauer){
   speichereState();
   schM('abwesend-modal');
   var cz=GRUPPE.zustaendigkeiten.filter(function(z){
-    return z.personId===personId&&z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1;
+    return z.personId===personId&&z.typ==='checkliste'
+      &&AKTIVE_CHECKS.indexOf(z.aufgabeId)!==-1
+      &&heuteIstGeplantFuer(z.aufgabeId); /* Feature 3: kein Vertreter für nicht-heutige Aufgaben */
   }).map(function(z){return{aufgabeId:z.aufgabeId};});
   Object.keys(STATE.vertretungen).forEach(function(id){
-    if(getVertPerson(id)===personId&&AKTIVE_CHECKS.indexOf(id)!==-1)
+    if(getVertPerson(id)===personId&&AKTIVE_CHECKS.indexOf(id)!==-1&&heuteIstGeplantFuer(id))
       if(!cz.find(function(t){return t.aufgabeId===id;}))cz.push({aufgabeId:id});
   });
   if(cz.length>0){oeffneVertretungsModal(personId,cz);return;}

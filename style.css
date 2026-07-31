@@ -355,3 +355,20 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 /* ── Feature 3: Termin-Datumslabel ── */
 .termin-datum-wrap{display:flex;flex-direction:column;gap:2px;}
 .termin-wt-label{font-size:.68rem;font-weight:900;color:var(--rot);letter-spacing:.04em;line-height:1;padding-left:2px;min-height:.9rem;}
+
+/* ── Feature 1: Neues Termine-Layout ── */
+.termin-frei-zeile,.termin-pflicht-zeile{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--hell);}
+.termin-ikon-col{display:flex;flex-direction:column;gap:3px;flex-shrink:0;align-items:center;}
+.termin-ikon-btn{width:30px;height:30px;border:2px solid var(--hell);border-radius:8px;background:white;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .15s;}
+.termin-ikon-btn:hover{border-color:var(--rot);}
+.termin-hidden-inp{display:none;width:0;height:0;opacity:0;position:absolute;}
+.termin-action-ikon{font-size:1.6rem;flex-shrink:0;line-height:1;width:36px;text-align:center;}
+.termin-content-col{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.termin-dt-anzeige{font-size:.72rem;font-weight:900;color:var(--rot);letter-spacing:.03em;}
+.termin-dt-leer{color:var(--grau);font-weight:500;}
+
+/* ── Feature 2: Arbeit-Modal Mindestbreite ── */
+#arbeit-modal .modal-box{min-width:min(520px,96vw);width:min(520px,96vw);}
+
+/* ── Feature 2: Arbeit-Btn Dauer-Icons ── */
+.arbeit-btn{font-size:1rem;}
