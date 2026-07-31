@@ -255,6 +255,17 @@ function ladeTermine(){
 }
 function speichereTermine(){localStorage.setItem(TERMINE_KEY,JSON.stringify(TERMINE));}
 
+/* Feature 3: Datum als "DO, 30.07.26" */
+function formatTerminDatum(iso){
+  if(!iso)return '';
+  var d=new Date(iso+'T00:00:00');
+  var wt=['SO','MO','DI','MI','DO','FR','SA'][d.getDay()];
+  var dd=String(d.getDate()).padStart(2,'0');
+  var mm=String(d.getMonth()+1).padStart(2,'0');
+  var yy=String(d.getFullYear()).slice(2);
+  return wt+', '+dd+'.'+mm+'.'+yy;
+}
+
 /* ═══ TERMIN-POPUP (Feature 4) ═══ */
 function oeffneNaechstenTermin(event){
   event.stopPropagation();
@@ -279,7 +290,7 @@ function oeffneNaechstenTermin(event){
       '<p style="color:var(--grau);font-size:.85rem;margin:0;">Keine zukünftigen Termine eingetragen.</p>';
   } else {
     var t=alle[0];
-    var ddmm=t.datum.split('-').reverse().join('.');
+    var ddmm=formatTerminDatum(t.datum);
     vorleseText=(t.label?t.label+': ':'')+(t.text||t.label)+'. Am '+isoDatumSprache(t.datum)
                 +(t.uhrzeit?' um '+uhrzeitSprache(t.uhrzeit):'')+'.'||'';
     var html='<div style="background:#f0f9ff;border-radius:10px;padding:12px 14px;">';
@@ -343,14 +354,22 @@ function getZustaendigePerson(id){
   var z=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.typ==='checkliste';});
   return z?MITARBEITENDE.find(function(m){return m.id===z.personId;})||null:null;
 }
+var _TAGKUERZEL={mo:1,di:2,mi:3,do:4,fr:5};
+function heuteIstGeplantFuer(id){
+  var _zt=ZEITEN[id]||{};
+  if(!_zt.tage||_zt.tage.length===0)return true;
+  var wt=new Date().getDay();
+  return _zt.tage.some(function(t){return _TAGKUERZEL[t]===wt;});
+}
 function istFaelligJetzt(id){
   var a=AUFGABEN[id];if(!a)return false;
   if(STATE.erledigt.indexOf(id)!==-1)return false;
   if(entfaelltHeute&&entfaelltHeute(id))return false;
   if(vertretungAusstehend&&vertretungAusstehend(id))return false;
+  if(!heuteIstGeplantFuer(id))return false;
   var jetzt=new Date();
   var h=jetzt.getHours(),m=jetzt.getMinutes();
-  var wt=jetzt.getDay(); /* 0=So,5=Fr */
+  var wt=jetzt.getDay();
   var _zt=ZEITEN[id]||{};
   var zeitStr=_zt.uhrzeit?_zt.uhrzeit:(wt===5?'14:30':'15:00');
   var tp=zeitStr.split(':');
@@ -509,7 +528,7 @@ function renderTermine(){
   for(var i=0;i<2;i++){
     var f=TERMINE.frei[i];
     html+='<div class="termin-frei-zeile" data-frei-idx="'+i+'">'
-         +'<input type="date" class="termin-input" data-frei-idx="'+i+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)">'
+         +'<div class="termin-datum-wrap"><span class="termin-wt-label" id="termin-frei-wt-'+i+'">'+(f.datum?formatTerminDatum(f.datum):'')+'</span><input type="date" class="termin-input" data-frei-idx="'+i+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)"></div>'
          +'<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin \u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
          +'</div>';
   }
@@ -517,7 +536,7 @@ function renderTermine(){
   TERMINE.pflicht.forEach(function(p){
     html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
          +'<div class="termin-pflicht-dt">'
-         +'<input type="date" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)" style="margin-bottom:2px">'
+         +'<div class="termin-datum-wrap"><span class="termin-wt-label" id="termin-pflicht-wt-'+p.id+'">'+(p.datum?formatTerminDatum(p.datum):'')+'</span><input type="date" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)" style="margin-bottom:2px"></div>'
          +'<input type="time" class="termin-input" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
          +'</div>'
          +'<div class="termin-icon-zelle">'+p.icon+'</div>'
@@ -526,12 +545,18 @@ function renderTermine(){
   document.getElementById('termine-anzeige').innerHTML=html;
   checkTerminDatumHeute();
 }
-function terminFreiSp(el){var i=parseInt(el.dataset.freiIdx);TERMINE.frei[i][el.dataset.feld]=el.value;speichereTermine();checkTerminDatumHeute();}
+function terminFreiSp(el){
+  var i=parseInt(el.dataset.freiIdx);
+  TERMINE.frei[i][el.dataset.feld]=el.value;
+  speichereTermine();checkTerminDatumHeute();
+  if(el.dataset.feld==='datum'){var lb=document.getElementById('termin-frei-wt-'+i);if(lb)lb.textContent=el.value?formatTerminDatum(el.value):'';}
+}
 function terminPflichtSp(el){
   var p=TERMINE.pflicht.find(function(p){return p.id===el.dataset.pflichtId;});if(!p)return;
   var feld=el.dataset.feld||'datum';
   p[feld]=el.value;
   speichereTermine();checkTerminDatumHeute();
+  if(feld==='datum'){var lb=document.getElementById('termin-pflicht-wt-'+p.id);if(lb)lb.textContent=el.value?formatTerminDatum(el.value):'';}
 }
 /* Feature 8: Datumsabgleich */
 function checkTerminDatumHeute(){
@@ -580,10 +605,11 @@ function renderCheckliste(){
     var aus=!erl&&!enf&&vertretungAusstehend(id);
     var person=getZustaendigePerson(id);
     var abw=!erl&&!enf&&!aus&&person&&STATE.abwesend.indexOf(person.id)!==-1;
-    var faellig=!erl&&!enf&&!aus&&istFaelligJetzt(id);
-    var rowKl=erl?'erledigt':(enf||aus)?'check-entfaellt':faellig?'check-faellig':abw?'warnung':'';
+    var falscherTag=!erl&&!enf&&!aus&&ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id);
+    var faellig=!erl&&!enf&&!aus&&!falscherTag&&istFaelligJetzt(id);
+    var rowKl=erl?'erledigt':(enf||aus||falscherTag)?'check-entfaellt':faellig?'check-faellig':abw?'warnung':'';
     var togKl=erl?'':faellig?'faellig':abw?'warnung':'';
-    var sym=erl?'&#10003;':faellig?'&#9888;':(enf||aus)?'&#8722;':abw?'&#9888;':'&#10007;';
+    var sym=erl?'&#10003;':faellig?'&#9888;':(enf||aus||falscherTag)?'&#8722;':abw?'&#9888;':'&#10007;';
     var warn=faellig?'<div class="check-warnung" style="color:#b45309;">&#9888; Jetzt fällig!</div>':
              abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':
              enf?'<div class="check-warnung" style="color:var(--rot)">&#9888; Entf&auml;llt heute</div>':

@@ -348,3 +348,10 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 #auslast-gut-label.gewaehlt        { background:#16a34a !important; color:white !important; border-color:#16a34a !important; }
 #auslast-bald-label.gewaehlt       { background:#d97706 !important; color:white !important; border-color:#d97706 !important; }
 #auslast-keine-label.gewaehlt      { background:#dc2626 !important; color:white !important; border-color:#dc2626 !important; }
+
+/* ── Feature 1: Arbeit-Modal breiter ── */
+#arbeit-modal .modal-box{width:min(540px,96vw);}
+
+/* ── Feature 3: Termin-Datumslabel ── */
+.termin-datum-wrap{display:flex;flex-direction:column;gap:2px;}
+.termin-wt-label{font-size:.68rem;font-weight:900;color:var(--rot);letter-spacing:.04em;line-height:1;padding-left:2px;min-height:.9rem;}
