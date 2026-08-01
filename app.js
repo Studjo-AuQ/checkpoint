@@ -133,8 +133,20 @@ function wechsleKostenstelle(kst) {
   if (!STATE.vertretungen) STATE.vertretungen = {};
   if (!STATE.abwesendWeiteres) STATE.abwesendWeiteres = [];
 
-  ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();
+  ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();ladeProfil();
 
+  /* Banner aktualisieren */
+  var gruppenname = GRUPPEN_CONFIG[kst] || 'Kostenstelle ' + kst;
+  document.getElementById('banner-name').textContent = gruppenname;
+  document.getElementById('kst-anzeige-nr').textContent = kst;
+  document.getElementById('kst-login-overlay').style.display = 'none';
+
+  /* Alles neu rendern */
+  MITARBEITENDE.splice(0, MITARBEITENDE.length);
+  MITARBEITENDE_DEFAULT.forEach(function(p){ MITARBEITENDE.push({id:p.id, name:p.name}); });
+  ladeNamen();
+  renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
+}
 /* ═══ PERSONEN-PROFIL ═══ */
 var PROFIL={};
 function ladeProfil(){var s=ladeLS(PROFIL_KEY);if(s&&typeof s==='object')PROFIL=s;}
@@ -202,19 +214,6 @@ function speichereProfilAusModal(personId){
   speichereProfil();
   schM('profil-modal');
   renderNamen();initSortable();
-}ladeProfil();
-
-  /* Banner aktualisieren */
-  var gruppenname = GRUPPEN_CONFIG[kst] || 'Kostenstelle ' + kst;
-  document.getElementById('banner-name').textContent = gruppenname;
-  document.getElementById('kst-anzeige-nr').textContent = kst;
-  document.getElementById('kst-login-overlay').style.display = 'none';
-
-  /* Alles neu rendern */
-  MITARBEITENDE.splice(0, MITARBEITENDE.length);
-  MITARBEITENDE_DEFAULT.forEach(function(p){ MITARBEITENDE.push({id:p.id, name:p.name}); });
-  ladeNamen();
-  renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
 }
 
 function heute(){return new Date().toISOString().slice(0,10);}
