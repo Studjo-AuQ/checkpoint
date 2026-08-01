@@ -335,6 +335,10 @@ function formatTerminDatum(iso){
   var yy=String(d.getFullYear()).slice(2);
   return wt+', '+dd+'.'+mm+'.'+yy;
 }
+function formatTerminAnzeige(datum,uhrzeit){
+  if(!datum)return '';
+  return formatTerminDatum(datum)+(uhrzeit?' um '+uhrzeit+' Uhr':'');
+}
 
 /* ═══ TERMIN-POPUP (Feature 4) ═══ */
 function oeffneNaechstenTermin(event){
@@ -564,7 +568,7 @@ function renderNamen(){
     var arbBtn='<button class="arbeit-btn'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'+_arbIkon+'</button>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
-         +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
+         +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="event.stopPropagation();oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
          +arbBtn  
          +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
