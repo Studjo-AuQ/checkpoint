@@ -80,7 +80,7 @@ var AKTIVE_KST = '';
 
 /* Alle Storage-Keys dynamisch mit KST-Prefix */
 var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
-    LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='';
+    LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='';
 
 function setzeKSTKeys(kst) {
   AKTIVE_KST  = kst;
@@ -92,6 +92,7 @@ function setzeKSTKeys(kst) {
   TERMINE_KEY = kst + '-chk-termine-v1';
   WICHTIG_KEY = kst + '-chk-wichtig-v1';
   ZEITEN_KEY  = kst + '-chk-zeiten-v1';
+  PROFIL_KEY  = kst + '-chk-profil-v1';
   setzeArbeitKey(kst);
 }
 
@@ -133,6 +134,75 @@ function wechsleKostenstelle(kst) {
   if (!STATE.abwesendWeiteres) STATE.abwesendWeiteres = [];
 
   ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();
+
+/* ═══ PERSONEN-PROFIL ═══ */
+var PROFIL={};
+function ladeProfil(){var s=ladeLS(PROFIL_KEY);if(s&&typeof s==='object')PROFIL=s;}
+function speichereProfil(){if(PROFIL_KEY)localStorage.setItem(PROFIL_KEY,JSON.stringify(PROFIL));}
+function profilFarbe(personId,aufgabeId){return (PROFIL[personId]||{})[aufgabeId]||'';}
+function profilBgKl(personId,aufgabeId){var w=profilFarbe(personId,aufgabeId);return w?'profil-bg-'+w:'';}
+
+function oeffneProfilModal(personId,event){
+  event.stopPropagation();
+  var p=MITARBEITENDE.find(function(m){return m.id===personId;});if(!p)return;
+  var profil=PROFIL[personId]||{};
+  var typen=['checkliste','allgemein'];
+  var html='<div class="modal-kopf"><h2>&#128101; Profil: '+p.name+'</h2>'
+           +'<button class="modal-schliessen" onclick="schM(\'profil-modal\')">&#10005;</button></div>'
+           +'<p style="font-size:.78rem;color:var(--grau);margin-bottom:10px;">F\u00e4higkeitsbewertung f\u00fcr jede Aufgabe – erscheint farbig bei Zuweisung.</p>'
+           +'<div id="profil-aufgaben-liste" style="display:flex;flex-direction:column;gap:5px;max-height:58vh;overflow-y:auto;">';
+  var letzterTyp='';
+  var aufgIds=Object.keys(AUFGABEN).sort(function(a,b){
+    var ta=AUFGABEN[a].typ==='checkliste'?0:1,tb=AUFGABEN[b].typ==='checkliste'?0:1;
+    return ta-tb||AUFGABEN[a].label.localeCompare(AUFGABEN[b].label,'de');
+  });
+  aufgIds.forEach(function(id){
+    var a=AUFGABEN[id];
+    var typLabel=a.typ==='checkliste'?'Tages-Checkliste':'Zust\u00e4ndigkeiten';
+    if(typLabel!==letzterTyp){
+      html+='<div style="font-size:.68rem;font-weight:900;text-transform:uppercase;color:var(--grau);letter-spacing:.06em;margin-top:6px;padding-bottom:3px;border-bottom:1.5px solid var(--hell);">'+typLabel+'</div>';
+      letzterTyp=typLabel;
+    }
+    var wert=profil[id]||'';
+    html+='<div class="profil-zeile" data-aufgabe-id="'+id+'">'
+         +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+         +'<img src="'+a.foto+'" style="width:28px;height:28px;border-radius:6px;object-fit:contain;background:#f1f5f9;flex-shrink:0;">'
+         +'<span style="font-size:.84rem;font-weight:800;line-height:1.2;">'+a.label+'</span>'
+         +'</div>'
+         +'<div class="profil-wahl-row">'
+         +'<button class="profil-wahl-btn profil-wahl-selbst'+(wert==='selbst'?' gewaehlt':'')+'" data-aufgabe-id="'+id+'" data-wert="selbst" onclick="profilWaehlen(this)">&#10003; Selbst&#173;st&#228;ndig</button>'
+         +'<button class="profil-wahl-btn profil-wahl-assistenz'+(wert==='assistenz'?' gewaehlt':'')+'" data-aufgabe-id="'+id+'" data-wert="assistenz" onclick="profilWaehlen(this)">&#9889; Mit Assistenz</button>'
+         +'<button class="profil-wahl-btn profil-wahl-nicht'+(wert==='nicht'?' gewaehlt':'')+'" data-aufgabe-id="'+id+'" data-wert="nicht" onclick="profilWaehlen(this)">&#9711; Nicht ge\u00fcbt</button>'
+         +'</div>'
+         +'</div>';
+  });
+  html+='</div>'
+       +'<div class="modal-btns" style="margin-top:12px;">'
+       +'<button class="btn-modal-secondary" onclick="schM(\'profil-modal\')">Schlie\u00dfen</button>'
+       +'<button class="btn-modal-primary" onclick="speichereProfilAusModal('+personId+')">&#128190; Speichern</button>'
+       +'</div>';
+  document.getElementById('profil-modal-body').innerHTML=html;
+  document.getElementById('profil-modal').classList.add('sichtbar');
+}
+function profilWaehlen(btn){
+  var id=btn.dataset.aufgabeId;
+  var wert=btn.dataset.wert;
+  var aktiv=btn.classList.contains('gewaehlt');
+  btn.closest('.profil-zeile').querySelectorAll('.profil-wahl-btn').forEach(function(b){b.classList.remove('gewaehlt');});
+  if(!aktiv)btn.classList.add('gewaehlt');
+}
+function speichereProfilAusModal(personId){
+  if(!PROFIL[personId])PROFIL[personId]={};
+  document.querySelectorAll('#profil-aufgaben-liste .profil-zeile').forEach(function(z){
+    var id=z.dataset.aufgabeId;
+    var aktiv=z.querySelector('.profil-wahl-btn.gewaehlt');
+    if(aktiv)PROFIL[personId][id]=aktiv.dataset.wert;
+    else delete PROFIL[personId][id];
+  });
+  speichereProfil();
+  schM('profil-modal');
+  renderNamen();initSortable();
+}ladeProfil();
 
   /* Banner aktualisieren */
   var gruppenname = GRUPPEN_CONFIG[kst] || 'Kostenstelle ' + kst;
@@ -490,11 +560,11 @@ function renderNamen(){
     var _auslTitles={gut:'Gut ausgelastet',bald:'Läuft bald aus',keine:'Keine/Kaum Arbeit'};
     var _auslKl=notiz&&notiz.auslastung?' auslast-'+notiz.auslastung:(hatNotiz?' hat-notiz':'');
     var _arbTitel=hatNotiz?(notiz.auslastung?(_auslTitles[notiz.auslastung]||notiz.text.slice(0,40)):notiz.text.slice(0,40)):'Arbeitsinhalt';
-    var _arbIkon=(notiz&&notiz.dauer==='weiteres')?'&#9854;':'&#128467;';
+    var _arbIkon=hatNotiz?(notiz.dauer==='weiteres'?'&#8734;':'&#128197;'):'&#128188;';
     var arbBtn='<button class="arbeit-btn'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'+_arbIkon+'</button>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
-         +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'+p.name+'</div>'
+         +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
          +arbBtn  
          +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
@@ -527,35 +597,35 @@ function renderLeitung(){
 function renderTermine(){
   var html='';
 
-  /* ── 2 Freie Termine ── */
-  for(var i=0;i<2;i++){
-    var f=TERMINE.frei[i];
+  /* 2 freie Termine */
+  TERMINE.frei.forEach(function(f,idx){
+    var bid='tf'+idx;
     var dt=formatTerminAnzeige(f.datum,f.uhrzeit||'');
-    html+='<div class="termin-frei-zeile" data-frei-idx="'+i+'">'
+    html+='<div class="termin-frei-zeile" data-frei-idx="'+idx+'">'
         +'<div class="termin-ikon-col">'
-        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tf-dat-\'+i+\'\')" title="Datum w\u00e4hlen">&#128197;</button>'
-        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tf-uhr-\'+i+\'\')" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
-        +'<input type="date" id="tf-dat-'+i+'" class="termin-hidden-inp" data-frei-idx="'+i+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)">'
-        +'<input type="time" id="tf-uhr-'+i+'" class="termin-hidden-inp" data-frei-idx="'+i+'" data-feld="uhrzeit" value="'+(f.uhrzeit||'')+'" onchange="terminFreiSp(this)">'
+        +'<button class="termin-ikon-btn" data-target-id="'+bid+'-dat" onclick="termOeffneById(this)" title="Datum w\u00e4hlen">&#128197;</button>'
+        +'<button class="termin-ikon-btn" data-target-id="'+bid+'-uhr" onclick="termOeffneById(this)" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
+        +'<input type="date" id="'+bid+'-dat" class="termin-hidden-inp" data-frei-idx="'+idx+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)">'
+        +'<input type="time" id="'+bid+'-uhr" class="termin-hidden-inp" data-frei-idx="'+idx+'" data-feld="uhrzeit" value="'+(f.uhrzeit||'')+'" onchange="terminFreiSp(this)">'
         +'</div>'
         +'<div class="termin-content-col">'
         +(dt?'<div class="termin-dt-anzeige">'+dt+'</div>':'<div class="termin-dt-anzeige termin-dt-leer">Datum &ndash; Uhrzeit</div>')
-        +'<input type="text" class="termin-input" data-frei-idx="'+i+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin \u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
+        +'<input type="text" class="termin-input" data-frei-idx="'+idx+'" data-feld="text" value="'+(f.text||'')+'" placeholder="Termin \u2026" maxlength="60" onchange="terminFreiSp(this)" onblur="terminFreiSp(this)">'
         +'</div>'
         +'</div>';
-  }
+  });
 
   html+='<div class="termin-trenner">&mdash; Regelm&auml;&szlig;ige Termine &mdash;</div>';
 
-  /* ── Pflicht-Termine ── */
   TERMINE.pflicht.forEach(function(p){
+    var pid='tp-'+p.id;
     var dt=formatTerminAnzeige(p.datum,p.uhrzeit||'');
     html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
         +'<div class="termin-ikon-col">'
-        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tp-dat-\'+p.id+\'\')" title="Datum w\u00e4hlen">&#128197;</button>'
-        +'<button class="termin-ikon-btn" onclick="termOeffne(\'tp-uhr-\'+p.id+\'\')" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
-        +'<input type="date" id="tp-dat-'+p.id+'" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)">'
-        +'<input type="time" id="tp-uhr-'+p.id+'" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
+        +'<button class="termin-ikon-btn" data-target-id="'+pid+'-dat" onclick="termOeffneById(this)" title="Datum w\u00e4hlen">&#128197;</button>'
+        +'<button class="termin-ikon-btn" data-target-id="'+pid+'-uhr" onclick="termOeffneById(this)" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
+        +'<input type="date" id="'+pid+'-dat" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)">'
+        +'<input type="time" id="'+pid+'-uhr" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
         +'</div>'
         +'<div class="termin-action-ikon">'+p.icon+'</div>'
         +'<div class="termin-content-col">'
@@ -567,6 +637,13 @@ function renderTermine(){
 
   document.getElementById('termine-anzeige').innerHTML=html;
   checkTerminDatumHeute();
+}
+/* Termin-Picker öffnen via data-target-id (keine Quote-Konflikte) */
+function termOeffneById(btn){
+  var id=btn.dataset.targetId;
+  var el=document.getElementById(id);
+  if(!el)return;
+  try{el.showPicker();}catch(e){el.focus();}
 }
 
 function terminFreiSp(el){
@@ -1049,7 +1126,10 @@ function oeffneVertretungsModal(personId,checkZust){
          +'</div>'
          +'<label class="vert-entfaellt-label"><input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(avPerson==='entfaellt'?' checked':'')+' onchange="vertEntfCh(this,\''+z.aufgabeId+'\')"> Diese Aufgabe entf&auml;llt heute</label>'
          +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).map(function(p){
-           return '<label class="vert-person-label"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(avPerson===p.id?' checked':'')+'>'+p.name+'</label>';
+           var vFarbe=profilFarbe(p.id,z.aufgabeId);
+           var vBg=vFarbe?{selbst:'#dcfce7',assistenz:'#fed7aa',nicht:'#fee2e2'}[vFarbe]:'';
+           var vHint=vFarbe?'<small style="float:right;font-size:.6rem;color:'+(vFarbe==='selbst'?'#166534':vFarbe==='assistenz'?'#92400e':'#991b1b')+'">'+(vFarbe==='selbst'?'&#10003;Selbst':vFarbe==='assistenz'?'&#9889;Assistenz':'&#9711;N.geübt')+'</small>':'';
+           return '<label class="vert-person-label'+(vFarbe?' profil-bg-'+vFarbe:'')+'" style="'+(vBg?'background:'+vBg+';border-color:'+(vFarbe==='selbst'?'#86efac':vFarbe==='assistenz'?'#fcd34d':'#fca5a5'):'')+';"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(avPerson===p.id?' checked':'')+'>'+p.name+vHint+'</label>';
          }).join('')+'</div></div>';
   });
   document.getElementById('vert-inhalt').innerHTML=html;
@@ -1301,10 +1381,21 @@ function oeffneCheckPersonPicker(id,event){
   html+='<button onclick="weiseCheckPersonZu(\'entfaellt\')" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(enf?'var(--rot)':'#fca5a5')+';background:'+(enf?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
        +'\u26D4 Aufgabe entf\u00e4llt heute'+(enf?' \u2713':'')+'</button>';
   html+='<div style="height:1px;background:var(--hell);margin:2px 0;"></div>';
-  MITARBEITENDE.forEach(function(p){
+  /* Profil-Sortierung: selbst → assistenz → nicht → ohne */
+  var _profilOrd={selbst:0,assistenz:1,nicht:2,'':3};
+  var _sortiert=MITARBEITENDE.slice().sort(function(a,b){
+    var wa=profilFarbe(a.id,id)||'';
+    var wb=profilFarbe(b.id,id)||'';
+    return (_profilOrd[wa]||3)-(_profilOrd[wb]||3)||a.name.localeCompare(b.name,'de');
+  });
+  _sortiert.forEach(function(p){
     var ist=!enf&&cur&&cur.id===p.id;
-    html+='<button onclick="weiseCheckPersonZu('+p.id+')" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(ist?'var(--rot)':'var(--hell)')+';background:'+(ist?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
-         +p.name+(ist?' <span style="color:var(--rot);">\u2713</span>':'')+'</button>';
+    var pFarbe=profilFarbe(p.id,id);
+    var pBg=pFarbe?{selbst:'#dcfce7',assistenz:'#fed7aa',nicht:'#fee2e2'}[pFarbe]:(ist?'#fef2f2':'white');
+    var pBorder=ist?'var(--rot)':pFarbe?{selbst:'#86efac',assistenz:'#fcd34d',nicht:'#fca5a5'}[pFarbe]:'var(--hell)';
+    var pIndikator=pFarbe?'<span style="font-size:.6rem;font-weight:900;color:'+(pFarbe==='selbst'?'#166534':pFarbe==='assistenz'?'#92400e':'#991b1b')+';">'+(pFarbe==='selbst'?'&#10003; Selbst':pFarbe==='assistenz'?'&#9889; Assistenz':'&#9711; Nicht ge\u00fcbt')+'</span>':'';
+    html+='<button onclick="weiseCheckPersonZu('+p.id+')" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+pBorder+';background:'+pBg+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
+         +p.name+(ist?' <span style="color:var(--rot);">\u2713</span>':pIndikator?'<span>'+pIndikator+'</span>':'')+'</button>';
   });
   html+='</div>';
   document.getElementById('check-person-picker-inhalt').innerHTML=html;
