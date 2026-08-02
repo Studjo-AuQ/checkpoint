@@ -412,3 +412,6 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 .profil-bg-selbst   {background:#dcfce7 !important;border-color:#86efac !important;}
 .profil-bg-assistenz{background:#fed7aa !important;border-color:#fcd34d !important;}
 .profil-bg-nicht    {background:#fee2e2 !important;border-color:#fca5a5 !important;}
+
+/* Feature 3: vergangene Termine */
+.termin-frei-geleert{background:#f1f5f9 !important;border-color:#cbd5e1 !important;}

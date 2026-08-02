@@ -590,7 +590,7 @@ function renderLeitung(){
   var labels=['Gruppenleitung','Vertretung 1','Vertretung 2'],html='';
   for(var i=0;i<3;i++){
     var ak=LEITUNG.aktiv===i,nm=LEITUNG.namen[i]||'';
-    html+='<div class="leitung-zeile'+(ak?' aktiv':'')+'"><div class="leitung-symbol">'+(ak?'&#10003;':'&#9675;')+'</div>'
+    html+='<div class="leitung-zeile'+(ak?' aktiv':'')+'"><div class="leitung-symbol">'+(ak?'<span style="font-size:1.5rem;line-height:1;">&#128081;</span>':'&#9675;')+'</div>'
          +'<div><div class="leitung-name'+(nm?'':' leer')+'">'+(nm||'(nicht eingetragen)')+'</div>'
          +'<div class="leitung-rolle">'+labels[i]+'</div></div></div>';
   }
@@ -677,15 +677,36 @@ function checkTerminDatumHeute(){
     if(datum<td) return 'termin-vergangenheit';
     return ''; /* Zukunft: keine Klasse */
   }
+  var _geaendert=false;
   TERMINE.frei.forEach(function(f,i){
     var kl=klasseF(f.datum);
     var rows=document.querySelectorAll('.termin-frei-zeile');
-    if(rows[i]&&kl)rows[i].classList.add(kl);
+    if(!rows[i])return;
+    if(kl==='termin-vergangenheit'){
+      /* Freier Termin abgelaufen → Eintragung löschen, neutral grau */
+      TERMINE.frei[i].datum='';TERMINE.frei[i].text='';TERMINE.frei[i].uhrzeit='';_geaendert=true;
+      var di=rows[i].querySelector('input[type="date"]');if(di)di.value='';
+      var ti=rows[i].querySelector('input[type="text"]');if(ti)ti.value='';
+      var ui=rows[i].querySelector('input[type="time"]');if(ui)ui.value='';
+      var da=rows[i].querySelector('.termin-dt-anzeige');
+      if(da){da.textContent='Datum – Uhrzeit';da.className='termin-dt-anzeige termin-dt-leer';}
+      rows[i].classList.add('termin-frei-geleert');
+    } else if(kl){
+      rows[i].classList.add(kl);
+    }
   });
+  if(_geaendert)speichereTermine();
   TERMINE.pflicht.forEach(function(p){
     var kl=klasseF(p.datum);
     var el=document.querySelector('[data-pflicht-id-row="'+p.id+'"]');
-    if(el&&kl)el.classList.add(kl);
+    if(el&&kl){
+      el.classList.add(kl);
+      /* Vergangener Pflicht-Termin: Datum ausblenden, Rot bleibt */
+      if(kl==='termin-vergangenheit'){
+        var da=el.querySelector('.termin-dt-anzeige');
+        if(da)da.style.display='none';
+      }
+    }
   });
 }
 
@@ -1128,7 +1149,7 @@ function oeffneVertretungsModal(personId,checkZust){
          +'<label class="vert-dauer-label'+(avDauer==='weiteres'?' gewaehlt':'')+'"><input type="radio" name="dauer-'+z.aufgabeId+'" value="weiteres"'+(avDauer==='weiteres'?' checked':'')+' onchange="vertDauerCh(this)"> Bis auf weiteres</label>'
          +'</div>'
          +'<label class="vert-entfaellt-label"><input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(avPerson==='entfaellt'?' checked':'')+' onchange="vertEntfCh(this,\''+z.aufgabeId+'\')"> Diese Aufgabe entf&auml;llt heute</label>'
-         +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).map(function(p){
+         +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).sort(function(a,b){var _o={selbst:0,assistenz:1,nicht:2};var wa=profilFarbe(a.id,z.aufgabeId)||'';var wb=profilFarbe(b.id,z.aufgabeId)||'';return (_o[wa]!==undefined?_o[wa]:3)-(_o[wb]!==undefined?_o[wb]:3)||a.name.localeCompare(b.name,'de');}).map(function(p){
            var vFarbe=profilFarbe(p.id,z.aufgabeId);
            var vBg=vFarbe?{selbst:'#dcfce7',assistenz:'#fed7aa',nicht:'#fee2e2'}[vFarbe]:'';
            var vHint=vFarbe?'<small style="float:right;font-size:.6rem;color:'+(vFarbe==='selbst'?'#166534':vFarbe==='assistenz'?'#92400e':'#991b1b')+'">'+(vFarbe==='selbst'?'&#10003;Selbst':vFarbe==='assistenz'?'&#9889;Assistenz':'&#9711;N.geübt')+'</small>':'';
