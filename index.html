@@ -234,14 +234,21 @@
   </div>
 
   <div class="col-wrap">
-    <div class="col-header">
-      <button class="col-btn" onclick="oeffneLeitungModal()">&#11088; Leitung</button>
-      <span class="col-btn-sep">|</span>
-      <button class="col-btn" onclick="oeffneNaechstenTermin(event)" title="Nächsten Termin anzeigen">&#128197; Termine</button>
+    <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Zählwerk zentriert -->
+    <div class="col-header" style="justify-content:center;padding:0 8px;">
+      <span id="anwesenheit-anzeige" style="font-size:.6rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
     </div>
     <div class="mitte">
-      <div class="info-box"><div class="info-titel">&#11088; Leitung der Gruppe</div><div id="leitung-anzeige"></div></div>
-      <div class="termine-box"><div class="info-titel">&#128197; Termine</div><div id="termine-anzeige"></div></div>
+      <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
+      <div class="info-box">
+        <div class="info-titel" onclick="oeffneLeitungModal()" title="Namen bearbeiten" style="cursor:pointer;">&#11088; Leitung der Gruppe &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9998;</span></div>
+        <div id="leitung-anzeige"></div>
+      </div>
+      <!-- Feature 2: Klick auf "Nächster Termin" öffnet Popup -->
+      <div class="termine-box">
+        <div class="info-titel" onclick="oeffneNaechstenTermin(event)" title="Nächsten Termin anzeigen" style="cursor:pointer;">&#128197; N&auml;chster Termin &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9650;</span></div>
+        <div id="termine-anzeige"></div>
+      </div>
       <div class="wichtig-box"><div class="info-titel">&#9888;&#65039; Diese Woche wichtig</div><div id="wichtig-anzeige"></div></div>
     </div>
   </div>

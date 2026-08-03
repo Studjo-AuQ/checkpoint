@@ -572,6 +572,7 @@ function renderNamen(){
          +'<div class="aufgaben-icons">'+icons+'</div></div>';
   });
   document.getElementById('namen-tabelle').innerHTML=html;
+  renderAnwesenheit();
 }
 
 function updateBadges(){
@@ -590,11 +591,18 @@ function renderLeitung(){
   var labels=['Gruppenleitung','Vertretung 1','Vertretung 2'],html='';
   for(var i=0;i<3;i++){
     var ak=LEITUNG.aktiv===i,nm=LEITUNG.namen[i]||'';
-    html+='<div class="leitung-zeile'+(ak?' aktiv':'')+'"><div class="leitung-symbol">'+(ak?'<span style="font-size:1.5rem;line-height:1;">&#128081;</span>':'&#9675;')+'</div>'
+    html+='<div class="leitung-zeile'+(ak?' aktiv':'')+'">'
+         +'<div class="leitung-symbol" onclick="setzeLeitungAktiv('+i+')" title="Als Leitung setzen" style="cursor:pointer;">'+(ak?'<span style="font-size:1.5rem;line-height:1;">&#128081;</span>':'<span style="font-size:1.1rem;color:var(--grau);">&#9675;</span>')+'</div>'
          +'<div><div class="leitung-name'+(nm?'':' leer')+'">'+(nm||'(nicht eingetragen)')+'</div>'
-         +'<div class="leitung-rolle">'+labels[i]+'</div></div></div>';
+         +'<div class="leitung-rolle">'+labels[i]+'</div></div>'
+         +'</div>';
   }
   document.getElementById('leitung-anzeige').innerHTML=html;
+}
+function setzeLeitungAktiv(idx){
+  LEITUNG.aktiv=idx;
+  speichereLeitung();
+  renderLeitung();
 }
 
 function renderTermine(){
@@ -1372,24 +1380,50 @@ function toggleEditModus(){
 }
 
 /* Feature 2: Tagesfortschritt */
+function pctFarbe6(pct){
+  if(pct>=95)return '#166534';
+  if(pct>=85)return '#16a34a';
+  if(pct>=75)return '#65a30d';
+  if(pct>=65)return '#ca8a04';
+  if(pct>=50)return '#ea580c';
+  return '#dc2626';
+}
+function istFalscherTag(id){
+  return !!(ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id));
+}
+/* Feature 4: Anwesenheits-Zählwerk */
+function renderAnwesenheit(){
+  var gesamt=MITARBEITENDE.length;
+  var anwesend=gesamt-(STATE.abwesend||[]).length;
+  var pct=gesamt>0?Math.round(anwesend/gesamt*100):100;
+  var el=document.getElementById('anwesenheit-anzeige');if(!el)return;
+  var farbe=pctFarbe6(pct);
+  var voll=Math.round(pct/100*8);
+  el.innerHTML=anwesend+'/'+gesamt+' anwesend&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
+    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
+    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
+    +'</span>&ensp;'+pct+'%';
+  el.style.color=farbe;
+}
 function renderFortschritt(){
   var ids=AKTIVE_CHECKS;
   /* Entfallene (rot umrandet) und ausstehende (noch kein Vertretungs-Entscheid)
      zählen nicht zur erledigbaren Gesamtmenge */
   var effektiv=ids.filter(function(id){
-    return !entfaelltHeute(id)&&!vertretungAusstehend(id);
+    return !entfaelltHeute(id)&&!vertretungAusstehend(id)&&!istFalscherTag(id);
   });
   var gesamt=effektiv.length;
   var erl=STATE.erledigt.filter(function(id){return effektiv.indexOf(id)!==-1;}).length;
-  var entf=ids.length-gesamt;
+  var entf=ids.filter(function(id){return entfaelltHeute(id)||vertretungAusstehend(id)||istFalscherTag(id);}).length;
   var pct=gesamt>0?Math.round(erl/gesamt*100):0;
-  var b=8,voll=Math.round(pct/100*b),bar='';
-  for(var i=0;i<b;i++)bar+=i<voll?'\u2588':'\u2591';
+  var farbe=pctFarbe6(pct);
+  var voll=Math.round(pct/100*8);
   var el=document.getElementById('fortschritt-anzeige');if(!el)return;
-  var txt=erl+'/'+gesamt+'\u2002'+bar+'\u2002'+pct+'%';
-  if(entf>0)txt+='\u2002\u2212'+entf+'\u00d7\u2205';
-  el.textContent=txt;
-  el.style.color=pct===100?'var(--gruen)':pct>=50?'var(--gelb)':'var(--grau)';
+  el.innerHTML=erl+'/'+gesamt+'&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
+    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
+    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
+    +'</span>&ensp;'+pct+'%'+(entf>0?'&ensp;<span style="color:var(--grau);">−19×∅</span>'.replace('19',entf):'');
+  el.style.color=farbe;
 }
 
 /* Feature 4: Check-Person-Picker */
