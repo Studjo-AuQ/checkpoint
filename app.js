@@ -216,6 +216,34 @@ function speichereProfilAusModal(personId){
   renderNamen();initSortable();
 }
 
+/* Feature 4: Export / Import der KST-Daten */
+function exportierenKST(){
+  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY];
+  var data={};
+  keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
+  data['__kst']=AKTIVE_KST;
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='checkpoint-'+AKTIVE_KST+'-'+heute()+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importierenKST(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=function(e){
+    var f=e.target.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(ev){
+      try{
+        var d=JSON.parse(ev.target.result);
+        Object.keys(d).forEach(function(k){if(k!=='__kst')localStorage.setItem(k,d[k]);});
+        wechsleKostenstelle(AKTIVE_KST);
+        alert('Daten f\u00fcr KST '+AKTIVE_KST+' erfolgreich geladen.');
+      }catch(err){alert('Fehler beim Laden: '+err.message);}
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
 function heute(){return new Date().toISOString().slice(0,10);}
 /* Minuten-Timer: Check auf Fälligkeit (Feature 3) */
 setInterval(function(){
@@ -400,7 +428,7 @@ function vorlesenTerminPopup(){
   window.speechSynthesis.speak(u);
 }
 
-var WICHTIG_KAT=['Produktion','Qualifizierung','Unterweisung','Neue Mitarbeitende','Ausfall','Ver\u00e4nderung','Motto der Woche','Sonstiges'];
+var WICHTIG_KAT=['Produktion','Qualifizierung','Unterweisung','Neue Mitarbeitende','Ausfall','Ver\u00e4nderung','Werkstattrat','Besuch','Motto der Woche','Sonstiges'];
 var WICHTIG=[{kategorie:'',text:''},{kategorie:'',text:''}];
 function ladeWichtig(){var s=ladeLS(WICHTIG_KEY);if(s&&Array.isArray(s))WICHTIG=s;}
 function speichereWichtig(){localStorage.setItem(WICHTIG_KEY,JSON.stringify(WICHTIG));}
@@ -1157,11 +1185,14 @@ function oeffneVertretungsModal(personId,checkZust){
          +'<label class="vert-dauer-label'+(avDauer==='weiteres'?' gewaehlt':'')+'"><input type="radio" name="dauer-'+z.aufgabeId+'" value="weiteres"'+(avDauer==='weiteres'?' checked':'')+' onchange="vertDauerCh(this)"> Bis auf weiteres</label>'
          +'</div>'
          +'<label class="vert-entfaellt-label"><input type="checkbox" name="entf-'+z.aufgabeId+'" value="entfaellt"'+(avPerson==='entfaellt'?' checked':'')+' onchange="vertEntfCh(this,\''+z.aufgabeId+'\')"> Diese Aufgabe entf&auml;llt heute</label>'
-         +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).sort(function(a,b){var _o={selbst:0,assistenz:1,nicht:2};var wa=profilFarbe(a.id,z.aufgabeId)||'';var wb=profilFarbe(b.id,z.aufgabeId)||'';return (_o[wa]!==undefined?_o[wa]:3)-(_o[wb]!==undefined?_o[wb]:3)||a.name.localeCompare(b.name,'de');}).map(function(p){
+         +'<div class="vert-person-liste">'+MITARBEITENDE.filter(function(p){return p.id!==personId;}).sort(function(a,b){var _o={selbst:0,assistenz:1,nicht:2};var wa=profilFarbe(a.id,z.aufgabeId)||'';var wb=profilFarbe(b.id,z.aufgabeId)||'';var aa=STATE.abwesend.indexOf(a.id)!==-1,ab=STATE.abwesend.indexOf(b.id)!==-1;if(aa&&!ab)return 1;if(!aa&&ab)return -1;return (_o[wa]!==undefined?_o[wa]:3)-(_o[wb]!==undefined?_o[wb]:3)||a.name.localeCompare(b.name,'de');}).map(function(p){
            var vFarbe=profilFarbe(p.id,z.aufgabeId);
            var vBg=vFarbe?{selbst:'#dcfce7',assistenz:'#fed7aa',nicht:'#fee2e2'}[vFarbe]:'';
-           var vHint=vFarbe?'<small style="float:right;font-size:.6rem;color:'+(vFarbe==='selbst'?'#166534':vFarbe==='assistenz'?'#92400e':'#991b1b')+'">'+(vFarbe==='selbst'?'&#10003;Selbst':vFarbe==='assistenz'?'&#9889;Assistenz':'&#9711;N.geübt')+'</small>':'';
-           return '<label class="vert-person-label'+(vFarbe?' profil-bg-'+vFarbe:'')+'" style="'+(vBg?'background:'+vBg+';border-color:'+(vFarbe==='selbst'?'#86efac':vFarbe==='assistenz'?'#fcd34d':'#fca5a5'):'')+';"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(avPerson===p.id?' checked':'')+'>'+p.name+vHint+'</label>';
+           var vAbw=STATE.abwesend.indexOf(p.id)!==-1;
+           var vHint=vFarbe&&!vAbw?'<small style="float:right;font-size:.6rem;color:'+(vFarbe==='selbst'?'#166534':vFarbe==='assistenz'?'#92400e':'#991b1b')+'">'+(vFarbe==='selbst'?'&#10003;Selbst':vFarbe==='assistenz'?'&#9889;Assistenz':'&#9711;N.geübt')+'</small>':'';
+           var vAbwStyle=vAbw?'opacity:.35;pointer-events:none;':'';
+           var vAbwHint=vAbw?'<small style="float:right;font-size:.6rem;color:var(--grau);">abwesend</small>':'';
+           return '<label class="vert-person-label'+(vFarbe&&!vAbw?' profil-bg-'+vFarbe:'')+'" style="'+(vBg&&!vAbw?'background:'+vBg+';border-color:'+(vFarbe==='selbst'?'#86efac':vFarbe==='assistenz'?'#fcd34d':'#fca5a5')+';':'')+''+vAbwStyle+'"><input type="radio" name="vert-'+z.aufgabeId+'" value="'+p.id+'"'+(avPerson===p.id?' checked':'')+(vAbw?' disabled':'')+'>'+p.name+vHint+vAbwHint+'</label>';
          }).join('')+'</div></div>';
   });
   document.getElementById('vert-inhalt').innerHTML=html;
@@ -1439,20 +1470,23 @@ function oeffneCheckPersonPicker(id,event){
   html+='<button onclick="weiseCheckPersonZu(\'entfaellt\')" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+(enf?'var(--rot)':'#fca5a5')+';background:'+(enf?'#fef2f2':'white')+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
        +'\u26D4 Aufgabe entf\u00e4llt heute'+(enf?' \u2713':'')+'</button>';
   html+='<div style="height:1px;background:var(--hell);margin:2px 0;"></div>';
-  /* Profil-Sortierung: selbst → assistenz → nicht → ohne */
+  /* Profil-Sortierung: selbst → assistenz → nicht → ohne → abwesend zuletzt */
   var _profilOrd={selbst:0,assistenz:1,nicht:2,'':3};
   var _sortiert=MITARBEITENDE.slice().sort(function(a,b){
+    var aa=STATE.abwesend.indexOf(a.id)!==-1,ab2=STATE.abwesend.indexOf(b.id)!==-1;
+    if(aa&&!ab2)return 1;if(!aa&&ab2)return -1;
     var wa=profilFarbe(a.id,id)||'';
     var wb=profilFarbe(b.id,id)||'';
     return (_profilOrd[wa]||3)-(_profilOrd[wb]||3)||a.name.localeCompare(b.name,'de');
   });
   _sortiert.forEach(function(p){
+    var pAbw=STATE.abwesend.indexOf(p.id)!==-1;
     var ist=!enf&&cur&&cur.id===p.id;
-    var pFarbe=profilFarbe(p.id,id);
-    var pBg=pFarbe?{selbst:'#dcfce7',assistenz:'#fed7aa',nicht:'#fee2e2'}[pFarbe]:(ist?'#fef2f2':'white');
-    var pBorder=ist?'var(--rot)':pFarbe?{selbst:'#86efac',assistenz:'#fcd34d',nicht:'#fca5a5'}[pFarbe]:'var(--hell)';
-    var pIndikator=pFarbe?'<span style="font-size:.6rem;font-weight:900;color:'+(pFarbe==='selbst'?'#166534':pFarbe==='assistenz'?'#92400e':'#991b1b')+';">'+(pFarbe==='selbst'?'&#10003; Selbst':pFarbe==='assistenz'?'&#9889; Assistenz':'&#9711; Nicht ge\u00fcbt')+'</span>':'';
-    html+='<button onclick="weiseCheckPersonZu('+p.id+')" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+pBorder+';background:'+pBg+';cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;">'
+    var pFarbe=pAbw?'':profilFarbe(p.id,id);
+    var pBg=pAbw?'#f1f5f9':pFarbe?{selbst:'#dcfce7',assistenz:'#fed7aa',nicht:'#fee2e2'}[pFarbe]:(ist?'#fef2f2':'white');
+    var pBorder=pAbw?'var(--hell)':ist?'var(--rot)':pFarbe?{selbst:'#86efac',assistenz:'#fcd34d',nicht:'#fca5a5'}[pFarbe]:'var(--hell)';
+    var pIndikator=pAbw?'<span style="font-size:.6rem;color:var(--grau);">abwesend</span>':pFarbe?'<span style="font-size:.6rem;font-weight:900;color:'+(pFarbe==='selbst'?'#166534':pFarbe==='assistenz'?'#92400e':'#991b1b')+';">'+(pFarbe==='selbst'?'&#10003; Selbst':pFarbe==='assistenz'?'&#9889; Assistenz':'&#9711; Nicht ge\u00fcbt')+'</span>':'';
+    html+='<button '+(pAbw?'disabled':'onclick="weiseCheckPersonZu('+p.id+')"')+' style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:2px solid '+pBorder+';background:'+pBg+';cursor:'+(pAbw?'not-allowed':'pointer')+';font-family:inherit;font-size:.82rem;font-weight:700;opacity:'+(pAbw?'.45':'1')+';">'
          +p.name+(ist?' <span style="color:var(--rot);">\u2713</span>':pIndikator?'<span>'+pIndikator+'</span>':'')+'</button>';
   });
   html+='</div>';

@@ -62,7 +62,9 @@
     <div class="clock-time" id="clock-time">00:00</div>
     <div class="clock-date" id="clock-date">&nbsp;</div>
   </div>
-  <div class="banner-rechts">
+  <div class="banner-rechts" style="display:flex;gap:6px;align-items:center;">
+    <button class="btn-banner" onclick="importierenKST()" title="Profil importieren (JSON)">&#8679;</button>
+    <button class="btn-banner" onclick="exportierenKST()" title="Profil exportieren (JSON)">&#8681;</button>
     <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
   </div>
 </div>
@@ -236,7 +238,7 @@
   <div class="col-wrap">
     <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Zählwerk zentriert -->
     <div class="col-header" style="justify-content:center;padding:0 8px;">
-      <span id="anwesenheit-anzeige" style="font-size:.6rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
+      <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
     </div>
     <div class="mitte">
       <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
@@ -256,7 +258,7 @@
   <div class="col-wrap">
     <div class="col-header" style="justify-content:space-between;flex-wrap:nowrap;">
       <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
-      <span id="fortschritt-anzeige" style="font-size:.6rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
+      <span id="fortschritt-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
     </div>
     <div class="check-tabelle" id="check-tabelle"></div>
   </div>
