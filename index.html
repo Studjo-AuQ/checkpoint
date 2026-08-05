@@ -32,11 +32,28 @@
   </div>
 </div>
 
-<!-- Icon-Info-Popup (erscheint beim Antippen eines Aufgaben-Symbols) -->
-<div id="aufg-info-popup" style="display:none;position:fixed;z-index:7000;background:white;border-radius:12px;padding:14px 16px;box-shadow:0 6px 24px rgba(0,0,0,.25);width:230px;pointer-events:none;">
-  <div id="aufg-info-titel" style="font-weight:900;font-size:.88rem;color:var(--text);margin-bottom:5px;"></div>
-  <div id="aufg-info-text" style="font-size:.75rem;color:var(--grau);line-height:1.55;"></div>
-  <div style="font-size:.6rem;color:var(--hell);margin-top:6px;">Antippen zum Schlie&szlig;en</div>
+<!-- ═══ Aufgaben-Info Modal (editierbar + vorlesbar, ersetzt das alte 4-Sekunden-Popup) ═══ -->
+<div class="modal-overlay" id="aufgabe-info-modal" onclick="modalAK(event,'aufgabe-info-modal')">
+  <div class="modal-box" style="width:min(460px,96vw)">
+    <div class="modal-kopf">
+      <h2 id="aufgabe-info-titel" style="display:flex;align-items:center;">Aufgabe</h2>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="vorlesenAufgabeInfoModal()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <img src="zuhoeren.jpg" alt="Vorlesen" style="width:20px;height:20px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128066;'">
+        </button>
+        <button class="modal-schliessen" onclick="schM('aufgabe-info-modal')">&#10005;</button>
+      </div>
+    </div>
+    <p id="aufgabe-info-zustaendig" style="font-size:.82rem;color:var(--grau);margin-bottom:14px;"></p>
+    <textarea id="aufgabe-info-textarea" rows="5"
+      style="width:100%;padding:10px;border:2px solid var(--hell);border-radius:10px;font-family:inherit;font-size:.88rem;resize:vertical;"
+      placeholder="Beschreibung / Hinweise zur Aufgabe …"></textarea>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="setzeAufgabeInfoStandard()">&#8617; Standardtext</button>
+      <button class="btn-modal-secondary" onclick="schM('aufgabe-info-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereAufgabeInfoNotiz()">&#128190; Speichern</button>
+    </div>
+  </div>
 </div>
 
 <!-- Check-Person-Picker Popup (Feature 4 neu) -->
@@ -181,7 +198,12 @@
   <div class="modal-box" style="width:min(460px,96vw)">
     <div class="modal-kopf">
       <h2>&#128188; Arbeitsinhalt</h2>
-      <button class="modal-schliessen" onclick="schM('arbeit-modal')">&#10005;</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="vorlesenArbeitModal()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <img src="zuhoeren.jpg" alt="Vorlesen" style="width:20px;height:20px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128066;'">
+        </button>
+        <button class="modal-schliessen" onclick="schM('arbeit-modal')">&#10005;</button>
+      </div>
     </div>
     <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="arbeit-modal-name"></p>
     <div class="vert-dauer-wrap" style="margin-bottom:12px;">
@@ -226,9 +248,7 @@
       <div style="display:flex;align-items:stretch;height:100%;">
         <!-- Breite Portrait(80)+Name(148) = 228px -->
         <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:flex-start;padding-left:10px;border-radius:0;">&#128100; Namen</button>
-        <!-- Arbeit-Spalte über arbeit-btn (32px) -->
-        <div style="width:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--grau);letter-spacing:.04em;text-transform:uppercase;border-left:1px solid var(--hell);border-right:1px solid var(--hell);">Arbeit</div>
-        <!-- Zuständigkeiten über den Symbolen -->
+        <!-- Zuständigkeiten (inkl. Arbeit-Icon ganz links) -->
         <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:flex-start;padding-left:10px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
       </div>
     </div>

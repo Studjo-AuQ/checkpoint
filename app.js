@@ -94,6 +94,7 @@ function setzeKSTKeys(kst) {
   ZEITEN_KEY  = kst + '-chk-zeiten-v1';
   PROFIL_KEY  = kst + '-chk-profil-v1';
   setzeArbeitKey(kst);
+  setzeAufgNotizKey(kst);
 }
 
 function zeigeKstEingabe(){
@@ -133,7 +134,7 @@ function wechsleKostenstelle(kst) {
   if (!STATE.vertretungen) STATE.vertretungen = {};
   if (!STATE.abwesendWeiteres) STATE.abwesendWeiteres = [];
 
-  ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();ladeProfil();
+  ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();ladeProfil();ladeAufgabenNotizen();
 
   /* Banner aktualisieren */
   var gruppenname = GRUPPEN_CONFIG[kst] || 'Kostenstelle ' + kst;
@@ -443,7 +444,14 @@ function setzeArbeitKey(kst){ARBEIT_KEY=kst+'-chk-arbeit-v1';}
 function ladeArbeitsnotizen(){var s=ladeLS(ARBEIT_KEY);if(s)ARBEITSNOTIZEN=s;}
 function speichereArbeitsnotizen(){localStorage.setItem(ARBEIT_KEY,JSON.stringify(ARBEITSNOTIZEN));}
 
-ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();
+/* Editierbare, gespeicherte Notizen zu Checklisten-/Zuständigkeits-Aufgaben (nicht personenbezogen) */
+var AUFGNOTIZ_KEY='';
+var AUFGABEN_NOTIZEN={};
+function setzeAufgNotizKey(kst){AUFGNOTIZ_KEY=kst+'-chk-aufgnotiz-v1';}
+function ladeAufgabenNotizen(){var s=ladeLS(AUFGNOTIZ_KEY);if(s)AUFGABEN_NOTIZEN=s;}
+function speichereAufgabenNotizen(){localStorage.setItem(AUFGNOTIZ_KEY,JSON.stringify(AUFGABEN_NOTIZEN));}
+
+ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();ladeAufgabenNotizen();
 
 /* ═══ HILFSFUNKTIONEN ═══ */
 function getZustaendigePerson(id){
@@ -520,25 +528,46 @@ var AUFGABEN_INFO={
   qualitaet:          'Die Qualit\u00e4t der Arbeitsergebnisse pr\u00fcfen und sicherstellen, dass Standards eingehalten werden.'
 };
 
-var _infoTimeout=null;
-function zeigeAufgabeInfo(id,event){
+/* Editierbares Aufgaben-Info-Modal (ersetzt das alte 4-Sekunden-Popup) */
+var _aufgabeInfoModalId=null;
+function oeffneAufgabenInfoModal(id,event){
   event.stopPropagation();
   if(editModus)return;
   var a=AUFGABEN[id];if(!a)return;
-  var popup=document.getElementById('aufg-info-popup');
-  document.getElementById('aufg-info-titel').textContent=a.label;
-  document.getElementById('aufg-info-text').textContent=AUFGABEN_INFO[id]||a.label;
-  /* Position: unterhalb des Icons, im sichtbaren Bereich */
-  var rect=event.currentTarget.getBoundingClientRect();
-  var left=Math.min(rect.left,window.innerWidth-250);
-  var top=rect.bottom+6;
-  if(top+120>window.innerHeight)top=rect.top-126;
-  popup.style.left=left+'px';
-  popup.style.top=top+'px';
-  popup.style.display='block';
-  popup.style.pointerEvents='auto';
-  clearTimeout(_infoTimeout);
-  _infoTimeout=setTimeout(function(){popup.style.display='none';popup.style.pointerEvents='none';},4000);
+  _aufgabeInfoModalId=id;
+  document.getElementById('aufgabe-info-titel').innerHTML='<img src="'+a.foto+'" style="width:26px;height:26px;vertical-align:middle;border-radius:5px;margin-right:6px;object-fit:contain;background:#f1f5f9;">'+a.label;
+  var pers=getZustaendigePerson(id);
+  var wannTxt='';
+  var _wz=ZEITEN[id]||{};
+  if(_wz.tage&&_wz.tage.length){
+    var tgN={mo:'Mo',di:'Di',mi:'Mi',do:'Do',fr:'Fr'};
+    wannTxt=' \u00b7 '+_wz.tage.map(function(t){return tgN[t]||t;}).join(',')+(_wz.uhrzeit?' '+_wz.uhrzeit+' Uhr':'');
+  }
+  document.getElementById('aufgabe-info-zustaendig').textContent='Zust\u00e4ndig: '+(pers?pers.name:'nicht zugewiesen')+wannTxt;
+  var gespeichert=AUFGABEN_NOTIZEN[id];
+  document.getElementById('aufgabe-info-textarea').value=(gespeichert!==undefined?gespeichert:(AUFGABEN_INFO[id]||''));
+  document.getElementById('aufgabe-info-modal').classList.add('sichtbar');
+}
+function speichereAufgabeInfoNotiz(){
+  if(!_aufgabeInfoModalId)return;
+  var txt=document.getElementById('aufgabe-info-textarea').value.trim();
+  if(txt)AUFGABEN_NOTIZEN[_aufgabeInfoModalId]=txt;
+  else delete AUFGABEN_NOTIZEN[_aufgabeInfoModalId];
+  speichereAufgabenNotizen();
+  schM('aufgabe-info-modal');
+}
+function setzeAufgabeInfoStandard(){
+  if(!_aufgabeInfoModalId)return;
+  document.getElementById('aufgabe-info-textarea').value=AUFGABEN_INFO[_aufgabeInfoModalId]||'';
+}
+function vorlesenAufgabeInfoModal(){
+  if(!window.speechSynthesis||!_aufgabeInfoModalId)return;
+  var a=AUFGABEN[_aufgabeInfoModalId];if(!a)return;
+  var txt=document.getElementById('aufgabe-info-textarea').value||a.label;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(sprachText(a.label+'. '+txt));
+  u.lang='de-DE';u.rate=0.88;
+  window.speechSynthesis.speak(u);
 }
 
 /* ═══ RENDER ═══ */
@@ -558,8 +587,9 @@ function renderNamen(){
     var vertIds=editModus ? allVertIds : allVertIds.filter(function(id){return AKTIVE_CHECKS.indexOf(id)!==-1;});
 
     var icons='';
+    var vertHtml='';
 
-    /* Permanente Icons */
+    /* Permanente Icons (sortierbar: check- gelb, zust- blau) */
     zust.forEach(function(z){
       var a=AUFGABEN[z.aufgabeId];if(!a)return;
       if(z.typ==='checkliste'&&AKTIVE_CHECKS.indexOf(z.aufgabeId)===-1)return;
@@ -567,12 +597,12 @@ function renderNamen(){
       if(z.typ==='checkliste'&&entfaelltHeute(z.aufgabeId))return;
       var erl=STATE.erledigt.indexOf(z.aufgabeId)!==-1;
       var badge=z.typ==='checkliste'?'<div class="aufg-badge'+(erl?' erledigt':'')+'" id="badge-'+z.aufgabeId+'">'+(erl?'&#10003;':'!')+'</div>':'';
-      var clickFn=editModus?'selectIconInEditModus(\''+z.aufgabeId+'\','+p.id+',event)':'zeigeAufgabeInfo(\''+z.aufgabeId+'\',event)';
+      var clickFn=editModus?'selectIconInEditModus(\''+z.aufgabeId+'\','+p.id+',event)':'oeffneAufgabenInfoModal(\''+z.aufgabeId+'\',event)';
       icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'" onclick="'+clickFn+'">'
             +'<img src="'+a.foto+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
 
-    /* Vertretungs-Icons (orangefarbener Rahmen, V-Badge) */
+    /* Vertretungs-Icons (orangefarbener Rahmen, V-Badge) – fest rechtsbündig, nicht sortierbar */
     vertIds.forEach(function(id){
       var a=AUFGABEN[id];if(!a)return;
       var hatPermanent=GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.personId===p.id;});
@@ -582,22 +612,27 @@ function renderNamen(){
       var dauer=getVertDauer(id);
       /* Im Edit-Modus: Remove-Button + Dauer-Hinweis anzeigen */
       var removeBtn=editModus?'<button class="aufg-vert-remove-btn" onclick="event.stopPropagation();entferneVertretung(\''+id+'\')" title="Vertretung '+(dauer==='weiteres'?'(bis auf weiteres) ':'')+'entfernen">&#10005;</button>':'';
-      icons+='<div class="aufg-icon-wrap aufg-vert" data-aufgabe-id="'+id+'" data-typ="checkliste" onclick="'+(editModus?'event.stopPropagation()':'zeigeAufgabeInfo(\''+id+'\',event)')+'" title="Vertretung: '+a.label+(editModus?' | Dauer: '+(dauer==='weiteres'?'bis auf weiteres':'nur heute'):'')+'">'+
+      vertHtml+='<div class="aufg-icon-wrap aufg-vert" data-aufgabe-id="'+id+'" data-typ="checkliste" onclick="'+(editModus?'event.stopPropagation()':'oeffneAufgabenInfoModal(\''+id+'\',event)')+'" title="Vertretung: '+a.label+(editModus?' | Dauer: '+(dauer==='weiteres'?'bis auf weiteres':'nur heute'):'')+'">'+
             '<img src="'+a.foto+'" alt="'+a.label+'" class="aufg-icon-img">'+badge+removeBtn+'</div>';
     });
 
     var notiz=ARBEITSNOTIZEN[p.id];
-    var hatNotiz=notiz&&notiz.text;
-    var _auslTitles={gut:'Gut ausgelastet',bald:'Läuft bald aus',keine:'Keine/Kaum Arbeit'};
-    var _auslKl=notiz&&notiz.auslastung?' auslast-'+notiz.auslastung:(hatNotiz?' hat-notiz':'');
-    var _arbTitel=hatNotiz?(notiz.auslastung?(_auslTitles[notiz.auslastung]||notiz.text.slice(0,40)):notiz.text.slice(0,40)):'Arbeitsinhalt';
-    var _arbIkon=hatNotiz?(notiz.dauer==='weiteres'?'&#8734;':'&#128197;'):'&#128188;';
-    var arbBtn='<button class="arbeit-btn'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'+_arbIkon+'</button>';
+    var hatNotiz=notiz&&(notiz.text||notiz.auslastung);
+    var _auslTitles={gut:'Gut ausgelastet',bald:'L\u00e4uft bald aus',keine:'Keine/Kaum Arbeit'};
+    var _auslKl=notiz&&notiz.auslastung?' auslast-'+notiz.auslastung:'';
+    var _arbTitel=hatNotiz?(notiz.auslastung?(_auslTitles[notiz.auslastung]||''):'')+(notiz.text?(notiz.auslastung?' \u2013 ':'')+notiz.text.slice(0,60):''):'Arbeitsinhalt eintragen';
+    var _arbBadgeTxt=hatNotiz?(notiz.dauer==='weiteres'?'&#8734;':'1'):'';
+    var arbeitIconHtml='<div class="aufg-icon-wrap arbeit-icon-fixed'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'
+      +'<img src="arbeit.jpg" alt="Arbeit" class="aufg-icon-img" onerror="this.style.background=\'#e2e8f0\'">'
+      +(_arbBadgeTxt?'<div class="aufg-badge arbeit-badge">'+_arbBadgeTxt+'</div>':'')
+      +'</div>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
          +'<img src="portrait.jpg" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\'" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
          +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="event.stopPropagation();oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
-         +arbBtn  
-         +'<div class="aufgaben-icons">'+icons+'</div></div>';
+         +arbeitIconHtml
+         +'<div class="aufgaben-icons">'+icons+'</div>'
+         +'<div class="vert-icons-fixed">'+vertHtml+'</div>'
+         +'</div>';
   });
   document.getElementById('namen-tabelle').innerHTML=html;
   renderAnwesenheit();
@@ -1316,6 +1351,18 @@ function loescheArbeitNotiz(){
   schM('arbeit-modal');
   renderNamen();
 }
+function vorlesenArbeitModal(){
+  if(!window.speechSynthesis||!arbeitModalPersonId)return;
+  var p=MITARBEITENDE.find(function(m){return m.id===arbeitModalPersonId;});
+  var txt=document.getElementById('arbeit-textarea').value.trim();
+  var auslEl=document.querySelector('input[name="arbeit-auslastung"]:checked');
+  var auslTxt=auslEl?({gut:'Gut ausgelastet',bald:'L\u00e4uft bald aus',keine:'Keine Arbeit'}[auslEl.value]||''):'';
+  var voll=(p?p.name+'. ':'')+'Arbeitsinhalt'+(auslTxt?', '+auslTxt:'')+(txt?': '+txt:'.');
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(sprachText(voll));
+  u.lang='de-DE';u.rate=0.88;
+  window.speechSynthesis.speak(u);
+}
 
 /* ═══ DRAG & DROP ═══ */
 var editModus=false,sortableInstances=[];
@@ -1348,7 +1395,9 @@ function initSortable(){
         var neu=[];
         document.querySelectorAll('.namen-row[data-person-id]').forEach(function(row){
           var pId=parseInt(row.dataset.personId);
-          row.querySelectorAll('.aufg-icon-wrap[data-aufgabe-id]').forEach(function(w){
+          var container=row.querySelector('.aufgaben-icons');
+          if(!container)return;
+          container.querySelectorAll('.aufg-icon-wrap[data-aufgabe-id]').forEach(function(w){
             neu.push({personId:pId,aufgabeId:w.dataset.aufgabeId,typ:w.dataset.typ});
           });
         });
@@ -1580,11 +1629,6 @@ updateClock();
 
 /* Popups bei Klick außerhalb schließen */
 document.addEventListener('click',function(e){
-  var popup=document.getElementById('aufg-info-popup');
-  if(popup&&popup.style.display!=='none'){
-    popup.style.display='none';popup.style.pointerEvents='none';
-    clearTimeout(_infoTimeout);
-  }
   var picker=document.getElementById('check-person-picker');
   if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)){
     schliesseCheckPicker();
@@ -1693,12 +1737,32 @@ function sprachText(s){
       var p=MITARBEITENDE.find(function(m){return m.id===pId;});
       if(!p)return '';
       var abw=STATE.abwesend.indexOf(pId)!==-1;
-      var aufg=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===pId;})
-               .map(function(z){var a=AUFGABEN[z.aufgabeId];return a?a.label:'';}).filter(Boolean);
-      var notiz=ARBEITSNOTIZEN&&ARBEITSNOTIZEN[pId]&&ARBEITSNOTIZEN[pId].text?ARBEITSNOTIZEN[pId].text:'';
-      var txt=p.name+(abw?' – heute abwesend':'')+'. ';
-      txt+=aufg.length?'Zuständig für: '+aufg.join(', ')+'. ':'Keine Aufgaben. ';
-      if(notiz)txt+='Arbeitsinhalt: '+notiz+'. ';
+      var txt=p.name+(abw?' \u2013 heute abwesend':'')+'. ';
+
+      /* 1) Arbeitsinhalt */
+      var notiz=ARBEITSNOTIZEN&&ARBEITSNOTIZEN[pId];
+      if(notiz&&(notiz.text||notiz.auslastung)){
+        var auslN={gut:'gut ausgelastet',bald:'l\u00e4uft bald aus',keine:'keine Arbeit'};
+        txt+='Arbeitsinhalt'+(notiz.auslastung?' ('+(auslN[notiz.auslastung]||'')+')':'')+(notiz.text?': '+notiz.text:'')+'. ';
+      }
+
+      /* 2) Checklisten-Aufgaben */
+      var checkAufg=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===pId&&z.typ==='checkliste';})
+        .map(function(z){var a=AUFGABEN[z.aufgabeId];return a?a.label:'';}).filter(Boolean);
+      if(checkAufg.length)txt+='Checklisten-Aufgaben: '+checkAufg.join(', ')+'. ';
+
+      /* 3) Allgemeine Zuständigkeiten */
+      var allgAufg=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===pId&&z.typ==='allgemein';})
+        .map(function(z){var a=AUFGABEN[z.aufgabeId];return a?a.label:'';}).filter(Boolean);
+      if(allgAufg.length)txt+='Allgemeine Zust\u00e4ndigkeiten: '+allgAufg.join(', ')+'. ';
+
+      if(!checkAufg.length&&!allgAufg.length)txt+='Keine Aufgaben zugewiesen. ';
+
+      /* 4) Mögliche Vertretungen (V-Badge) */
+      var vertAufg=Object.keys(STATE.vertretungen).filter(function(id){return getVertPerson(id)===pId;})
+        .map(function(id){var a=AUFGABEN[id];return a?a.label:'';}).filter(Boolean);
+      if(vertAufg.length)txt+='Vertretung f\u00fcr: '+vertAufg.join(', ')+'. ';
+
       return txt;
     }
     /* Checklisten-Zeile */

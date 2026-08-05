@@ -297,10 +297,15 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
 .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
-/* ── Arbeit-Notiz Spalte ── */
-.arbeit-btn{width:34px;height:var(--ROW);background:var(--bg);border:none;border-left:1px solid var(--hell);cursor:pointer;font-size:.95rem;color:var(--grau);transition:background .15s;flex-shrink:0;}
-.arbeit-btn:hover{background:var(--hell);}
-.arbeit-btn.hat-notiz{color:var(--rot);background:#fff7ed;}
+/* ── Arbeit-Icon: fest, 80x80px, immer erstes Symbol, nicht sortierbar ── */
+.arbeit-icon-fixed{cursor:pointer;background:var(--bg);}
+.arbeit-icon-fixed .aufg-icon-img{background:#f1f5f9;outline:3px solid var(--hell);outline-offset:-3px;}
+.arbeit-icon-fixed.auslast-gut   .aufg-icon-img{outline-color:#16a34a;background:#f0fdf4;}
+.arbeit-icon-fixed.auslast-bald  .aufg-icon-img{outline-color:#d97706;background:#fffbeb;}
+.arbeit-icon-fixed.auslast-keine .aufg-icon-img{outline-color:#dc2626;background:#fef2f2;}
+.arbeit-badge{background:var(--grau);}
+/* Fest platzierte Vertretungs-Icons, rechtsbündig, nicht sortierbar */
+.vert-icons-fixed{display:flex;align-items:center;height:var(--ROW);margin-left:auto;flex-shrink:0;}
 /* Termin-Pflicht: zwei Zeilen für date+time */
 .termin-pflicht-dt{display:flex;flex-direction:column;gap:2px;}
 .termin-pflicht-dt .termin-input{padding:3px 6px;font-size:.68rem;}
@@ -327,10 +332,7 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 .auslast-label.gewaehlt.auslast-bald{background:#d97706;color:white;border-color:#d97706;}
 .auslast-label.gewaehlt.auslast-keine{background:#dc2626;color:white;border-color:#dc2626;}
 
-/* ── Feature 5: arbeit-btn Auslastungsfarben ── */
-.arbeit-btn.auslast-gut {background:#16a34a !important;color:white !important;}
-.arbeit-btn.auslast-bald{background:#d97706 !important;color:white !important;}
-.arbeit-btn.auslast-keine{background:#dc2626 !important;color:white !important;}
+/* Feature 5 Auslastungsfarben: siehe .arbeit-icon-fixed weiter oben */
 
 /* ── Auslastungs-Buttons (echte Buttons, kein Radio) ── */
 .auslast-btn{padding:9px 6px;border-radius:9px;border:2px solid var(--hell);cursor:pointer;font-size:.76rem;font-weight:800;font-family:inherit;transition:all .15s;background:white;}
@@ -371,7 +373,7 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 #arbeit-modal .modal-box{min-width:min(520px,96vw);width:min(520px,96vw);}
 
 /* ── Feature 2: Arbeit-Btn Dauer-Icons ── */
-.arbeit-btn{font-size:1rem;}
+/* .arbeit-btn entfällt – ersetzt durch .arbeit-icon-fixed */
 
 /* ══════════════════════════════════
    PERSONEN-PROFIL
