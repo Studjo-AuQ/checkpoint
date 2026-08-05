@@ -771,13 +771,13 @@ function renderCheckliste(){
     var abw=!erl&&!enf&&!aus&&person&&STATE.abwesend.indexOf(person.id)!==-1;
     var falscherTag=!erl&&!enf&&!aus&&ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id);
     var faellig=!erl&&!enf&&!aus&&!falscherTag&&istFaelligJetzt(id);
-    var rowKl=erl?'erledigt':(enf||aus||falscherTag)?'check-entfaellt':faellig?'check-faellig':abw?'warnung':'';
-    var togKl=erl?'':faellig?'faellig':abw?'warnung':'';
-    var sym=erl?'&#10003;':faellig?'&#9888;':(enf||aus||falscherTag)?'&#8722;':abw?'&#9888;':'&#10007;';
+    var rowKl=erl?'erledigt':(enf||falscherTag)?'check-entfaellt':aus?'check-faellig':faellig?'check-faellig':abw?'warnung':'';
+    var togKl=erl?'':(faellig||aus)?'faellig':abw?'warnung':'';
+    var sym=erl?'&#10003;':(faellig||aus)?'&#9888;':(enf||falscherTag)?'&#8722;':abw?'&#9888;':'&#10007;';
     var warn=faellig?'<div class="check-warnung" style="color:#b45309;">&#9888; Jetzt fällig!</div>':
              abw?'<div class="check-warnung">&#9888; '+person.name+' ist abwesend</div>':
              enf?'<div class="check-warnung" style="color:var(--rot)">&#9888; Entf&auml;llt heute</div>':
-             aus?'<div class="check-warnung" style="color:var(--rot)">&#9888; Vertretung noch offen</div>':'';
+             aus?'<div class="check-warnung" style="color:#b45309;">&#9888; Vertretung noch offen</div>':'';
     var wann=formatWann(id);
     var wannZeile=wann?'<div class="check-wann-anzeige">'+wann+'</div>':'';
     var persName=person?person.name:'&#8212;';
@@ -860,7 +860,7 @@ function setzeAbwesend(personId,dauer){
     if(getVertPerson(id)===personId&&AKTIVE_CHECKS.indexOf(id)!==-1&&heuteIstGeplantFuer(id))
       if(!cz.find(function(t){return t.aufgabeId===id;}))cz.push({aufgabeId:id});
   });
-  if(cz.length>0){oeffneVertretungsModal(personId,cz);return;}
+  if(cz.length>0){oeffneVertretungsModal(personId,cz,dauer);return;}
   renderNamen();renderCheckliste();
 }
 function setzeAnwesend(personId){
@@ -1166,7 +1166,7 @@ function resetAktiveChecks(){
 
 /* Vertretung */
 var vertPersonId=null,vertZust=[];
-function oeffneVertretungsModal(personId,checkZust){
+function oeffneVertretungsModal(personId,checkZust,vorDauer){
   vertPersonId=personId;vertZust=checkZust;
   var person=MITARBEITENDE.find(function(p){return p.id===personId;});
   document.getElementById('vert-beschreibung').innerHTML=
@@ -1407,7 +1407,13 @@ function toggleEditModus(){
   btn.classList.toggle('aktiv',editModus);
   btn.innerHTML=editModus?'&#10003; Fertig':'&#9998; Zust&auml;ndigkeiten';
   document.getElementById('edit-leiste').classList.toggle('sichtbar',editModus);
-  sortableInstances.forEach(function(s){s.option('disabled',!editModus);});
+  if(editModus){
+    initSortable();
+  } else {
+    /* Bug5: Instanzen vollständig zerstören, damit onclick-Handler wieder greifen */
+    sortableInstances.forEach(function(s){try{s.destroy();}catch(e){}});
+    sortableInstances=[];
+  }
 }
 
 /* Feature 2: Tagesfortschritt */
