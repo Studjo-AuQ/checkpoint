@@ -231,12 +231,11 @@
     </div>
     <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="arbeit-modal-name"></p>
     <div class="vert-dauer-wrap" style="margin-bottom:12px;">
-      <label class="vert-dauer-label gewaehlt" id="arbeit-dauer-1tag-label">
-        <input type="radio" name="arbeit-dauer" value="1tag" checked onchange="arbeitDauerCh(this)"> Nur für 1 Tag
-      </label>
-      <label class="vert-dauer-label" id="arbeit-dauer-weit-label">
-        <input type="radio" name="arbeit-dauer" value="weiteres" onchange="arbeitDauerCh(this)"> Bis auf weiteres
-      </label>
+      <label class="vert-dauer-label" id="arbeit-stufe-0-label"><input type="radio" name="arbeit-stufe" value="0" onchange="arbeitStufeCh(this)"> 0 (fo)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-1-label"><input type="radio" name="arbeit-stufe" value="1" onchange="arbeitStufeCh(this)"> 1 (tto)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-2-label"><input type="radio" name="arbeit-stufe" value="2" onchange="arbeitStufeCh(this)"> 2 (apo)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-3-label"><input type="radio" name="arbeit-stufe" value="3" onchange="arbeitStufeCh(this)"> 3 (bfo)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-4-label"><input type="radio" name="arbeit-stufe" value="4" onchange="arbeitStufeCh(this)"> 4 (bbo)</label>
     </div>
     <!-- Auslastungs-Auswahl – gleiche Struktur wie Dauer-Radios oben -->
     <input type="hidden" id="arbeit-auslastung-val" value="">

@@ -275,11 +275,9 @@ function tagesReset(m){
     if(dauer==='weiteres') behalte[id]=v;
   });
   STATE={datum:heute(),abwesend:(STATE.abwesendWeiteres||[]).slice(),abwesendWeiteres:(STATE.abwesendWeiteres||[]).slice(),erledigt:[],vertretungen:behalte};
-  /* Arbeitsnotizen: nur "1tag" löschen */
-  Object.keys(ARBEITSNOTIZEN).forEach(function(id){
-    if(!ARBEITSNOTIZEN[id]||ARBEITSNOTIZEN[id].dauer!=='weiteres') delete ARBEITSNOTIZEN[id];
-  });
-  speichereArbeitsnotizen();
+  /* Arbeitsinhalte (Text/Schwierigkeitsstufe/Auslastung) bleiben seit Entfernen der
+     "1 Tag"/"Bis auf weiteres"-Auswahl erhalten und werden beim Tages-Reset NICHT
+     mehr automatisch gelöscht – manuelles Löschen weiterhin über den Modal-Button möglich. */
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('abwesend');});
   renderNamen();renderCheckliste();
@@ -621,11 +619,16 @@ function renderNamen(){
     });
 
     var notiz=ARBEITSNOTIZEN[p.id];
-    var hatNotiz=notiz&&(notiz.text||notiz.auslastung);
+    var _hatStufe=notiz&&notiz.stufe!==undefined&&notiz.stufe!==null&&notiz.stufe!=='';
+    var hatNotiz=notiz&&(notiz.text||notiz.auslastung||_hatStufe);
     var _auslTitles={gut:'Gut ausgelastet',bald:'L\u00e4uft bald aus',keine:'Keine/Kaum Arbeit'};
     var _auslKl=notiz&&notiz.auslastung?' auslast-'+notiz.auslastung:'';
-    var _arbTitel=hatNotiz?(notiz.auslastung?(_auslTitles[notiz.auslastung]||''):'')+(notiz.text?(notiz.auslastung?' \u2013 ':'')+notiz.text.slice(0,60):''):'Arbeitsinhalt eintragen';
-    var _arbBadgeTxt=hatNotiz?(notiz.dauer==='weiteres'?'&#8734;':'1'):'';
+    var _titelTeile=[];
+    if(notiz&&notiz.auslastung&&_auslTitles[notiz.auslastung])_titelTeile.push(_auslTitles[notiz.auslastung]);
+    if(_hatStufe)_titelTeile.push('Stufe '+notiz.stufe);
+    if(notiz&&notiz.text)_titelTeile.push(notiz.text.slice(0,60));
+    var _arbTitel=hatNotiz?_titelTeile.join(' \u2013 '):'Arbeitsinhalt eintragen';
+    var _arbBadgeTxt=_hatStufe?String(notiz.stufe):'';
     var arbeitIconHtml='<div class="aufg-icon-wrap arbeit-icon-fixed'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'
       +'<img src="arbeit.jpg" alt="Arbeit" class="aufg-icon-img" onerror="this.style.background=\'#e2e8f0\'">'
       +(_arbBadgeTxt?'<div class="aufg-badge arbeit-badge">'+_arbBadgeTxt+'</div>':'')
@@ -1334,14 +1337,15 @@ function oeffneArbeitModal(personId,e){
   arbeitModalPersonId=personId;
   var p=MITARBEITENDE.find(function(m){return m.id===personId;});
   document.getElementById('arbeit-modal-name').textContent='Arbeitsinhalt für: '+(p?p.name:'');
-  var notiz=ARBEITSNOTIZEN[personId]||{text:'',dauer:'1tag',auslastung:''};
+  var notiz=ARBEITSNOTIZEN[personId]||{text:'',stufe:'',auslastung:''};
   document.getElementById('arbeit-textarea').value=notiz.text||'';
-  /* Dauer Radio */
-  var ist1tag=notiz.dauer!=='weiteres';
-  document.querySelector('input[name="arbeit-dauer"][value="1tag"]').checked=ist1tag;
-  document.querySelector('input[name="arbeit-dauer"][value="weiteres"]').checked=!ist1tag;
-  document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',ist1tag);
-  document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',!ist1tag);
+  /* Schwierigkeitsstufe Radio – Zustand wiederherstellen */
+  var stufe=(notiz.stufe!==undefined&&notiz.stufe!==null)?String(notiz.stufe):'';
+  document.querySelectorAll('input[name="arbeit-stufe"]').forEach(function(r){r.checked=r.value===stufe;});
+  ['0','1','2','3','4'].forEach(function(v){
+    var el=document.getElementById('arbeit-stufe-'+v+'-label');
+    if(el)el.classList.toggle('gewaehlt',v===stufe);
+  });
   /* Auslastung Radio – Zustand wiederherstellen */
   var ausl=notiz.auslastung||'';
   var avEl=document.getElementById('arbeit-auslastung-val');
@@ -1354,9 +1358,11 @@ function oeffneArbeitModal(personId,e){
   document.getElementById('arbeit-modal').classList.add('sichtbar');
   setTimeout(function(){document.getElementById('arbeit-textarea').focus();},80);
 }
-function arbeitDauerCh(radio){
-  document.getElementById('arbeit-dauer-1tag-label').classList.toggle('gewaehlt',radio.value==='1tag');
-  document.getElementById('arbeit-dauer-weit-label').classList.toggle('gewaehlt',radio.value==='weiteres');
+function arbeitStufeCh(radio){
+  ['0','1','2','3','4'].forEach(function(v){
+    var el=document.getElementById('arbeit-stufe-'+v+'-label');
+    if(el)el.classList.toggle('gewaehlt',v===radio.value);
+  });
 }
 function auslastCh(radio){
   /* Setzt Hidden-Input + visuelles gewaehlt-Klasse */
@@ -1370,11 +1376,11 @@ function auslastCh(radio){
 }
 function speichereArbeitNotiz(){
   var text=document.getElementById('arbeit-textarea').value.trim();
-  var dauerEl=document.querySelector('input[name="arbeit-dauer"]:checked');
-  var dauer=dauerEl?dauerEl.value:'1tag';
+  var stufeEl=document.querySelector('input[name="arbeit-stufe"]:checked');
+  var stufe=stufeEl?stufeEl.value:'';
   var avEl=document.getElementById('arbeit-auslastung-val');
   var ausl=avEl?avEl.value:'';
-  if(text||ausl){ARBEITSNOTIZEN[arbeitModalPersonId]={text:text,dauer:dauer,auslastung:ausl};}
+  if(text||ausl||stufe!==''){ARBEITSNOTIZEN[arbeitModalPersonId]={text:text,stufe:stufe,auslastung:ausl};}
   else{delete ARBEITSNOTIZEN[arbeitModalPersonId];}
   speichereArbeitsnotizen();
   schM('arbeit-modal');
@@ -1392,7 +1398,12 @@ function vorlesenArbeitModal(){
   var txt=document.getElementById('arbeit-textarea').value.trim();
   var auslEl=document.querySelector('input[name="arbeit-auslastung"]:checked');
   var auslTxt=auslEl?({gut:'Gut ausgelastet',bald:'L\u00e4uft bald aus',keine:'Keine Arbeit'}[auslEl.value]||''):'';
-  var voll=(p?p.name+'. ':'')+'Arbeitsinhalt'+(auslTxt?', '+auslTxt:'')+(txt?': '+txt:'.');
+  var stufeEl=document.querySelector('input[name="arbeit-stufe"]:checked');
+  var stufeTxt=stufeEl?'Schwierigkeitsstufe '+stufeEl.value:'';
+  var teile=[];
+  if(auslTxt)teile.push(auslTxt);
+  if(stufeTxt)teile.push(stufeTxt);
+  var voll=(p?p.name+'. ':'')+'Arbeitsinhalt'+(teile.length?', '+teile.join(', '):'')+(txt?': '+txt:'.');
   window.speechSynthesis.cancel();
   var u=new SpeechSynthesisUtterance(sprachText(voll));
   u.lang='de-DE';u.rate=0.88;
@@ -1785,9 +1796,10 @@ function sprachText(s){
 
       /* 1) Arbeitsinhalt */
       var notiz=ARBEITSNOTIZEN&&ARBEITSNOTIZEN[pId];
-      if(notiz&&(notiz.text||notiz.auslastung)){
+      if(notiz&&(notiz.text||notiz.auslastung||(notiz.stufe!==undefined&&notiz.stufe!==null&&notiz.stufe!==''))){
         var auslN={gut:'gut ausgelastet',bald:'l\u00e4uft bald aus',keine:'keine Arbeit'};
-        txt+='Arbeitsinhalt'+(notiz.auslastung?' ('+(auslN[notiz.auslastung]||'')+')':'')+(notiz.text?': '+notiz.text:'')+'. ';
+        var stufeN=(notiz.stufe!==undefined&&notiz.stufe!==null&&notiz.stufe!=='')?', Schwierigkeitsstufe '+notiz.stufe:'';
+        txt+='Arbeitsinhalt'+(notiz.auslastung?' ('+(auslN[notiz.auslastung]||'')+')':'')+stufeN+(notiz.text?': '+notiz.text:'')+'. ';
       }
 
       /* 2) Checklisten-Aufgaben */
