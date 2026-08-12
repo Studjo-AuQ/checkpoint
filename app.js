@@ -464,11 +464,15 @@ function getZustaendigePerson(id){
   return z?MITARBEITENDE.find(function(m){return m.id===z.personId;})||null:null;
 }
 var _TAGKUERZEL={mo:1,di:2,mi:3,do:4,fr:5};
+/* Bug2: zentrale, case-insensitive Umwandlung Kürzel → voller Wochentagsname */
+var _TAG_VOLL_MAP={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag',sa:'Samstag',so:'Sonntag'};
+function tagVollName(t){return _TAG_VOLL_MAP[String(t).toLowerCase()]||t;}
 function heuteIstGeplantFuer(id){
   var _zt=ZEITEN[id]||{};
   if(!_zt.tage||_zt.tage.length===0)return true;
   var wt=new Date().getDay();
-  return _zt.tage.some(function(t){return _TAGKUERZEL[t]===wt;});
+  /* Bug2: Kürzel case-insensitiv vergleichen (gespeichert z.B. als "Mi", nicht "mi") */
+  return _zt.tage.some(function(t){return _TAGKUERZEL[String(t).toLowerCase()]===wt;});
 }
 function istFaelligJetzt(id){
   var a=AUFGABEN[id];if(!a)return false;
@@ -540,8 +544,7 @@ function oeffneAufgabenInfoModal(id,event){
   var wannTxt='';
   var _wz=ZEITEN[id]||{};
   if(_wz.tage&&_wz.tage.length){
-    var tgN={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag'};
-    wannTxt=' \u00b7 '+_wz.tage.map(function(t){return tgN[t]||t;}).join(',')+(_wz.uhrzeit?' '+_wz.uhrzeit+' Uhr':'');
+    wannTxt=' \u00b7 '+_wz.tage.map(function(t){return tagVollName(t);}).join(',')+(_wz.uhrzeit?' '+_wz.uhrzeit+' Uhr':'');
   }
   document.getElementById('aufgabe-info-zustaendig').textContent='Zust\u00e4ndig: '+(pers?pers.name:'nicht zugewiesen')+wannTxt;
   var gespeichert=AUFGABEN_NOTIZEN[id];
@@ -1818,8 +1821,7 @@ function sprachText(s){
       var wannTxt='';
       var _wz=ZEITEN[id]||{};
       if(_wz.tage||_wz.uhrzeit){
-        var tgN={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag'};
-        var _tage=(_wz.tage&&_wz.tage.length)?_wz.tage.map(function(t){return tgN[t]||t;}).join(' und '):'';
+        var _tage=(_wz.tage&&_wz.tage.length)?_wz.tage.map(function(t){return tagVollName(t);}).join(' und '):'';
         var _zeit=_wz.uhrzeit?uhrzeitSprache(_wz.uhrzeit):'';
         if(_tage&&_zeit)wannTxt=_tage+', '+_zeit+', ';
         else if(_tage)wannTxt=_tage+', ';
@@ -1841,14 +1843,18 @@ function sprachText(s){
       /* Bug6: vergangene oder gelöschte Termine nicht vorlesen */
       if(tz.classList.contains('termin-vergangenheit')||tz.classList.contains('termin-frei-geleert'))
         return 'Dieser Termin ist bereits abgelaufen.';
-      var parts=[];
-      var lbl=tz.querySelector('.termin-pflicht-label');if(lbl)parts.push(lbl.textContent.trim());
-      tz.querySelectorAll('input').forEach(function(inp){
-        var v=inp.value;if(!v)return;
-        if(inp.type==='date')v=isoDatumSpracheVoll(v); /* Bug6: voller Wochentag */
-        else if(inp.type==='time')v=uhrzeitSprache(v);
-        parts.push(v);
-      });
+      /* Bug2: Datum/Uhrzeit-Felder wurden durch das Termin-Modal ersetzt (keine <input>
+         mehr in der Zeile) – Werte daher direkt aus TERMINE lesen statt aus dem DOM. */
+      var parts=[],datum='',uhrzeit='';
+      if(tz.dataset.freiIdx!==undefined){
+        var f=TERMINE.frei[parseInt(tz.dataset.freiIdx)];
+        if(f){if(f.text)parts.push(f.text);datum=f.datum;uhrzeit=f.uhrzeit;}
+      }else{
+        var p=TERMINE.pflicht.find(function(p){return p.id===tz.dataset.pflichtIdRow;});
+        if(p){parts.push(p.label);datum=p.datum;uhrzeit=p.uhrzeit;}
+      }
+      if(datum)parts.push(isoDatumSpracheVoll(datum)); /* voller Wochentag, z.B. "Mittwoch" */
+      if(uhrzeit)parts.push(uhrzeitSprache(uhrzeit));
       return parts.join(': ')||'Kein Termin eingetragen';
     }
     /* Wichtig-Zeile */
