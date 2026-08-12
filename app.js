@@ -540,7 +540,7 @@ function oeffneAufgabenInfoModal(id,event){
   var wannTxt='';
   var _wz=ZEITEN[id]||{};
   if(_wz.tage&&_wz.tage.length){
-    var tgN={mo:'Mo',di:'Di',mi:'Mi',do:'Do',fr:'Fr'};
+    var tgN={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'Freitag'};
     wannTxt=' \u00b7 '+_wz.tage.map(function(t){return tgN[t]||t;}).join(',')+(_wz.uhrzeit?' '+_wz.uhrzeit+' Uhr':'');
   }
   document.getElementById('aufgabe-info-zustaendig').textContent='Zust\u00e4ndig: '+(pers?pers.name:'nicht zugewiesen')+wannTxt;
@@ -577,7 +577,8 @@ function renderNamen(){
     var abw=STATE.abwesend.indexOf(p.id)!==-1;
 
     /* Permanente Zuständigkeiten dieser Person */
-    var zust=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===p.id;});
+    /* Bug5: check-Icons immer vor zust-Icons rendern, unabhängig von gespeicherter Reihenfolge */
+    var zust=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===p.id;}).sort(function(a,b){return (a.typ==='checkliste'?0:1)-(b.typ==='checkliste'?0:1);});
 
     /* Vertretungs-Aufgaben (V-Badge):
        Im Normal-Modus nur heute aktive, im Edit-Modus ALLE anzeigen */
@@ -675,12 +676,11 @@ function renderTermine(){
   TERMINE.frei.forEach(function(f,idx){
     var bid='tf'+idx;
     var dt=formatTerminAnzeige(f.datum,f.uhrzeit||'');
+    var dtValue=f.datum?(f.datum+'T'+(f.uhrzeit||'00:00')):'';
     html+='<div class="termin-frei-zeile" data-frei-idx="'+idx+'">'
         +'<div class="termin-ikon-col">'
-        +'<button class="termin-ikon-btn" data-target-id="'+bid+'-dat" onclick="termOeffneById(this)" title="Datum w\u00e4hlen">&#128197;</button>'
-        +'<button class="termin-ikon-btn" data-target-id="'+bid+'-uhr" onclick="termOeffneById(this)" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
-        +'<input type="date" id="'+bid+'-dat" class="termin-hidden-inp" data-frei-idx="'+idx+'" data-feld="datum" value="'+(f.datum||'')+'" onchange="terminFreiSp(this)">'
-        +'<input type="time" id="'+bid+'-uhr" class="termin-hidden-inp" data-frei-idx="'+idx+'" data-feld="uhrzeit" value="'+(f.uhrzeit||'')+'" onchange="terminFreiSp(this)">'
+        +'<button class="termin-ikon-btn" data-target-id="'+bid+'-dt" onclick="termOeffneById(this)" title="Datum und Uhrzeit w\u00e4hlen">&#128197;</button>'
+        +'<input type="datetime-local" id="'+bid+'-dt" class="termin-hidden-inp" data-frei-idx="'+idx+'" data-feld="dt" value="'+dtValue+'" onchange="terminFreiSp(this)">'
         +'</div>'
         +'<div class="termin-content-col">'
         +(dt?'<div class="termin-dt-anzeige">'+dt+'</div>':'<div class="termin-dt-anzeige termin-dt-leer">Datum &ndash; Uhrzeit</div>')
@@ -694,12 +694,11 @@ function renderTermine(){
   TERMINE.pflicht.forEach(function(p){
     var pid='tp-'+p.id;
     var dt=formatTerminAnzeige(p.datum,p.uhrzeit||'');
+    var dtValue=p.datum?(p.datum+'T'+(p.uhrzeit||'00:00')):'';
     html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
         +'<div class="termin-ikon-col">'
-        +'<button class="termin-ikon-btn" data-target-id="'+pid+'-dat" onclick="termOeffneById(this)" title="Datum w\u00e4hlen">&#128197;</button>'
-        +'<button class="termin-ikon-btn" data-target-id="'+pid+'-uhr" onclick="termOeffneById(this)" title="Uhrzeit w\u00e4hlen">&#9202;</button>'
-        +'<input type="date" id="'+pid+'-dat" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="datum" value="'+(p.datum||'')+'" onchange="terminPflichtSp(this)">'
-        +'<input type="time" id="'+pid+'-uhr" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="uhrzeit" value="'+(p.uhrzeit||'')+'" onchange="terminPflichtSp(this)">'
+        +'<button class="termin-ikon-btn" data-target-id="'+pid+'-dt" onclick="termOeffneById(this)" title="Datum und Uhrzeit w\u00e4hlen">&#128197;</button>'
+        +'<input type="datetime-local" id="'+pid+'-dt" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="dt" value="'+dtValue+'" onchange="terminPflichtSp(this)">'
         +'</div>'
         +'<div class="termin-action-ikon">'+p.icon+'</div>'
         +'<div class="termin-content-col">'
@@ -712,28 +711,79 @@ function renderTermine(){
   document.getElementById('termine-anzeige').innerHTML=html;
   checkTerminDatumHeute();
 }
-/* Termin-Picker öffnen via data-target-id (keine Quote-Konflikte) */
+/* Termin-Picker öffnen via data-target-id (keine Quote-Konflikte)
+   Bug1-Fix: Element wird ON-SCREEN (statt off-screen bei top:-200px) positioniert,
+   damit der native Picker in jedem Browser zuverlässig andockt und öffnet.
+   Die Wiederherstellung des Ausgangs-Stils erfolgt jetzt an "change"/"blur" statt
+   an einem festen 600ms-Timeout, damit der Picker nicht mitten in der Bedienung
+   wieder unsichtbar/verschoben wird (das führte zum "Auswahl kommt nicht an"-Effekt). */
 function termOeffneById(btn){
   var id=btn.dataset.targetId;
   var el=document.getElementById(id);
   if(!el)return;
-  try{el.showPicker();}catch(e){el.focus();}
+  if(el._terminPickerCleanup)el._terminPickerCleanup();
+  var old=el.dataset.origStyle!==undefined?el.dataset.origStyle:el.style.cssText;
+  el.dataset.origStyle=old;
+  var rect=btn.getBoundingClientRect();
+  var left=Math.min(Math.max(rect.left,4),window.innerWidth-160);
+  var top=Math.min(Math.max(rect.bottom+6,4),window.innerHeight-40);
+  el.style.cssText='position:fixed;left:'+left+'px;top:'+top+'px;opacity:.02;width:150px;height:32px;z-index:9999;';
+  var restored=false;
+  function restore(){
+    if(restored)return;restored=true;
+    el.style.cssText=old;
+    el.removeEventListener('change',restore);
+    el.removeEventListener('blur',onBlur);
+    el._terminPickerCleanup=null;
+  }
+  function onBlur(){setTimeout(restore,250);}
+  el.addEventListener('change',restore);
+  el.addEventListener('blur',onBlur);
+  el._terminPickerCleanup=restore;
+  setTimeout(restore,15000); /* Sicherheitsnetz, falls kein change/blur kommt */
+  setTimeout(function(){
+    try{el.showPicker();}catch(e){el.click();}
+  },10);
+}
+
+/* Zerlegt den kombinierten datetime-local-Wert in Datum/Uhrzeit.
+   00:00 gilt als "keine Uhrzeit gesetzt" und wird nicht angezeigt. */
+function parseTerminDT(value){
+  if(!value)return{datum:'',uhrzeit:''};
+  var teile=value.split('T');
+  var datum=teile[0]||'';
+  var uhrzeit=teile[1]||'';
+  if(uhrzeit==='00:00')uhrzeit='';
+  return{datum:datum,uhrzeit:uhrzeit};
 }
 
 function terminFreiSp(el){
   var i=parseInt(el.dataset.freiIdx);
-  TERMINE.frei[i][el.dataset.feld]=el.value;
-  speichereTermine();checkTerminDatumHeute();
+  if(el.dataset.feld==='dt'){
+    var teile=parseTerminDT(el.value);
+    TERMINE.frei[i].datum=teile.datum;
+    TERMINE.frei[i].uhrzeit=teile.uhrzeit;
+  }else{
+    TERMINE.frei[i][el.dataset.feld]=el.value;
+  }
+  speichereTermine();
   var f=TERMINE.frei[i];
   var dtEl=el.closest('.termin-frei-zeile');
   if(dtEl){var da=dtEl.querySelector('.termin-dt-anzeige');if(da){var t=formatTerminAnzeige(f.datum,f.uhrzeit||'');da.textContent=t||'Datum – Uhrzeit';da.className='termin-dt-anzeige'+(t?'':' termin-dt-leer');}}
 }
 function terminPflichtSp(el){
   var p=TERMINE.pflicht.find(function(p){return p.id===el.dataset.pflichtId;});if(!p)return;
-  var feld=el.dataset.feld||'datum';
-  p[feld]=el.value;
-  speichereTermine();checkTerminDatumHeute();
-  var row=el.closest('.termin-pflicht-zeile');
+  if(el.dataset.feld==='dt'){
+    var teile=parseTerminDT(el.value);
+    p.datum=teile.datum;
+    p.uhrzeit=teile.uhrzeit;
+  }else{
+    var feld=el.dataset.feld||'datum';
+    p[feld]=el.value;
+  }
+  speichereTermine();
+  /* Bug1: sofortige Anzeige ohne checkTerminDatumHeute (würde vergangene Daten löschen) */
+  var row=el.closest('.termin-pflicht-zeile')||document.querySelector('[data-pflicht-id-row="'+p.id+'"]');
   if(row){var da=row.querySelector('.termin-dt-anzeige');if(da){var t=formatTerminAnzeige(p.datum,p.uhrzeit||'');da.textContent=t||'';da.className='termin-dt-anzeige'+(t?'':' termin-dt-leer');}}
 }
 /* Feature 8: Datumsabgleich */
@@ -756,9 +806,8 @@ function checkTerminDatumHeute(){
     if(kl==='termin-vergangenheit'){
       /* Freier Termin abgelaufen → Eintragung löschen, neutral grau */
       TERMINE.frei[i].datum='';TERMINE.frei[i].text='';TERMINE.frei[i].uhrzeit='';_geaendert=true;
-      var di=rows[i].querySelector('input[type="date"]');if(di)di.value='';
+      var dti=rows[i].querySelector('input[type="datetime-local"]');if(dti)dti.value='';
       var ti=rows[i].querySelector('input[type="text"]');if(ti)ti.value='';
-      var ui=rows[i].querySelector('input[type="time"]');if(ui)ui.value='';
       var da=rows[i].querySelector('.termin-dt-anzeige');
       if(da){da.textContent='Datum – Uhrzeit';da.className='termin-dt-anzeige termin-dt-leer';}
       rows[i].classList.add('termin-frei-geleert');
@@ -1211,7 +1260,7 @@ function oeffneVertretungsModal(personId,checkZust,vorDauer){
     var a=AUFGABEN[z.aufgabeId];if(!a)return;
     var av=STATE.vertretungen[z.aufgabeId];
     var avPerson=getVertPerson(z.aufgabeId);
-    var avDauer=getVertDauer(z.aufgabeId);
+    var avDauer=vorDauer||getVertDauer(z.aufgabeId);
     if(zi>0)html+='<div class="vert-trenn"></div>';
     html+='<div class="vert-aufgabe-block"><div class="vert-aufgabe-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="vert-aufgabe-label">'+a.label+'</span></div>'
          /* Dauer-Auswahl */
@@ -1532,7 +1581,7 @@ function oeffneCheckPersonPicker(id,event){
     if(aa&&!ab2)return 1;if(!aa&&ab2)return -1;
     var wa=profilFarbe(a.id,id)||'';
     var wb=profilFarbe(b.id,id)||'';
-    return (_profilOrd[wa]||3)-(_profilOrd[wb]||3)||a.name.localeCompare(b.name,'de');
+    return (_profilOrd[wa]!==undefined?_profilOrd[wa]:3)-(_profilOrd[wb]!==undefined?_profilOrd[wb]:3)||a.name.localeCompare(b.name,'de');
   });
   _sortiert.forEach(function(p){
     var pAbw=STATE.abwesend.indexOf(p.id)!==-1;
@@ -1673,6 +1722,15 @@ function isoDatumSprache(iso){
   if(p.length!==3)return iso;
   return datumSprache(p[2]+'.'+p[1]+'.'+p[0]);
 }
+/* Bug6: vollständige Sprachausgabe für Vorlesen */
+function isoDatumSpracheVoll(iso){
+  if(!iso)return '';
+  var d=new Date(iso+'T00:00:00');
+  if(isNaN(d.getTime()))return '';
+  var wt=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  var mo=['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  return wt[d.getDay()]+', der '+(_TAGORD[d.getDate()]||d.getDate()+'.')+' '+mo[d.getMonth()]+' '+_z(d.getFullYear());
+}
 function sprachText(s){
   if(!s)return s;
   s=s.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g,datumSprache);
@@ -1797,11 +1855,14 @@ function sprachText(s){
     /* Termin-Zeile */
     var tz=target.closest('.termin-frei-zeile,.termin-pflicht-zeile');
     if(tz){
+      /* Bug6: vergangene oder gelöschte Termine nicht vorlesen */
+      if(tz.classList.contains('termin-vergangenheit')||tz.classList.contains('termin-frei-geleert'))
+        return 'Dieser Termin ist bereits abgelaufen.';
       var parts=[];
       var lbl=tz.querySelector('.termin-pflicht-label');if(lbl)parts.push(lbl.textContent.trim());
       tz.querySelectorAll('input').forEach(function(inp){
         var v=inp.value;if(!v)return;
-        if(inp.type==='date')v=isoDatumSprache(v);
+        if(inp.type==='date')v=isoDatumSpracheVoll(v); /* Bug6: voller Wochentag */
         else if(inp.type==='time')v=uhrzeitSprache(v);
         parts.push(v);
       });
