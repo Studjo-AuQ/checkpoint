@@ -193,6 +193,30 @@
   </div>
 </div>
 
+<!-- ═══ Termin Datum/Uhrzeit Modal (Bug1) ═══ -->
+<div class="modal-overlay" id="termin-dt-modal" onclick="modalAK(event,'termin-dt-modal')">
+  <div class="modal-box" style="width:min(360px,94vw)">
+    <div class="modal-kopf"><h2>&#128197; Termin einstellen</h2><button class="modal-schliessen" onclick="schM('termin-dt-modal')">&#10005;</button></div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:.78rem;font-weight:800;display:block;margin-bottom:5px;">Datum:</label>
+      <input type="date" id="termin-dt-datum" class="wann-uhrzeit-input" style="width:100%;">
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;margin-bottom:12px;cursor:pointer;">
+      <input type="checkbox" id="termin-dt-hatzeit" onchange="toggleTerminDtUhrzeit()" style="width:18px;height:18px;">
+      Uhrzeit angeben <span style="color:var(--grau);font-weight:500;">(sonst ganzt&auml;gig)</span>
+    </label>
+    <div class="wann-uhrzeit-wrap" id="termin-dt-uhrzeit-wrap" style="display:none;">
+      <label style="font-size:.78rem;font-weight:800;">Uhrzeit:</label>
+      <input type="time" id="termin-dt-uhrzeit" class="wann-uhrzeit-input">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="loescheTerminDt()">&#8617; L&ouml;schen</button>
+      <button class="btn-modal-secondary" onclick="schM('termin-dt-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereTerminDtAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ Arbeit-Notiz Modal ═══ -->
 <div class="modal-overlay" id="arbeit-modal" onclick="modalAK(event,'arbeit-modal')">
   <div class="modal-box" style="width:min(460px,96vw)">

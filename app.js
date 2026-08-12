@@ -674,13 +674,10 @@ function renderTermine(){
 
   /* 2 freie Termine */
   TERMINE.frei.forEach(function(f,idx){
-    var bid='tf'+idx;
     var dt=formatTerminAnzeige(f.datum,f.uhrzeit||'');
-    var dtValue=f.datum?(f.datum+'T'+(f.uhrzeit||'00:00')):'';
     html+='<div class="termin-frei-zeile" data-frei-idx="'+idx+'">'
         +'<div class="termin-ikon-col">'
-        +'<button class="termin-ikon-btn" data-target-id="'+bid+'-dt" onclick="termOeffneById(this)" title="Datum und Uhrzeit w\u00e4hlen">&#128197;</button>'
-        +'<input type="datetime-local" id="'+bid+'-dt" class="termin-hidden-inp" data-frei-idx="'+idx+'" data-feld="dt" value="'+dtValue+'" onchange="terminFreiSp(this)">'
+        +'<button class="termin-ikon-btn" data-frei-idx="'+idx+'" onclick="oeffneTerminDtModal(this)" title="Datum und Uhrzeit einstellen">&#128197;</button>'
         +'</div>'
         +'<div class="termin-content-col">'
         +(dt?'<div class="termin-dt-anzeige">'+dt+'</div>':'<div class="termin-dt-anzeige termin-dt-leer">Datum &ndash; Uhrzeit</div>')
@@ -692,13 +689,10 @@ function renderTermine(){
   html+='<div class="termin-trenner">&mdash; Regelm&auml;&szlig;ige Termine &mdash;</div>';
 
   TERMINE.pflicht.forEach(function(p){
-    var pid='tp-'+p.id;
     var dt=formatTerminAnzeige(p.datum,p.uhrzeit||'');
-    var dtValue=p.datum?(p.datum+'T'+(p.uhrzeit||'00:00')):'';
     html+='<div class="termin-pflicht-zeile" data-pflicht-id-row="'+p.id+'">'
         +'<div class="termin-ikon-col">'
-        +'<button class="termin-ikon-btn" data-target-id="'+pid+'-dt" onclick="termOeffneById(this)" title="Datum und Uhrzeit w\u00e4hlen">&#128197;</button>'
-        +'<input type="datetime-local" id="'+pid+'-dt" class="termin-hidden-inp" data-pflicht-id="'+p.id+'" data-feld="dt" value="'+dtValue+'" onchange="terminPflichtSp(this)">'
+        +'<button class="termin-ikon-btn" data-pflicht-id="'+p.id+'" onclick="oeffneTerminDtModal(this)" title="Datum und Uhrzeit einstellen">&#128197;</button>'
         +'</div>'
         +'<div class="termin-action-ikon">'+p.icon+'</div>'
         +'<div class="termin-content-col">'
@@ -711,80 +705,70 @@ function renderTermine(){
   document.getElementById('termine-anzeige').innerHTML=html;
   checkTerminDatumHeute();
 }
-/* Termin-Picker öffnen via data-target-id (keine Quote-Konflikte)
-   Bug1-Fix: Element wird ON-SCREEN (statt off-screen bei top:-200px) positioniert,
-   damit der native Picker in jedem Browser zuverlässig andockt und öffnet.
-   Die Wiederherstellung des Ausgangs-Stils erfolgt jetzt an "change"/"blur" statt
-   an einem festen 600ms-Timeout, damit der Picker nicht mitten in der Bedienung
-   wieder unsichtbar/verschoben wird (das führte zum "Auswahl kommt nicht an"-Effekt). */
-function termOeffneById(btn){
-  var id=btn.dataset.targetId;
-  var el=document.getElementById(id);
-  if(!el)return;
-  if(el._terminPickerCleanup)el._terminPickerCleanup();
-  var old=el.dataset.origStyle!==undefined?el.dataset.origStyle:el.style.cssText;
-  el.dataset.origStyle=old;
-  var rect=btn.getBoundingClientRect();
-  var left=Math.min(Math.max(rect.left,4),window.innerWidth-160);
-  var top=Math.min(Math.max(rect.bottom+6,4),window.innerHeight-40);
-  el.style.cssText='position:fixed;left:'+left+'px;top:'+top+'px;opacity:.02;width:150px;height:32px;z-index:9999;';
-  var restored=false;
-  function restore(){
-    if(restored)return;restored=true;
-    el.style.cssText=old;
-    el.removeEventListener('change',restore);
-    el.removeEventListener('blur',onBlur);
-    el._terminPickerCleanup=null;
-  }
-  function onBlur(){setTimeout(restore,250);}
-  el.addEventListener('change',restore);
-  el.addEventListener('blur',onBlur);
-  el._terminPickerCleanup=restore;
-  setTimeout(restore,15000); /* Sicherheitsnetz, falls kein change/blur kommt */
-  setTimeout(function(){
-    try{el.showPicker();}catch(e){el.click();}
-  },10);
-}
 
-/* Zerlegt den kombinierten datetime-local-Wert in Datum/Uhrzeit.
-   00:00 gilt als "keine Uhrzeit gesetzt" und wird nicht angezeigt. */
-function parseTerminDT(value){
-  if(!value)return{datum:'',uhrzeit:''};
-  var teile=value.split('T');
-  var datum=teile[0]||'';
-  var uhrzeit=teile[1]||'';
-  if(uhrzeit==='00:00')uhrzeit='';
-  return{datum:datum,uhrzeit:uhrzeit};
+/* ═══ Termin Datum/Uhrzeit Modal ═══
+   Bug1-Fix: Statt fragiler nativer Picker-Tricks ein eigenes, zuverlässiges Modal.
+   Uhrzeit ist optional ("Ganztägig", wenn Haken nicht gesetzt) – keine erzwungene
+   Uhrzeitangabe mehr. */
+var _terminDtEdit=null; /* {type:'frei',idx:n} oder {type:'pflicht',id:'...'} */
+function oeffneTerminDtModal(btn){
+  var t;
+  if(btn.dataset.freiIdx!==undefined){
+    _terminDtEdit={type:'frei',idx:parseInt(btn.dataset.freiIdx)};
+    t=TERMINE.frei[_terminDtEdit.idx];
+  }else{
+    _terminDtEdit={type:'pflicht',id:btn.dataset.pflichtId};
+    t=TERMINE.pflicht.find(function(p){return p.id===_terminDtEdit.id;});
+  }
+  if(!t)return;
+  document.getElementById('termin-dt-datum').value=t.datum||'';
+  var hatZeit=!!t.uhrzeit;
+  document.getElementById('termin-dt-hatzeit').checked=hatZeit;
+  document.getElementById('termin-dt-uhrzeit').value=t.uhrzeit||'';
+  document.getElementById('termin-dt-uhrzeit-wrap').style.display=hatZeit?'flex':'none';
+  document.getElementById('termin-dt-modal').classList.add('sichtbar');
+}
+function toggleTerminDtUhrzeit(){
+  var an=document.getElementById('termin-dt-hatzeit').checked;
+  document.getElementById('termin-dt-uhrzeit-wrap').style.display=an?'flex':'none';
+}
+function speichereTerminDtAusModal(){
+  if(!_terminDtEdit)return;
+  var datum=document.getElementById('termin-dt-datum').value;
+  var hatZeit=document.getElementById('termin-dt-hatzeit').checked;
+  var uhrzeit=hatZeit?document.getElementById('termin-dt-uhrzeit').value:'';
+  if(_terminDtEdit.type==='frei'){
+    TERMINE.frei[_terminDtEdit.idx].datum=datum;
+    TERMINE.frei[_terminDtEdit.idx].uhrzeit=uhrzeit;
+  }else{
+    var p=TERMINE.pflicht.find(function(p){return p.id===_terminDtEdit.id;});
+    if(p){p.datum=datum;p.uhrzeit=uhrzeit;}
+  }
+  speichereTermine();
+  renderTermine();
+  schM('termin-dt-modal');
+}
+function loescheTerminDt(){
+  if(!_terminDtEdit)return;
+  if(_terminDtEdit.type==='frei'){
+    TERMINE.frei[_terminDtEdit.idx].datum='';
+    TERMINE.frei[_terminDtEdit.idx].uhrzeit='';
+  }else{
+    var p=TERMINE.pflicht.find(function(p){return p.id===_terminDtEdit.id;});
+    if(p){p.datum='';p.uhrzeit='';}
+  }
+  speichereTermine();
+  renderTermine();
+  schM('termin-dt-modal');
 }
 
 function terminFreiSp(el){
   var i=parseInt(el.dataset.freiIdx);
-  if(el.dataset.feld==='dt'){
-    var teile=parseTerminDT(el.value);
-    TERMINE.frei[i].datum=teile.datum;
-    TERMINE.frei[i].uhrzeit=teile.uhrzeit;
-  }else{
-    TERMINE.frei[i][el.dataset.feld]=el.value;
-  }
+  TERMINE.frei[i][el.dataset.feld]=el.value;
   speichereTermine();
   var f=TERMINE.frei[i];
   var dtEl=el.closest('.termin-frei-zeile');
   if(dtEl){var da=dtEl.querySelector('.termin-dt-anzeige');if(da){var t=formatTerminAnzeige(f.datum,f.uhrzeit||'');da.textContent=t||'Datum – Uhrzeit';da.className='termin-dt-anzeige'+(t?'':' termin-dt-leer');}}
-}
-function terminPflichtSp(el){
-  var p=TERMINE.pflicht.find(function(p){return p.id===el.dataset.pflichtId;});if(!p)return;
-  if(el.dataset.feld==='dt'){
-    var teile=parseTerminDT(el.value);
-    p.datum=teile.datum;
-    p.uhrzeit=teile.uhrzeit;
-  }else{
-    var feld=el.dataset.feld||'datum';
-    p[feld]=el.value;
-  }
-  speichereTermine();
-  /* Bug1: sofortige Anzeige ohne checkTerminDatumHeute (würde vergangene Daten löschen) */
-  var row=el.closest('.termin-pflicht-zeile')||document.querySelector('[data-pflicht-id-row="'+p.id+'"]');
-  if(row){var da=row.querySelector('.termin-dt-anzeige');if(da){var t=formatTerminAnzeige(p.datum,p.uhrzeit||'');da.textContent=t||'';da.className='termin-dt-anzeige'+(t?'':' termin-dt-leer');}}
 }
 /* Feature 8: Datumsabgleich */
 function checkTerminDatumHeute(){
@@ -806,7 +790,6 @@ function checkTerminDatumHeute(){
     if(kl==='termin-vergangenheit'){
       /* Freier Termin abgelaufen → Eintragung löschen, neutral grau */
       TERMINE.frei[i].datum='';TERMINE.frei[i].text='';TERMINE.frei[i].uhrzeit='';_geaendert=true;
-      var dti=rows[i].querySelector('input[type="datetime-local"]');if(dti)dti.value='';
       var ti=rows[i].querySelector('input[type="text"]');if(ti)ti.value='';
       var da=rows[i].querySelector('.termin-dt-anzeige');
       if(da){da.textContent='Datum – Uhrzeit';da.className='termin-dt-anzeige termin-dt-leer';}
