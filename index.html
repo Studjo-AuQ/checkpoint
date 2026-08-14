@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gruppen&middot;Checkpoint &ndash; Studjo</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -350,6 +350,11 @@
 <div class="a11y-toast" id="a11y-toast"></div>
 
 <script src="sortable.min.js"></script>
-<script src="app.js"></script>
+<!-- Ladereihenfolge ist wichtig: storage → render → modal → checkliste → app (zuletzt) -->
+<script src="js/storage.js"></script>
+<script src="js/render.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/checkliste.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
