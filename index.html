@@ -67,13 +67,20 @@
 
 <!-- Banner mit Uhr -->
 <div class="banner">
-  <div class="kst-banner-wrap">
-    <div class="kst-banner-zeile">
-      <span class="kst-nr-badge" id="kst-anzeige-nr">&#8212;</span>
-      <button class="kst-wechseln-btn" onclick="zeigeKstEingabe()">&#8646; wechseln</button>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="kst-banner-wrap">
+      <div class="kst-banner-zeile">
+        <span class="kst-nr-badge" id="kst-anzeige-nr">&#8212;</span>
+        <button class="kst-wechseln-btn" onclick="zeigeKstEingabe()">&#8646; wechseln</button>
+      </div>
+      <h1 id="banner-name" style="font-size:1rem;font-weight:800;color:white;">Gruppen&middot;Checkpoint</h1>
+      <div style="font-size:0.78rem;opacity:.85;color:white;" id="banner-kw"></div>
     </div>
-    <h1 id="banner-name" style="font-size:1rem;font-weight:800;color:white;">Gruppen&middot;Checkpoint</h1>
-    <div style="font-size:0.78rem;opacity:.85;color:white;" id="banner-kw"></div>
+    <div class="banner-phase" id="banner-phase">
+      <div class="banner-phase-titel">Aktuell</div>
+      <div class="banner-phase-icon" id="banner-phase-icon">&#8211;</div>
+      <div class="banner-phase-text" id="banner-phase-text">&nbsp;</div>
+    </div>
   </div>
   <div class="banner-clock">
     <div class="clock-time" id="clock-time">00:00</div>
