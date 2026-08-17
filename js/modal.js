@@ -361,6 +361,31 @@ function schM(id){
 }
 function modalAK(e,id){if(e.target===document.getElementById(id))schM(id);}
 
+/* ═══ Hilfe-Modal (Anleitung als Aufklapp-Liste) ═══ */
+function oeffneHilfeModal(){
+  var html='';
+  HILFE_INHALTE.forEach(function(k,i){
+    html+='<div class="hilfe-kapitel">'
+        +'<button class="hilfe-kapitel-kopf" onclick="toggleHilfeKapitel('+i+')">'
+        +'<span>'+k.titel+'</span><span class="hilfe-kapitel-pfeil" id="hilfe-pfeil-'+i+'">&#9656;</span>'
+        +'</button>'
+        +'<div class="hilfe-kapitel-body" id="hilfe-body-'+i+'" style="display:none;">'
+        +'<ul>'+k.saetze.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ul>'
+        +'</div>'
+        +'</div>';
+  });
+  document.getElementById('hilfe-modal-body').innerHTML=html;
+  document.getElementById('hilfe-modal').classList.add('sichtbar');
+}
+function toggleHilfeKapitel(i){
+  var body=document.getElementById('hilfe-body-'+i);
+  var pfeil=document.getElementById('hilfe-pfeil-'+i);
+  if(!body)return;
+  var offen=body.style.display!=='none';
+  body.style.display=offen?'none':'block';
+  if(pfeil)pfeil.innerHTML=offen?'&#9656;':'&#9662;';
+}
+
 /* Namen (Feature 3: 1-spaltig + sortable, kein Standard) */
 var namenSortable=null;
 function oeffneNamenModal(){
