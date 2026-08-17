@@ -347,6 +347,40 @@ function berechneKWZeile(){
   var fr=new Date(mo);fr.setDate(mo.getDate()+4);
   return 'KW '+getKW(now)+' | '+formatDatum2(mo)+' – '+formatDatum2(fr);
 }
+/* ═══ Arbeits-/Pausenzeit-Erkennung ("Aktuell"-Feld im Banner) ═══
+   Regulär: 08:00–10:00, 10:20–12:00, 13:00–15:15 Arbeit | 10:00–10:20, 12:00–13:00 Pause
+   Freitags UND am 1. Dienstag im Monat endet die Arbeit bereits um 14:45 Uhr.
+   Wochenende sowie außerhalb aller Zeitfenster = neutral ("Kein Betrieb"). */
+function istErsterDienstagImMonat(d){
+  return d.getDay()===2&&d.getDate()<=7;
+}
+function berechnePhase(d){
+  d=d||new Date();
+  var tag=d.getDay(); /* 0=So … 6=Sa */
+  if(tag===0||tag===6)return{phase:'neutral',label:'Kein Betrieb'};
+  var min=d.getHours()*60+d.getMinutes();
+  var kurzerTag=(tag===5)||istErsterDienstagImMonat(d);
+  var arbeitBloecke=kurzerTag
+    ?[[480,600],[620,720],[780,885]]   /* 08:00-10:00 / 10:20-12:00 / 13:00-14:45 */
+    :[[480,600],[620,720],[780,915]];  /* 08:00-10:00 / 10:20-12:00 / 13:00-15:15 */
+  var pauseBloecke=[[600,620],[720,780]]; /* 10:00-10:20 / 12:00-13:00 */
+  function inBloecken(bloecke){return bloecke.some(function(b){return min>=b[0]&&min<b[1];});}
+  if(inBloecken(arbeitBloecke))return{phase:'arbeit',label:'Arbeitszeit'};
+  if(inBloecken(pauseBloecke))return{phase:'pause',label:'Pause'};
+  return{phase:'neutral',label:'Kein Betrieb'};
+}
+function renderAktuellePhase(){
+  var el=document.getElementById('banner-phase');
+  if(!el)return;
+  var p=berechnePhase(new Date());
+  el.classList.remove('phase-arbeit','phase-pause','phase-neutral');
+  el.classList.add('phase-'+p.phase);
+  var icon=document.getElementById('banner-phase-icon');
+  var txt=document.getElementById('banner-phase-text');
+  if(icon)icon.textContent=p.phase==='arbeit'?'\u{1F4BC}':(p.phase==='pause'?'\u2615':'\u2013');
+  if(txt)txt.textContent=p.label;
+  el.title=p.label;
+}
 function updateClock(){
   var now=new Date();
   var h=now.getHours().toString().padStart(2,'0');
@@ -356,6 +390,7 @@ function updateClock(){
   /* KW-Zeile automatisch */
   var kwEl=document.getElementById('banner-kw');
   if(kwEl)kwEl.textContent=berechneKWZeile();
+  renderAktuellePhase();
   checkTerminDatumHeute();
 }
 /* ── Datum / Uhrzeit → gesprochenes Deutsch (global) ── */
