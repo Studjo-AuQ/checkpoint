@@ -294,6 +294,14 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .kst-banner-wrap{display:flex;flex-direction:column;gap:2px;}
 .kst-banner-zeile{display:flex;align-items:center;gap:6px;}
 .kst-nr-badge{background:rgba(255,255,255,.25);border-radius:6px;padding:1px 8px;font-size:.75rem;font-weight:900;letter-spacing:.08em;color:white;}
+/* "Aktuell"-Feld: Arbeit/Pause-Erkennung anhand Systemzeit */
+.banner-phase{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;padding:2px 14px;min-width:62px;border:1.5px solid rgba(255,255,255,.35);transition:background-color .4s;}
+.banner-phase-titel{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:white;opacity:.9;}
+.banner-phase-icon{font-size:1.7rem;line-height:1.15;}
+.banner-phase-text{font-size:.66rem;font-weight:800;color:white;}
+.banner-phase.phase-arbeit{background:rgba(22,163,74,.4);}
+.banner-phase.phase-pause{background:rgba(182,31,41,.4);}
+.banner-phase.phase-neutral{background:rgba(255,255,255,.12);}
 .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
 .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
