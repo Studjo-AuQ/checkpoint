@@ -350,99 +350,99 @@ var AUFGABEN_INFO={
 var HILFE_INHALTE=[
   {titel:'1) Sinn und Zweck des Checkpoints',saetze:[
     'Der Checkpoint hilft der Gruppe, den Tag gemeinsam zu organisieren.',
-    'Hier steht auf einen Blick, wer da ist, wer was macht und was heute wichtig ist.',
-    'Die Tages-Checkliste zeigt, welche Aufgaben heute erledigt werden müssen.',
+    'Du siehst auf einen Blick: Wer ist da, wer macht was, was ist wichtig.',
+    'Die Tages-Checkliste zeigt: Diese Aufgaben müssen erledigt werden.',
     'Termine, Zuständigkeiten und Arbeitsinhalte sind alle an einem Ort.',
-    'So haben alle in der Gruppe die gleichen Informationen.',
+    'So haben alle in der Gruppe die gleichen Infos.',
     'Das Dashboard läuft direkt im Browser, ganz ohne Internet.'
   ]},
   {titel:'2) Kostenstelle wechseln',saetze:[
     'Jede Gruppe hat eine eigene Kostenstellen-Nummer.',
     'Oben links auf den Button „wechseln" tippen.',
-    'Die richtige Nummer eingeben und bestätigen.',
+    'Die richtige, 5-stellige Nr. eingeben und bestätigen.',
     'Das Tablet zeigt dann automatisch die Daten der eigenen Gruppe.',
     'Jede Kostenstelle speichert ihre Daten getrennt voneinander.',
-    'Das Wechseln ist nur nötig, wenn ein Tablet für mehrere Gruppen genutzt wird.'
+    'Wechseln der Nr. ist nur bei mehreren Gruppen auf 1 Tablet nötig.'
   ]},
   {titel:'3) Portraitbilder',saetze:[
     'Ein Foto macht das Dashboard persönlicher und übersichtlicher.',
-    'Im Profil einer Person auf „Foto hochladen" tippen.',
-    'Ein Bild auswählen – es wird automatisch auf die richtige Größe zugeschnitten.',
+    'Im Profil - runder Punkt im Namensfeld - auf „Foto hochladen" tippen.',
+    'Bild auswählen – es wird automatisch auf 80x80px zugeschnitten.',
     'Die App bietet die fertige Bild-Datei zum Herunterladen an.',
-    'Diese Datei muss einmalig in den Ordner „fotos" neben der App verschoben werden.',
-    'Erst nach dem Verschieben und einem Neuladen der Seite erscheint das Foto dauerhaft.'
+    'Verschiebe diese Datei  einmalig in den Ordner „fotos" im App-Ordner.',
+    'Nach dem Verschieben und Neuladen erscheint das Foto dauerhaft.'
+    'Beachte die Bild-Erlaubnis. Löschen im "fotos" Ordner möglich '
   ]},
-  {titel:'4) Namen: Editieren, Abwesenheit und Profil',saetze:[
-    'Ein Tipp auf einen Namen in der Liste öffnet das Aufgaben-Modal dieser Person.',
-    'Über das Namen-Modal (Stift-Symbol) lassen sich Namen bearbeiten, sortieren oder neu hinzufügen.',
-    'Ein Tipp direkt auf das Foto markiert die Person als abwesend.',
-    'Bei Abwesenheit lässt sich wählen: nur für heute oder bis auf weiteres.',
-    'Im Profil-Modal wird für jede Aufgabe eingestellt, wie sicher die Person sie schon beherrscht.',
-    'Diese Einstellung sorgt dafür, dass Aufgaben farblich passend zur Fähigkeit angezeigt werden.'
+  {titel:'4) Namen der Gruppenmitglieder',saetze:[
+    'Klick auf Überschrift "Namen" für ändern, verschieben, löschen.',
+    'Entfernst du Personen: Beachte, ggf. das Foto mit zu löschen',
+    'Klick auf Portrait oder Namen: Person stellt sich "abwesend".',
+    'Wähle bei Abwesenheit: Nur für heute oder bis auf weiteres.',
+    'Profil - Button unten rechts im Namensfeld - für Fähigkeitsbewertung.',
+    '3 Möglichkeiten wählbar: Selbstständig, Assistenz oder nicht geübt.'
   ]},
   {titel:'5) Arbeitsinhalt einstellen',saetze:[
-    'Über das Werkzeug-Symbol wird eingetragen, woran eine Person gerade arbeitet.',
-    'Ein kurzer Text beschreibt die aktuelle Tätigkeit.',
-    'Die Schwierigkeitsstufe (0 bis 4) zeigt nach Binnendifferenzierung: „Wie schwer ist die Tätigkeit?"',
-    'Je höher die Zahl, desto anspruchsvoller ist die Aufgabe für die Person.',
-    'Zusätzlich lässt sich die Auslastung markieren: gut ausgelastet, läuft bald aus oder keine Arbeit.',
-    'Alle Angaben erscheinen als kleines Symbol direkt auf dem Werkzeug-Icon.'
+    'Stelle über das Arbeits-Symbol ein: Das arbeitet die Person gerade.',
+    'Ein kurzer Text beschreibt die Tätigkeit. Auch Vorlesen möglich.',
+    'Schwierigkeitsstufe (0 bis 4) zeigt die Binnendifferenzierung',
+    'Je höher die Zahl, desto anspruchsvoller ist die Aufgabe.',
+    'Auslastung möglich: ausgelastet, läuft bald aus oder keine Arbeit.',
+    'Angaben erscheinen mit Farb-Rahmen und als kleines Symbol.'
   ]},
-  {titel:'6) Symbole für Tages-Checkliste und allgemeine Zuständigkeiten',saetze:[
-    'Gelbe Symbole gehören zur Tages-Checkliste, zum Beispiel „Boden fegen".',
-    'Blaue Symbole sind allgemeine Zuständigkeiten, zum Beispiel „Botengänge".',
-    'Ein Symbol lässt sich per Ziehen (Maus oder Finger) auf eine Person legen.',
-    'Alternativ: Symbol antippen, dann die passende Person antippen.',
-    'So sieht jede Person sofort, welche Aufgaben zu ihr gehören.',
-    'Über das Aufgaben-Modal lassen sich mehrere Zuständigkeiten gleichzeitig einstellen.'
+  {titel:'6) Symbole für Zuständigkeiten',saetze:[
+    'Gelbe Symbole für Tages-Checkliste. Z.B. Beispiel „Boden fegen".',
+    'Blaue Symbole für allg. Zuständigkeiten. Z.B. „Botengänge".',
+    'Klick auf Überschrift "Zuständigkeiten" für Änderungen.',
+    'Klicke dann auf Namen: Zuständigkeiten per Checkboxen.',
+    'Oder verschiebe die Symbole auf andere Personen.',
+    'So sieht jede Person sofort: Welche Aufgaben habe ich.'
   ]},
-  {titel:'7) Leitung der Gruppe: Namen wechseln und Krone wechseln',saetze:[
-    'Die Krone zeigt an, wer aktuell die Gruppe leitet.',
-    'Ein Tipp auf eine andere Person in der Leitungs-Liste überträgt ihr die Krone.',
-    'Die Namen in dieser Liste lassen sich über das Leitungs-Modal bearbeiten.',
-    'Es kann jederzeit nur eine Person gleichzeitig die Krone tragen.',
-    'Die Leitung wird nicht automatisch zurückgesetzt und bleibt bis zur nächsten Änderung bestehen.',
-    'So ist immer klar erkennbar, wer heute die Ansprechperson ist.'
+  {titel:'7) Leitung der Gruppe',saetze:[
+    'Die Krone zeigt an: Wer leitet aktuell die Gruppe.',
+    'Schnelles Übertragen der Krone durch Klick auf den Kreis.',
+    'Bearbeitung der 3 Namen über die Überschrift "Leitung der Gruppe.',
+    'Es kann  nur eine Person gleichzeitig die Krone tragen.',
+    'Leitung kann auch MAmWV sein. Z.B. der Checkpoint-Verantwortliche.',
+    'So ist klar erkennbar: Wer ist heute Ansprechperson.'
   ]},
-  {titel:'8) Termine: Nächster Termin, Datum/Uhrzeit, Farbhintergründe',saetze:[
-    'In der Mitte vom Dashboard stehen die möglichen Termine der Gruppe.',
-    'Ein Klick auf „Nächster Termin" zeigt ihn groß an und liest ihn vor.',
-    'Über das Kalender-Symbol lassen sich Datum und Uhrzeit einstellen.',
+  {titel:'8) Termine',saetze:[
+    'In der Mitte vom Dashboard findest du Gruppen-Termine.',
+    'Klick auf Überschrift „Nächster Termin": Anzeige groß u. vorlesbar.',
+    'Klick auf Kalender-Symbol stellt Datum und Uhrzeit ein.',
     'Wird keine Uhrzeit gewählt, gilt der Termin als ganztägig.',
     'Grüner Hintergrund bedeutet: Der Termin ist heute.',
-    'Roter, blasser Hintergrund bedeutet: Der Termin liegt in der Vergangenheit.'
+    'Roter Hintergrund bedeutet: Der Termin ist vorbei.'
   ]},
   {titel:'9) Diese Woche wichtig',saetze:[
-    'Hier steht ein wichtiger Hinweis, der für die ganze Woche gilt.',
-    'Es gibt bewusst kein festes Datum – der Hinweis bleibt einfach stehen, bis er geändert wird.',
-    'Über das Dropdown-Menü lässt sich ein passender, vorbereiteter Text auswählen.',
-    'Der Hinweis ist gut sichtbar oben im Dashboard platziert.',
-    'So verpasst niemand wichtige Infos für die laufende Woche.',
-    'Der Text lässt sich jederzeit wieder ändern oder löschen.'
-  ]},
-  {titel:'10) Tages-Checkliste pflegen',saetze:[
-    'Jede Aufgabe hat vier mögliche Status-Symbole zur Auswahl.',
-    'Grün bedeutet erledigt, grau bedeutet an diesem Tag nicht nötig.',
-    'Ein Tipp auf das Symbol wechselt zwischen den Status-Möglichkeiten.',
-    'Über das Uhr-Symbol wird eingestellt, an welchen Wochentagen und zu welcher Uhrzeit eine Aufgabe fällig ist.',
-    'Die zuständige Person lässt sich für den Tag wechseln, zum Beispiel bei Krankheit (Vertretung).',
-    'So bleibt die Checkliste jeden Tag aktuell und passend besetzt.'
+    'Wichtige Hinweise für die ganze Woche stehen unten.',
+    'Ohne Datum – bleibt bis zur Änderung stehen.',
+    'Über Dropdown-Menü lassen sich Kategorien wählen.',
+    'Dann ist rechts daneben ein Freitext möglich.',
+    'So verpasst niemand wichtige Infos für die Woche.',
+      ]},
+  {titel:'10) Tages-Checkliste',saetze:[
+    'Jede Aufgabe mit 4 möglichen Status-Symbolen.',
+    'Grün=erledigt. Rot=offen, Gelb=schnell fällig, Grau=nicht nötig.',
+    'Ein Tipp auf das Symbol wechselt den Status - also quittieren.',
+    'Uhr-Symbol rechts stellt ein: Fällig an x Wochentagen oder Zeiten.',
+    'Klick auf Bezeichnung: Zuständige Person wechseln oder Ausfall.',
+    'So bleibt die Checkliste jeden Tag aktuell passend besetzt.'
   ]},
   {titel:'11) Import / Export / Neuer Tag',saetze:[
-    'Der Pfeil nach oben lädt eine zuvor gespeicherte Datei wieder ein.',
-    'Der Pfeil nach unten sichert alle aktuellen Daten als Datei zum Herunterladen.',
+    'Pfeil nach oben: Lädt eine zuvor gespeicherte Datei wieder ein.',
+    'Pfeil nach unten: Sichert aktuelle Daten als Datei zum Download.',
     'Dieses Exportieren regelmäßig durchführen – am besten täglich.',
-    'Achtung: Wird der Browser-Speicher gelöscht (z. B. manuell durch Nutzer), gehen alle Eintragungen unwiderruflich verloren.',
-    'Nur eine vorher exportierte Datei kann die Daten dann wiederherstellen – deshalb den Export nicht vergessen.',
-    '„Neuer Tag" setzt die Tages-Checkliste zurück und startet den nächsten Arbeitstag.'
+    'Achtung: Wenn Browser-Speicher gelöscht (z.B. manuell durch Nutzer), gehen Eintragungen verloren.',
+    'Nur eine vorher exportierte Datei kann dann wiederherstellen.',
+    '„Neuer Tag" setzt Tages-Checkliste zurück - startet nächsten Arbeitstag.'
   ]},
   {titel:'12) Hilfe und Barrierefreiheit',saetze:[
     'Unten rechts öffnet der Button „H" die Bedienungshilfen.',
     '„A+" vergrößert die Schrift in mehreren Stufen für bessere Lesbarkeit.',
-    'Das Kontrast-Symbol schaltet einen kontrastreicheren Anzeigemodus ein und aus.',
+    'Kontrast-Symbol schaltet kontrastreichere Anzeige ein und aus.',
     'Der Vorlesen-Button liest Inhalte auf Wunsch laut vor.',
-    'Nach dem Aktivieren einfach einen Bereich auf dem Dashboard antippen – dieser wird dann vorgelesen.',
-    'Ein erneuter Tipp auf den Vorlesen-Button oder die Escape-Taste beendet das Vorlesen wieder.'
+    'Nach dem Aktivieren einen Bereich antippen zum Vorlesen.',
+    'Erneuter Tipp auf den Vorlesen-Button oder Escape-Taste beendet Vorlesen.'
   ]}
 ];
 
