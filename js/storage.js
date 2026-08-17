@@ -29,6 +29,18 @@ var MITARBEITENDE=[
   {id:9,name:"Monika L."},{id:10,name:"Michael G."},{id:11,name:"Christine D."},{id:12,name:"Andreas N."},
   {id:13,name:"Sabine T."},{id:14,name:"Markus E."},{id:15,name:"Ursula C."},{id:16,name:"Frank J."}
 ];
+/* ═══ Foto-Funktion: Portraits liegen als echte Dateien im Ordner "fotos"
+   (nicht in localStorage/Cloud) – Dateiname wird aus dem Namen abgeleitet,
+   z.B. "Anna B." -> "anna_b.jpg". Kein Foto vorhanden = Bild wird per
+   onerror ausgeblendet, es gibt keinen Fehler. ═══ */
+function dateiNameFuerFoto(name){
+  var s=(name||'').toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/\./g,'').replace(/\s+/g,'_')
+    .replace(/[^a-z0-9_]/g,'');
+  return (s||'foto')+'.jpg';
+}
+function fotoPfad(name){return 'fotos/'+dateiNameFuerFoto(name);}
 var AUFGABEN={
   checkpoint:{label:"Kontrolle Checkpoint",foto:"check-checkpoint.jpg",typ:"checkliste"},
   arbeitsvorbereitung:{label:"Arbeit vorbereiten",foto:"check-arbeitsvorbereitung.jpg",typ:"checkliste"},

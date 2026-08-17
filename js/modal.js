@@ -9,8 +9,18 @@ function oeffneProfilModal(personId,event){
   var p=MITARBEITENDE.find(function(m){return m.id===personId;});if(!p)return;
   var profil=PROFIL[personId]||{};
   var typen=['checkliste','allgemein'];
+  var dName=dateiNameFuerFoto(p.name);
   var html='<div class="modal-kopf"><h2>&#128101; Profil: '+p.name+'</h2>'
            +'<button class="modal-schliessen" onclick="schM(\'profil-modal\')">&#10005;</button></div>'
+           /* ═══ Foto-Upload (lokal, Festplatte – kein Server/Cloud) ═══ */
+           +'<div style="display:flex;gap:12px;align-items:flex-start;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;">'
+           +'<img id="profil-foto-preview" src="fotos/'+dName+'" alt="Foto" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--hell);" onerror="this.style.display=\'none\';document.getElementById(\'profil-foto-platzhalter\').style.display=\'flex\';">'
+           +'<div id="profil-foto-platzhalter" style="display:none;width:80px;height:80px;border-radius:8px;background:var(--hell);color:var(--grau);align-items:center;justify-content:center;font-size:.65rem;text-align:center;flex-shrink:0;">Kein Foto</div>'
+           +'<div style="flex:1;min-width:0;">'
+           +'<label class="btn-modal-secondary" style="display:inline-block;cursor:pointer;font-size:.8rem;">&#128247; Foto hochladen'
+           +'<input type="file" accept="image/*" style="display:none;" onchange="fotoAusgewaehlt(this,'+p.id+')"></label>'
+           +'<p id="profil-foto-hinweis" style="font-size:.7rem;color:var(--grau);margin-top:6px;line-height:1.4;">Wird automatisch auf 80×80px zugeschnitten und als Datei heruntergeladen (Dateiname: <b>'+dName+'</b>). Bitte danach einmalig in den Ordner <b>fotos</b> neben der App verschieben.</p>'
+           +'</div></div>'
            +'<p style="font-size:.78rem;color:var(--grau);margin-bottom:10px;">F\u00e4higkeitsbewertung f\u00fcr jede Aufgabe – erscheint farbig bei Zuweisung.</p>'
            +'<div id="profil-aufgaben-liste" style="display:flex;flex-direction:column;gap:5px;max-height:58vh;overflow-y:auto;">';
   var letzterTyp='';
@@ -46,6 +56,46 @@ function oeffneProfilModal(personId,event){
   document.getElementById('profil-modal-body').innerHTML=html;
   document.getElementById('profil-modal').classList.add('sichtbar');
 }
+/* ═══ Foto-Upload: lokal zuschneiden (80×80) und als Datei herunterladen ═══
+   Läuft komplett offline im Browser (Canvas). Es werden keine Daten irgendwohin
+   gesendet – die fertige Datei landet im Downloads-Ordner des Tablets und muss
+   einmalig manuell in den Ordner "fotos" verschoben werden. */
+function fotoAusgewaehlt(input,personId){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var p=MITARBEITENDE.find(function(m){return m.id===personId;});
+  if(!p)return;
+  var dName=dateiNameFuerFoto(p.name);
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      /* Quadratischer Mittenausschnitt, dann auf 80x80 skalieren (wie object-fit:cover) */
+      var gr=Math.min(img.width,img.height);
+      var sx=(img.width-gr)/2,sy=(img.height-gr)/2;
+      var canvas=document.createElement('canvas');
+      canvas.width=80;canvas.height=80;
+      var ctx=canvas.getContext('2d');
+      ctx.drawImage(img,sx,sy,gr,gr,0,0,80,80);
+      var dataUrl=canvas.toDataURL('image/jpeg',0.88);
+      /* Sofort-Vorschau im Modal (nur für diese Sitzung) */
+      var prev=document.getElementById('profil-foto-preview');
+      if(prev){prev.src=dataUrl;prev.style.display='block';}
+      var ph=document.getElementById('profil-foto-platzhalter');
+      if(ph)ph.style.display='none';
+      /* Download der fertigen 80x80-Datei mit korrektem Dateinamen anstoßen */
+      var a=document.createElement('a');
+      a.href=dataUrl;a.download=dName;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      var hin=document.getElementById('profil-foto-hinweis');
+      if(hin)hin.innerHTML='&#9989; Als <b>'+dName+'</b> heruntergeladen. Bitte jetzt in den Ordner <b>fotos</b> neben der App verschieben – danach Seite einmal neu laden.';
+    };
+    img.onerror=function(){alert('Diese Datei konnte nicht als Bild gelesen werden.');};
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function profilWaehlen(btn){
   var id=btn.dataset.aufgabeId;
   var wert=btn.dataset.wert;
@@ -391,6 +441,13 @@ function speichereNamenAusModal(){
   if(ordered.length===0)return;
   /* Entfernte Personen: Zuständigkeiten und State bereinigen */
   var entferntIds=alleAltenIds.filter(function(id){return !ordered.find(function(p){return p.id===id;});});
+  /* Foto-Löschen-Erinnerung: Namen VOR dem Entfernen sichern, da Fotos als
+     eigene Dateien im Ordner "fotos" liegen und nicht automatisch von der
+     App gelöscht werden können. */
+  var entferntNamen=entferntIds.map(function(id){
+    var alt=MITARBEITENDE.find(function(p){return p.id===id;});
+    return alt?alt.name:null;
+  }).filter(Boolean);
   entferntIds.forEach(function(id){
     GRUPPE.zustaendigkeiten=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId!==id;});
     var ai=STATE.abwesend.indexOf(id);if(ai!==-1)STATE.abwesend.splice(ai,1);
@@ -402,6 +459,10 @@ function speichereNamenAusModal(){
   localStorage.setItem(NAMEN_KEY,JSON.stringify(MITARBEITENDE.map(function(p){return{id:p.id,name:p.name};})));
   if(entferntIds.length>0){speichereZuordnung();speichereState();speichereArbeitsnotizen();}
   schM('namen-modal');renderNamen();initSortable();renderCheckliste();
+  if(entferntNamen.length>0){
+    var dateien=entferntNamen.map(function(n){return dateiNameFuerFoto(n);});
+    alert('Hinweis: Falls vorhanden, bitte folgende Foto-Datei(en) manuell aus dem Ordner "fotos" l\u00f6schen:\n\n'+dateien.join('\n'));
+  }
 }
 
 /* Leitung */
@@ -446,7 +507,7 @@ function oeffneAufgabenModal(personId){
           +'</span><div class="aufg-chip-check">'+(gew?'&#10003;':'')+'</div></button>';
   }
   document.getElementById('aufgaben-modal-inhalt').innerHTML=
-    '<div class="aufg-modal-person"><img src="portrait.jpg" alt="'+person.name+'" onerror="this.style.background=\'#e2e8f0\'"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
+    '<div class="aufg-modal-person"><img src="'+fotoPfad(person.name)+'" alt="'+person.name+'" onerror="this.style.background=\'#e2e8f0\';this.style.opacity=0;"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
    +'<div class="aufg-modal-cols">'
    +'<div><div class="aufg-col-titel gelb">&#128203; Checklisten-Aufgaben</div><div class="aufg-col-chips">'+sortierteCheckIds().map(function(id){return chip(id,'check-chip');}).join('')+'</div></div>'
    +'<div><div class="aufg-col-titel blau">&#9881; Allgemeine Zust&auml;ndigkeiten</div><div class="aufg-col-chips">'+sortierteZustIds().map(function(id){return chip(id,'zust-chip');}).join('')+'</div></div>'
