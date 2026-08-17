@@ -309,6 +309,14 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .banner-phase.phase-pause .banner-phase-titel,
 .banner-phase.phase-pause .banner-phase-text{color:#991b1b;opacity:1;}
 .banner-phase.phase-neutral{background:rgba(255,255,255,.12);}
+/* Hilfe-Modal: Aufklapp-Kapitel */
+.hilfe-kapitel{border-bottom:1px solid var(--hell);}
+.hilfe-kapitel:last-child{border-bottom:none;}
+.hilfe-kapitel-kopf{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:11px 4px;font-size:.86rem;font-weight:800;text-align:left;cursor:pointer;color:var(--text);}
+.hilfe-kapitel-pfeil{color:var(--grau);font-size:.75rem;flex-shrink:0;margin-left:8px;}
+.hilfe-kapitel-body{padding:0 4px 14px 4px;}
+.hilfe-kapitel-body ul{margin:0;padding-left:18px;font-size:.82rem;line-height:1.55;color:var(--text);}
+.hilfe-kapitel-body li{margin-bottom:4px;}
 .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
 .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
