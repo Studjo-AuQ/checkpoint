@@ -234,6 +234,24 @@
   </div>
 </div>
 
+<!-- ═══ Impressum-Modal ═══ -->
+<div class="modal-overlay" id="impressum-modal" onclick="modalAK(event,'impressum-modal')">
+  <div class="modal-box" style="width:min(560px,96vw)">
+    <div class="modal-kopf"><h2>&#128196; Impressum</h2><button class="modal-schliessen" onclick="schM('impressum-modal')">&#10005;</button></div>
+    <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
+    <div id="impressum-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ Datenschutz-Modal ═══ -->
+<div class="modal-overlay" id="datenschutz-modal" onclick="modalAK(event,'datenschutz-modal')">
+  <div class="modal-box" style="width:min(560px,96vw)">
+    <div class="modal-kopf"><h2>&#128274; Datenschutz</h2><button class="modal-schliessen" onclick="schM('datenschutz-modal')">&#10005;</button></div>
+    <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
+    <div id="datenschutz-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
 <!-- ═══ Arbeit-Notiz Modal ═══ -->
 <div class="modal-overlay" id="arbeit-modal" onclick="modalAK(event,'arbeit-modal')">
   <div class="modal-box" style="width:min(460px,96vw)">
@@ -324,7 +342,13 @@
   </div>
 </div>
 
-<footer>&copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen&middot;Checkpoint</footer>
+<footer>
+  &copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen&middot;Checkpoint
+  &nbsp;&middot;&nbsp;
+  <a href="#" class="footer-link" onclick="oeffneImpressumModal();return false;">Impressum</a>
+  &nbsp;|&nbsp;
+  <a href="#" class="footer-link" onclick="oeffneDatenschutzModal();return false;">Datenschutz</a>
+</footer>
 
 <!-- ── Personen-Profil Modal ── -->
 <div class="modal-overlay" id="profil-modal" onclick="if(event.target===this)schM('profil-modal')">
