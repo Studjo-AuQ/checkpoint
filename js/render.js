@@ -134,7 +134,7 @@ function renderNamen(){
     var _arbTitel=hatNotiz?_titelTeile.join(' \u2013 '):'Arbeitsinhalt eintragen';
     var _arbBadgeTxt=_hatStufe?String(notiz.stufe):'';
     var arbeitIconHtml='<div class="aufg-icon-wrap arbeit-icon-fixed'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'
-      +'<img src="arbeit.jpg" alt="Arbeit" class="aufg-icon-img" onerror="this.style.background=\'#e2e8f0\'">'
+      +'<img src="symbole/arbeit.jpg" alt="Arbeit" class="aufg-icon-img" onerror="this.style.background=\'#e2e8f0\'">'
       +(_arbBadgeTxt?'<div class="aufg-badge arbeit-badge">'+_arbBadgeTxt+'</div>':'')
       +'</div>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
