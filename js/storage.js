@@ -446,3 +446,89 @@ var HILFE_INHALTE=[
   ]}
 ];
 
+/* ══════ Impressum / Datenschutz (rote Fußzeile) ══════
+   Gleiches Akkordeon-Prinzip wie HILFE_INHALTE, aber mit
+   fertigem HTML statt einzelner Sätze (Adressen, Hervorhebungen usw.). */
+var IMPRESSUM_INHALTE=[
+  {titel:'1) Anbieter und Herausgeber',html:
+    '<p>Herausgeber und inhaltlich verantwortlich für die Nutzung innerhalb des Studjo:</p>'
+    +'<address>Evangelisches Johanneswerk gGmbH<br>Studjo | Arbeit und Qualifizierung<br>Freisenbergstra\u00dfe 33<br>58513 L\u00fcdenscheid</address>'
+    +'<p style="margin-top:10px">\u00dcbergeordneter Tr\u00e4ger:</p>'
+    +'<address>Evangelisches Johanneswerk gGmbH<br>Schildescher Str. 101<br>33611 Bielefeld<br>Telefon: 0521 801-01<br>Fax: 0521 801-2569<br>E-Mail: <a href="mailto:kommunikation@johanneswerk.de">kommunikation@johanneswerk.de</a><br>Web: <a href="https://www.johanneswerk.de" target="_blank" rel="noopener">www.johanneswerk.de</a></address>'
+  },
+  {titel:'2) Geschäftsführung und Registereintrag',html:
+    '<p>Vertretungsberechtigte Gesch\u00e4ftsf\u00fchrung:<br>Sabine Hirte (Vorsitzende)<br>Dr. Bodo de Vries (stellv. Vorsitzender)<br>Burkhard Bensiek<br>Frank Lohmann</p>'
+    +'<p style="margin-top:10px">Rechtsform: Gemeinn\u00fctzige Gesellschaft mit beschr\u00e4nkter Haftung (gGmbH)<br>Handelsregister: Amtsgericht Bielefeld, HRB 42903<br>Umsatzsteuer-Identifikationsnummer gem. \u00a7 27a UStG: DE316517497</p>'
+  },
+  {titel:'3) Inhaltlich Verantwortlicher',html:
+    '<p>Christoph Pasch<br>Studjo | Arbeit und Qualifizierung<br>Evangelisches Johanneswerk gGmbH<br>Freisenbergstra\u00dfe 33<br>58513 L\u00fcdenscheid<br>E-Mail: <a href="mailto:christoph.pasch@johanneswerk.de">christoph.pasch@johanneswerk.de</a></p>'
+  },
+  {titel:'4) Technische Umsetzung und Bereitstellung',html:
+    '<p>Entwicklung und Pflege:<br>Marc Brenzel<br>Studjo | Arbeit und Qualifizierung<br>Evangelisches Johanneswerk gGmbH<br>E-Mail: <a href="mailto:marc.brenzel@johanneswerk.de">marc.brenzel@johanneswerk.de</a></p>'
+    +'<p style="margin-top:10px">Gruppen\u00b7Checkpoint ist eine lokale Anwendung ohne \u00f6ffentlichen Internet-Auftritt. Sie wird direkt auf dem Tablet bzw. Ger\u00e4t der jeweiligen Gruppe ge\u00f6ffnet und l\u00e4uft offline. Der Quellcode wird zur Entwicklung in einem GitHub-Repository verwaltet; die Verteilung an die Gruppen erfolgt als Download-Paket \u00fcber GitHub Releases, nicht als \u00f6ffentlich aufrufbare Website.</p>'
+  },
+  {titel:'5) Haftungsausschluss',html:
+    '<p><strong>Haftung f\u00fcr Inhalte:</strong> Die Inhalte dieser Anwendung wurden mit gr\u00f6\u00dfter Sorgfalt erstellt. F\u00fcr die Richtigkeit, Vollst\u00e4ndigkeit und Aktualit\u00e4t der Inhalte kann jedoch keine Gew\u00e4hr \u00fcbernommen werden.</p>'
+    +'<p><strong>Haftung f\u00fcr Links:</strong> Sofern die Anwendung Links zu externen Webseiten Dritter enth\u00e4lt, besteht auf deren Inhalte kein Einfluss. F\u00fcr die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter verantwortlich.</p>'
+    +'<p><strong>Urheberrecht:</strong> Die durch den Betreiber erstellten Inhalte unterliegen dem deutschen Urheberrecht. Vervielf\u00e4ltigung, Bearbeitung, Verbreitung und jede Art der Verwertung au\u00dferhalb der Grenzen des Urheberrechts bed\u00fcrfen der schriftlichen Zustimmung des jeweiligen Erstellers.</p>'
+    +'<p>Die in der Anwendung verwendeten Metacom-Symbole sind urheberrechtlich gesch\u00fctzt. Metacom\u00ae ist ein eingetragenes Warenzeichen von Annick Schauer-S\u00fcss, Mayer-Johnson LLC und weiteren Rechteinhabern.</p>'
+  }
+];
+
+var DATENSCHUTZ_INHALTE=[
+  {titel:'1) Verantwortlicher für die Datenverarbeitung',html:
+    '<p>Verantwortliche Stelle im Sinne des Datenschutzgesetzes der evangelischen Kirche in Deutschland (DSG-EKD) ist die Ev. Johanneswerk gGmbH.</p>'
+    +'<address>Evangelisches Johanneswerk gGmbH<br>Studjo | Arbeit und Qualifizierung<br>Freisenbergstra\u00dfe 33<br>58513 L\u00fcdenscheid<br>Telefon: +49 0 23 51 95 80-0<br>E-Mail: <a href="mailto:christoph.pasch@johanneswerk.de">christoph.pasch@johanneswerk.de</a></address>'
+  },
+  {titel:'2) Datenschutzbeauftragter',html:
+    '<p>Der Datenschutzbeauftragte des Evangelischen Johanneswerks ist erreichbar unter:</p>'
+    +'<address>Niels Kill<br>c/o Althammer &amp; Kill GmbH &amp; Co. KG<br>Roscherstra\u00dfe 7<br>30161 Hannover<br>Telefon: +49 511 33 06 03-0<br>E-Mail: <a href="mailto:johanneswerk@ak-datenschutz.de">johanneswerk@ak-datenschutz.de</a><br><a href="https://www.althammer-kill.de" target="_blank" rel="noopener">www.althammer-kill.de</a></address>'
+  },
+  {titel:'3) Wie und wo werden die Daten gespeichert?',html:
+    '<div class="info-ok">\u2713 <strong>Kurz zusammengefasst:</strong> Gruppen\u00b7Checkpoint ist eine rein lokale Anwendung. Es gibt keinen Server, keine Cloud und keine Datenübertragung im laufenden Betrieb.</div>'
+    +'<p>Alle Eingaben \u2013 Namen, Anwesenheit, Zust\u00e4ndigkeiten, Arbeitsinhalte, Termine und Notizen \u2013 werden ausschlie\u00dflich im lokalen Speicher (localStorage) des Browsers auf dem jeweiligen Tablet bzw. Ger\u00e4t abgelegt.</p>'
+    +'<p>Jede Kostenstelle (Gruppe) hat einen eigenen, getrennten Datenspeicher auf dem Ger\u00e4t. Die Daten verlassen das Ger\u00e4t zu keinem Zeitpunkt automatisch \u2013 es findet weder eine Synchronisation noch ein Cloud-Abgleich oder eine \u00dcbermittlung an den Betreiber oder Dritte statt.</p>'
+    +'<p>Die App wird lokal per Doppelklick auf die Datei <code>index.html</code> ge\u00f6ffnet und funktioniert vollst\u00e4ndig offline.</p>'
+  },
+  {titel:'4) Portraitbilder – schriftliche Einwilligung erforderlich',html:
+    '<div class="info-hervorhebung">\u26a0\ufe0f <strong>Wichtig:</strong> Bevor ein Foto einer Person im Checkpoint hinterlegt wird, muss die schriftliche Einwilligung der abgebildeten Person bzw. ihrer gesetzlichen Vertretung zur Nutzung des Bildes vorliegen. Ohne diese Einwilligung darf kein Foto hochgeladen werden.</div>'
+    +'<p>Portraitfotos werden nicht in der App selbst gespeichert, sondern als eigenst\u00e4ndige Bilddatei (80\u00d780\u2009px) im Ordner <code>fotos/</code> auf dem jeweiligen Ger\u00e4t abgelegt. Die App verweist lediglich auf diese Datei.</p>'
+    +'<p>Die Fotos werden nicht auf GitHub oder einem anderen Online-Dienst gespeichert oder ver\u00f6ffentlicht. Eine L\u00f6schung ist jederzeit m\u00f6glich, indem die entsprechende Datei im Ordner <code>fotos/</code> entfernt wird.</p>'
+  },
+  {titel:'5) Datensicherung (Export / Import)',html:
+    '<p>Da alle Daten ausschlie\u00dflich lokal gespeichert werden, kann ein manuelles Leeren des Browser-Caches zum vollst\u00e4ndigen Verlust der Eingaben f\u00fchren. Als Sicherung dient die Export-Funktion (Pfeil-Symbol im Banner), die alle Daten als JSON-Datei zum Download anbietet.</p>'
+    +'<p>Diese Export-Datei enth\u00e4lt personenbezogene Daten (u.\u2009a. Namen, Notizen zu Arbeitsinhalten, Abwesenheiten). Sie sollte daher sorgf\u00e4ltig aufbewahrt und nicht an \u00f6ffentlich zug\u00e4ngliche oder ungesicherte Orte hochgeladen werden.</p>'
+  },
+  {titel:'6) Entwicklung des Programms auf GitHub',html:
+    '<p>Der Programmcode des Gruppen\u00b7Checkpoints wird zur Entwicklung in einem GitHub-Repository verwaltet. Die Verteilung an die Gruppen erfolgt als ZIP-Datei \u00fcber GitHub Releases \u2013 die Anwendung wird von den Gruppen nicht online \u00fcber GitHub, sondern lokal auf dem eigenen Ger\u00e4t ausgef\u00fchrt.</p>'
+    +'<p>Der Ordner <code>fotos/</code> mit den Portraitbildern ist bewusst nicht Teil des Repositorys und wird bei einem Update nicht \u00fcberschrieben oder mit hochgeladen. Es werden keine personenbezogenen Daten im Quellcode-Repository gespeichert.</p>'
+  },
+  {titel:'7) Externe Schriftart (Google Fonts)',html:
+    '<p>F\u00fcr die Darstellung wird die Schriftart „Nunito Sans" eingebunden. Ist das Ger\u00e4t beim Start mit dem Internet verbunden, wird diese Schriftart von den Servern von Google Fonts nachgeladen; dabei wird die IP-Adresse des Ger\u00e4ts an Google \u00fcbermittelt.</p>'
+    +'<p>Im normalen, offline genutzten Betrieb (ohne Internetverbindung) findet dieser Abruf nicht statt; die App verwendet dann automatisch eine im Betriebssystem hinterlegte Ersatzschrift.</p>'
+  },
+  {titel:'8) Cookies und Tracking',html:
+    '<div class="info-ok">\u2713 Es werden keine Cookies gesetzt.<br>\u2713 Es kommen keine Analyse- oder Tracking-Werkzeuge zum Einsatz.<br>\u2713 Es gibt keine Nutzerkonten oder Anmeldung.<br>\u2713 Die einzige verwendete Speichertechnik (localStorage) dient ausschlie\u00dflich der technisch notwendigen Funktion der App und verbleibt auf dem Ger\u00e4t.</div>'
+    +'<p>Da keine nicht notwendigen Speichertechniken eingesetzt werden, ist gem\u00e4\u00df \u00a7 25 Abs. 2 Nr. 2 TTDSG keine Einwilligung erforderlich.</p>'
+  },
+  {titel:'9) Ihre Rechte als betroffene Person',html:
+    '<ul>'
+    +'<li><strong>Auskunftsrecht</strong> (Art. 15 DSGVO)</li>'
+    +'<li><strong>Berichtigungsrecht</strong> (Art. 16 DSGVO)</li>'
+    +'<li><strong>Recht auf L\u00f6schung</strong> (Art. 17 DSGVO)</li>'
+    +'<li><strong>Recht auf Einschr\u00e4nkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>'
+    +'<li><strong>Widerspruchsrecht</strong> (Art. 21 DSGVO)</li>'
+    +'<li><strong>Recht auf Daten\u00fcbertragbarkeit</strong> (Art. 20 DSGVO)</li>'
+    +'</ul>'
+    +'<p style="margin-top:10px">Da die Daten ausschlie\u00dflich lokal auf dem Ger\u00e4t der Gruppe gespeichert werden, richten sich Anfragen bitte direkt an den Verantwortlichen (siehe Kapitel 1), z.\u2009B. an Christoph Pasch oder die zust\u00e4ndige Gruppenleitung.</p>'
+  },
+  {titel:'10) Beschwerderecht bei der Aufsichtsbehörde',html:
+    '<p>Sie haben das Recht, sich bei der zust\u00e4ndigen Datenschutz-Aufsichtsbeh\u00f6rde \u00fcber die Verarbeitung Ihrer personenbezogenen Daten zu beschweren. Zust\u00e4ndige Aufsichtsbeh\u00f6rde f\u00fcr das Evangelische Johanneswerk ist:</p>'
+    +'<address>Landesbeauftragte f\u00fcr Datenschutz und Informationsfreiheit<br>Nordrhein-Westfalen (LfDI NRW)<br>Kavalleriestra\u00dfe 2\u20134<br>40213 D\u00fcsseldorf<br>Telefon: 0211 38424-0<br>E-Mail: <a href="mailto:poststelle@ldi.nrw.de">poststelle@ldi.nrw.de</a><br>Web: <a href="https://www.ldi.nrw.de" target="_blank" rel="noopener">www.ldi.nrw.de</a></address>'
+  },
+  {titel:'11) Aktualität dieser Datenschutzerklärung',html:
+    '<p>Diese Datenschutzerkl\u00e4rung hat den Stand: August 2026.</p>'
+    +'<p>Sie wird bei Bedarf aktualisiert, insbesondere bei technischen \u00c4nderungen der Anwendung. Die jeweils aktuelle Version ist in dieser App unter „Datenschutz" abrufbar.</p>'
+  }
+];
+

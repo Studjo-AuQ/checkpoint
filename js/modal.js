@@ -386,6 +386,40 @@ function toggleHilfeKapitel(i){
   if(pfeil)pfeil.innerHTML=offen?'&#9656;':'&#9662;';
 }
 
+/* ═══ Impressum / Datenschutz (rote Fußzeile) ═══
+   Gleiches Akkordeon-Prinzip wie die Hilfe, aber mit fertigem HTML
+   je Kapitel (Adressen, Hervorhebungen) statt einzelner Sätze. */
+function baueInfoModalHtml(inhalte,prefix){
+  var html='';
+  inhalte.forEach(function(k,i){
+    html+='<div class="hilfe-kapitel">'
+        +'<button class="hilfe-kapitel-kopf" onclick="toggleInfoKapitel(\''+prefix+'\','+i+')">'
+        +'<span>'+k.titel+'</span><span class="hilfe-kapitel-pfeil" id="'+prefix+'-pfeil-'+i+'">&#9656;</span>'
+        +'</button>'
+        +'<div class="hilfe-kapitel-body" id="'+prefix+'-body-'+i+'" style="display:none;">'
+        +k.html
+        +'</div>'
+        +'</div>';
+  });
+  return html;
+}
+function toggleInfoKapitel(prefix,i){
+  var body=document.getElementById(prefix+'-body-'+i);
+  var pfeil=document.getElementById(prefix+'-pfeil-'+i);
+  if(!body)return;
+  var offen=body.style.display!=='none';
+  body.style.display=offen?'none':'block';
+  if(pfeil)pfeil.innerHTML=offen?'&#9656;':'&#9662;';
+}
+function oeffneImpressumModal(){
+  document.getElementById('impressum-modal-body').innerHTML=baueInfoModalHtml(IMPRESSUM_INHALTE,'impr');
+  document.getElementById('impressum-modal').classList.add('sichtbar');
+}
+function oeffneDatenschutzModal(){
+  document.getElementById('datenschutz-modal-body').innerHTML=baueInfoModalHtml(DATENSCHUTZ_INHALTE,'dat');
+  document.getElementById('datenschutz-modal').classList.add('sichtbar');
+}
+
 /* Namen (Feature 3: 1-spaltig + sortable, kein Standard) */
 var namenSortable=null;
 function oeffneNamenModal(){
