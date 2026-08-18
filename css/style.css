@@ -334,6 +334,18 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .termin-pflicht-dt .termin-input{padding:3px 6px;font-size:.68rem;}
 
 footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:.78rem;font-weight:600;margin-top:auto;}
+.footer-link{color:rgba(255,255,255,.85);text-decoration:none;font-weight:700;}
+.footer-link:hover{color:white;text-decoration:underline;}
+
+/* ── Impressum/Datenschutz: Fließtext in Hilfe-Kapiteln ── */
+.hilfe-kapitel-body p{font-size:.82rem;line-height:1.6;color:var(--text);margin-bottom:8px;}
+.hilfe-kapitel-body p:last-child{margin-bottom:0;}
+.hilfe-kapitel-body address{font-size:.82rem;line-height:1.6;color:var(--text);font-style:normal;margin-bottom:8px;}
+.hilfe-kapitel-body strong{font-weight:800;}
+.hilfe-kapitel-body a{color:var(--rot);}
+.hilfe-kapitel-body code{background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.8em;}
+.hilfe-kapitel-body .info-hervorhebung{background:#fef3c7;border-left:3px solid var(--gelb);border-radius:0 8px 8px 0;padding:9px 13px;font-size:.8rem;line-height:1.5;margin:6px 0 10px;color:#7a5000;}
+.hilfe-kapitel-body .info-ok{background:#dcfce7;border-left:3px solid var(--gruen);border-radius:0 8px 8px 0;padding:9px 13px;font-size:.8rem;line-height:1.5;margin:6px 0 10px;color:#14532d;}
 
 /* ── Abwesenheits-Modal Buttons ── */
 .btn-abw-option{display:block;width:100%;padding:12px 16px;border-radius:10px;border:2px solid var(--hell);background:white;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:700;text-align:left;line-height:1.4;transition:border-color .15s,background .15s;}
