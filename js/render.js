@@ -76,6 +76,18 @@ function formatWann(id){
 }
 
 /* ═══ RENDER ═══ */
+/* Portrait konnte nicht geladen werden: erst Platzhalter-Muster versuchen,
+   erst wenn das auch fehlt (z. B. Ordner "symbole" nicht vorhanden) grauer Kreis wie bisher. */
+function fotoFehler(img){
+  if(img.dataset.platzhalter){
+    img.style.background='#e2e8f0';
+    img.style.opacity=0;
+    return;
+  }
+  img.dataset.platzhalter='1';
+  img.src='symbole/portrait.jpg';
+}
+
 function renderNamen(){
   var html='';
   MITARBEITENDE.forEach(function(p){
@@ -138,7 +150,7 @@ function renderNamen(){
       +(_arbBadgeTxt?'<div class="aufg-badge arbeit-badge">'+_arbBadgeTxt+'</div>':'')
       +'</div>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
-         +'<img src="'+fotoPfad(p.name)+'" alt="'+p.name+'" class="person-portrait" onerror="this.style.background=\'#e2e8f0\';this.style.opacity=0;" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
+         +'<img src="'+fotoPfad(p.name)+'" alt="'+p.name+'" class="person-portrait" title="Nur meine Aufgaben" onerror="fotoFehler(this)" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
          +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="event.stopPropagation();oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
          +arbeitIconHtml
          +'<div class="aufgaben-icons">'+icons+'</div>'
