@@ -218,6 +218,116 @@ function vorlesenAufgabeInfoModal(){
   window.speechSynthesis.speak(u);
 }
 
+/* ═══ Fokus-Modal: "Meine Aufgaben" (persönliche Übersicht) ═══
+   Öffnet sich beim Klick auf das Portraitbild. Zeigt ausschließlich die
+   eigenen Inhalte der Person – bewusst ohne Termine, Leitung usw. */
+var _fokusPersonId=null, _fokusVorleseText='';
+
+function checklistenStatusHeute(id){
+  var erl=STATE.erledigt.indexOf(id)!==-1;
+  if(erl)return {text:'Bereits erledigt',klasse:'fokus-status-ok'};
+  if(entfaelltHeute(id))return {text:'Entf\u00e4llt heute',klasse:'fokus-status-entfaellt'};
+  if(vertretungAusstehend(id))return {text:'Vertretung noch offen',klasse:'fokus-status-warnung'};
+  var z=ZEITEN[id]||{};
+  var falscherTag=z.tage&&z.tage.length>0&&!heuteIstGeplantFuer(id);
+  if(falscherTag){
+    var tage=z.tage.map(tagVollName).join(', ');
+    return {text:'Heute nicht dran (planm\u00e4\u00dfig: '+tage+')',klasse:'fokus-status-neutral'};
+  }
+  var zeitTxt=z.uhrzeit?' um '+z.uhrzeit+' Uhr':'';
+  return {text:'Heute f\u00e4llig'+zeitTxt,klasse:'fokus-status-faellig'};
+}
+
+function baueFokusInhalt(personId){
+  var p=MITARBEITENDE.find(function(m){return m.id===personId;});
+  if(!p)return '';
+  var vorlesenTeile=[p.name+'.'];
+  var html='';
+
+  /* ── Arbeitsinhalte: nur Freitext, nichts anzeigen wenn leer ── */
+  var notiz=ARBEITSNOTIZEN[personId];
+  var arbeitText=notiz&&notiz.text?notiz.text.trim():'';
+  if(arbeitText){
+    html+='<div class="fokus-abschnitt">'
+        +'<h3 class="fokus-abschnitt-titel"><img src="symbole/arbeit.jpg" class="fokus-mini-icon" alt="">Arbeitsinhalte</h3>'
+        +'<p class="fokus-text">'+escFokus(arbeitText)+'</p>'
+        +'</div>';
+    vorlesenTeile.push('Arbeitsinhalte: '+arbeitText+'.');
+  }
+
+  /* ── Checklisten-Aufgaben: permanente + heute aktive Vertretungen ── */
+  var permCheck=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='checkliste';}).map(function(z){return z.aufgabeId;});
+  var allVertIds=Object.keys(STATE.vertretungen).filter(function(id){return getVertPerson(id)===personId;});
+  var vertIds=allVertIds.filter(function(id){return AKTIVE_CHECKS.indexOf(id)!==-1&&permCheck.indexOf(id)===-1;});
+  var checkIds=permCheck.filter(function(id){return AKTIVE_CHECKS.indexOf(id)!==-1;}).concat(vertIds);
+
+  if(checkIds.length){
+    html+='<div class="fokus-abschnitt"><h3 class="fokus-abschnitt-titel" style="margin-bottom:12px;">Checklisten-Aufgaben</h3>';
+    checkIds.forEach(function(id){
+      var a=AUFGABEN[id];if(!a)return;
+      var beschreibung=(AUFGABEN_NOTIZEN[id]!==undefined?AUFGABEN_NOTIZEN[id]:(AUFGABEN_INFO[id]||''));
+      var status=checklistenStatusHeute(id);
+      html+='<div style="margin-bottom:14px;">'
+          +'<div style="display:flex;align-items:center;font-weight:800;font-size:.96rem;margin-bottom:4px;"><img src="'+a.foto+'" class="fokus-mini-icon" alt="">'+a.label+'</div>'
+          +(beschreibung?'<p class="fokus-text">'+escFokus(beschreibung)+'</p>':'')
+          +'<span class="fokus-status '+status.klasse+'">'+status.text+'</span>'
+          +'</div>';
+      vorlesenTeile.push(a.label+(beschreibung?': '+beschreibung:'')+'. '+status.text+'.');
+    });
+    html+='</div>';
+  }
+
+  /* ── Allgemeine Zuständigkeiten: wie oben, aber ohne "heute fällig"-Status ── */
+  var allgIds=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId===personId&&z.typ==='allgemein';}).map(function(z){return z.aufgabeId;});
+  if(allgIds.length){
+    html+='<div class="fokus-abschnitt"><h3 class="fokus-abschnitt-titel" style="margin-bottom:12px;">Allgemeine Zust\u00e4ndigkeiten</h3>';
+    allgIds.forEach(function(id){
+      var a=AUFGABEN[id];if(!a)return;
+      var beschreibung=(AUFGABEN_NOTIZEN[id]!==undefined?AUFGABEN_NOTIZEN[id]:(AUFGABEN_INFO[id]||''));
+      html+='<div style="margin-bottom:14px;">'
+          +'<div style="display:flex;align-items:center;font-weight:800;font-size:.96rem;margin-bottom:4px;"><img src="'+a.foto+'" class="fokus-mini-icon" alt="">'+a.label+'</div>'
+          +(beschreibung?'<p class="fokus-text">'+escFokus(beschreibung)+'</p>':'')
+          +'</div>';
+      vorlesenTeile.push(a.label+(beschreibung?': '+beschreibung:'')+'.');
+    });
+    html+='</div>';
+  }
+
+  if(!arbeitText&&!checkIds.length&&!allgIds.length){
+    html='<p class="fokus-leer">F\u00fcr dich sind aktuell keine Aufgaben oder Zust\u00e4ndigkeiten eingetragen.</p>';
+    vorlesenTeile.push('F\u00fcr dich sind aktuell keine Aufgaben oder Zust\u00e4ndigkeiten eingetragen.');
+  }
+
+  _fokusVorleseText=sprachText(vorlesenTeile.join(' '));
+  return html;
+}
+function escFokus(s){
+  return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+function oeffneFokusModal(personId,event){
+  if(event)event.stopPropagation();
+  if(editModus)return;
+  var p=MITARBEITENDE.find(function(m){return m.id===personId;});
+  if(!p)return;
+  _fokusPersonId=personId;
+  document.getElementById('fokus-name').textContent=p.name;
+  document.getElementById('fokus-inhalt').innerHTML=baueFokusInhalt(personId);
+  document.getElementById('fokus-modal').classList.add('sichtbar');
+}
+function schliesseFokusModal(){
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  document.getElementById('fokus-modal').classList.remove('sichtbar');
+  _fokusPersonId=null;
+}
+function fokusModalAK(e){if(e.target===document.getElementById('fokus-modal'))schliesseFokusModal();}
+function vorlesenFokusModal(){
+  if(!window.speechSynthesis||!_fokusVorleseText)return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(_fokusVorleseText);
+  u.lang='de-DE';u.rate=0.88;
+  window.speechSynthesis.speak(u);
+}
+
 /* ═══ Termin Datum/Uhrzeit Modal ═══
    Bug1-Fix: Statt fragiler nativer Picker-Tricks ein eigenes, zuverlässiges Modal.
    Uhrzeit ist optional ("Ganztägig", wenn Haken nicht gesetzt) – keine erzwungene

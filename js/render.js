@@ -150,7 +150,7 @@ function renderNamen(){
       +(_arbBadgeTxt?'<div class="aufg-badge arbeit-badge">'+_arbBadgeTxt+'</div>':'')
       +'</div>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
-         +'<img src="'+fotoPfad(p.name)+'" alt="'+p.name+'" class="person-portrait" title="Nur meine Aufgaben" onerror="fotoFehler(this)" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
+         +'<img src="'+fotoPfad(p.name)+'" alt="'+p.name+'" class="person-portrait" title="Nur meine Aufgaben" onerror="fotoFehler(this)" onclick="oeffneFokusModal('+p.id+',event)" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
          +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="event.stopPropagation();oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
          +arbeitIconHtml
          +'<div class="aufgaben-icons">'+icons+'</div>'
