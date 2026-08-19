@@ -36,13 +36,13 @@ header img{width:100%;max-height:80px;object-fit:cover;object-position:left;disp
 /* ── Namen-Tabelle ── */
 .namen-tabelle{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);}
 body.edit-modus .namen-tabelle{outline:3px dashed var(--gelb);outline-offset:2px;}
-.namen-row{display:flex;align-items:center;height:var(--ROW);border-bottom:1px solid var(--hell);cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.namen-row{display:flex;align-items:center;height:var(--ROW);border-bottom:1px solid var(--hell);transition:background .15s;-webkit-tap-highlight-color:transparent;}
 .namen-row:last-child{border-bottom:none;}
 .namen-row:hover{background:#fef2f2;}
 .namen-row.abwesend{background:#f8fafc;opacity:.5;}
 body.edit-modus .namen-row:hover{background:#fefce8;}
-.person-portrait{width:var(--ROW);height:var(--ROW);object-fit:cover;flex-shrink:0;border-right:1px solid var(--hell);}
-.person-name{width:148px;min-width:148px;height:var(--ROW);display:flex;align-items:center;padding:0 12px;font-size:.95rem;font-weight:800;border-right:1px solid var(--hell);overflow:hidden;white-space:nowrap;}
+.person-portrait{width:var(--ROW);height:var(--ROW);object-fit:cover;flex-shrink:0;border-right:1px solid var(--hell);cursor:default;}
+.person-name{width:148px;min-width:148px;height:var(--ROW);display:flex;align-items:center;padding:0 12px;font-size:.95rem;font-weight:800;border-right:1px solid var(--hell);overflow:hidden;white-space:nowrap;cursor:pointer;}
 .namen-row.abwesend .person-name{text-decoration:line-through;color:var(--grau);}
 body.edit-modus .person-name::after{content:' \270F';font-size:.7rem;opacity:.5;}
 .aufgaben-icons{display:flex;align-items:center;height:var(--ROW);}
