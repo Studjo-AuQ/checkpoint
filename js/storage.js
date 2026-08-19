@@ -97,7 +97,8 @@ var AKTIVE_KST = '';
 
 /* Alle Storage-Keys dynamisch mit KST-Prefix */
 var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
-    LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='';
+    LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='',
+    EXPORT_ERINNERUNG_KEY='';
 
 function setzeKSTKeys(kst) {
   AKTIVE_KST  = kst;
@@ -110,6 +111,7 @@ function setzeKSTKeys(kst) {
   WICHTIG_KEY = kst + '-chk-wichtig-v1';
   ZEITEN_KEY  = kst + '-chk-zeiten-v1';
   PROFIL_KEY  = kst + '-chk-profil-v1';
+  EXPORT_ERINNERUNG_KEY = kst + '-chk-export-erinnerung-v1';
   setzeArbeitKey(kst);
   setzeAufgNotizKey(kst);
 }
@@ -164,6 +166,9 @@ function wechsleKostenstelle(kst) {
   MITARBEITENDE_DEFAULT.forEach(function(p){ MITARBEITENDE.push({id:p.id, name:p.name}); });
   ladeNamen();
   renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
+
+  /* Feature: Freitags-Erinnerung "Bitte exportieren" (siehe unten) */
+  pruefeExportErinnerung();
 }
 /* ═══ PERSONEN-PROFIL ═══ */
 var PROFIL={};
@@ -182,6 +187,8 @@ function exportierenKST(){
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='checkpoint-'+AKTIVE_KST+'-'+heute()+'.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  /* Datum des Exports merken (für Freitags-Erinnerung, Feature s.u.) */
+  if(EXPORT_ERINNERUNG_KEY)localStorage.setItem(EXPORT_ERINNERUNG_KEY,heute());
 }
 function importierenKST(){
   var inp=document.createElement('input');inp.type='file';inp.accept='.json';
@@ -200,6 +207,23 @@ function importierenKST(){
   };
   inp.click();
 }
+
+/* ═══ Freitags-Erinnerung: "Bitte heute exportieren/sichern" ═══
+   Läuft jeden Freitag einmal auf, sobald eine KST geladen ist.
+   Wird pro KST und Tag nur einmal gezeigt (localStorage-Merker). */
+function pruefeExportErinnerung(){
+  if(!AKTIVE_KST||!EXPORT_ERINNERUNG_KEY)return;
+  if(new Date().getDay()!==5)return; /* 5 = Freitag */
+  var letzte=localStorage.getItem(EXPORT_ERINNERUNG_KEY);
+  if(letzte===heute())return; /* heute bereits exportiert oder weggeklickt */
+  setTimeout(function(){oeffneExportErinnerungModal();},600);
+}
+function schliesseExportErinnerung(nichtMehrHeute){
+  if(nichtMehrHeute&&EXPORT_ERINNERUNG_KEY)localStorage.setItem(EXPORT_ERINNERUNG_KEY,heute());
+  var m=document.getElementById('export-erinnerung-modal');
+  if(m)m.classList.remove('sichtbar');
+}
+
 function heute(){return new Date().toISOString().slice(0,10);}
 function ladeLS(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
 function speichereState(){localStorage.setItem(STATE_KEY,JSON.stringify(STATE));}

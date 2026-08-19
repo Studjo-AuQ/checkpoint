@@ -361,6 +361,12 @@ function schM(id){
 }
 function modalAK(e,id){if(e.target===document.getElementById(id))schM(id);}
 
+/* ═══ Freitags-Erinnerung "Bitte exportieren" ═══ */
+function oeffneExportErinnerungModal(){
+  var m=document.getElementById('export-erinnerung-modal');
+  if(m)m.classList.add('sichtbar');
+}
+
 /* ═══ Hilfe-Modal (Anleitung als Aufklapp-Liste) ═══ */
 function oeffneHilfeModal(){
   var html='';
