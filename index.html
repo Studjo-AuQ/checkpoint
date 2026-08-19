@@ -89,6 +89,23 @@
   </div>
 </div>
 
+<!-- ═══ Fokus-Modal: "Meine Aufgaben" (persönliche Übersicht, per Klick auf Portrait) ═══ -->
+<div class="fokus-overlay" id="fokus-modal" onclick="fokusModalAK(event)">
+  <div class="fokus-box">
+    <div class="fokus-kopf">
+      <h2>&#128100; <span id="fokus-name"></span></h2>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="vorlesenFokusModal()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <img src="symbole/zuhoeren.jpg" alt="Vorlesen" style="width:22px;height:22px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128066;'">
+        </button>
+        <button class="modal-schliessen" onclick="schliesseFokusModal()">&#10005;</button>
+      </div>
+    </div>
+    <p class="fokus-unter">Nur meine Aufgaben &ndash; ohne Termine, Leitung und weitere Angaben.</p>
+    <div id="fokus-inhalt"></div>
+  </div>
+</div>
+
 <!-- Check-Person-Picker Popup (Feature 4 neu) -->
 <div id="check-person-picker" style="display:none;position:fixed;z-index:7500;background:white;border-radius:14px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,.22);width:220px;border:2px solid var(--hell);">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
