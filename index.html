@@ -6,8 +6,41 @@
   <title>Gruppen&middot;Checkpoint &ndash; Studjo</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    /* ═══ Notbremse: verständliche Fehlermeldung statt leerer weißer Seite ═══
+       Muss VOR allen anderen Skripten stehen, damit auch ein Fehler beim
+       Laden von storage.js/render.js/... abgefangen wird. */
+    window.onerror = function(nachricht, datei, zeile){
+      var el = document.getElementById('fehler-overlay');
+      if(!el) return false; /* Overlay noch nicht im DOM (sehr früher Fehler) */
+      var kurzName = (datei || '').split('/').pop();
+      document.getElementById('fehler-details').textContent =
+        (kurzName ? 'Datei: ' + kurzName + (zeile ? ', Zeile ' + zeile : '') + '\n' : '')
+        + 'Meldung: ' + nachricht;
+      el.style.display = 'flex';
+      return false; /* Fehler zusätzlich normal in der Konsole anzeigen */
+    };
+  </script>
 </head>
 <body>
+
+<!-- ═══ Notbremse: wird nur bei einem echten Programmfehler sichtbar ═══ -->
+<div id="fehler-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,47,55,.92);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:16px;padding:26px 30px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);">
+    <div style="font-size:1.3rem;font-weight:900;color:#b61f29;margin-bottom:10px;">&#9888;&#65039; Es ist ein Fehler aufgetreten</div>
+    <p style="font-size:.92rem;line-height:1.6;color:#0f2f37;margin:0 0 12px;">
+      Der Gruppen&middot;Checkpoint konnte nicht richtig geladen werden. Das passiert meist,
+      wenn zuletzt von Hand etwas an einer der Programmdateien (z.&nbsp;B. <code>storage.js</code>)
+      geändert wurde und dabei z.&nbsp;B. ein Komma oder eine Klammer fehlt.
+    </p>
+    <p style="font-size:.92rem;line-height:1.6;color:#0f2f37;margin:0 0 12px;">
+      <b>Was tun?</b> Öffne die zuletzt geänderte Datei mit dem Code-Prüfungs-Werkzeug
+      (<code>code-pruefung.html</code>) oder setze die vorherige, funktionierende
+      Version der Datei wieder ein.
+    </p>
+    <pre id="fehler-details" style="background:#f0f2f5;border-radius:8px;padding:10px 12px;font-size:.78rem;white-space:pre-wrap;word-break:break-word;color:#64748b;margin:0;"></pre>
+  </div>
+</div>
 
 <header><img src="header.jpg" alt="Studjo" onerror="this.style.display='none'"></header>
 
@@ -252,6 +285,21 @@
   </div>
 </div>
 
+<!-- ═══ Freitags-Erinnerung: Export-Modal ═══ -->
+<div class="modal-overlay" id="export-erinnerung-modal">
+  <div class="modal-box" style="width:min(420px,94vw);text-align:center;">
+    <div class="modal-kopf" style="justify-content:center;"><h2>&#128190; Heute ist Freitag</h2></div>
+    <p style="font-size:1rem;line-height:1.6;margin:6px 0 18px;">
+      Bitte denk daran, die Daten dieser Gruppe zu <b>exportieren</b> (sichern).<br>
+      So gehen keine Eingaben verloren, falls der Browser-Speicher einmal gel&ouml;scht wird.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-modal-primary" style="background:var(--gruen);" onclick="exportierenKST();schliesseExportErinnerung(true);">&#128190; Jetzt exportieren</button>
+      <button class="btn-modal-secondary" onclick="schliesseExportErinnerung(true);">Heute nicht mehr erinnern</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ Arbeit-Notiz Modal ═══ -->
 <div class="modal-overlay" id="arbeit-modal" onclick="modalAK(event,'arbeit-modal')">
   <div class="modal-box" style="width:min(460px,96vw)">
@@ -390,7 +438,7 @@
 <button id="btn-a11y-help" title="Bedienungshilfen" aria-label="Bedienungshilfen öffnen" aria-expanded="false">H</button>
 <div class="a11y-toast" id="a11y-toast"></div>
 
-<script src="sortable.min.js"></script>
+<script src="js/sortable.min.js"></script>
 <!-- Ladereihenfolge ist wichtig: storage → render → modal → checkliste → app (zuletzt) -->
 <script src="js/storage.js"></script>
 <script src="js/render.js"></script>
