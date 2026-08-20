@@ -5,12 +5,12 @@
    ══════════════════════════════════════════════════════ */
 :root{--rot:#b61f29;--gruen:#16a34a;--gelb:#ca8a04;--bg:#f0f2f5;--text:#0f2f37;--grau:#64748b;--hell:#e2e8f0;--ROW:80px;--check-bg:#fef9c3;--check-rand:#fde047;--zust-bg:#eff6ff;--zust-rand:#93c5fd;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-header{background:white;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;width:100%;overflow-x:hidden;}
+header{background:white;box-shadow:0 2px 10px rgba(0,0,0,.08);width:100%;}
 header img{width:100%;max-height:80px;object-fit:cover;object-position:left;display:block;}
 
 /* ── Banner mit Uhr ── */
-.banner{background:var(--rot);color:white;padding:8px 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;}
+.banner{background:var(--rot);color:white;padding:8px 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;width:100%;}
 .banner-links h1{font-size:1rem;font-weight:800;}
 .banner-links .kw{font-size:0.78rem;opacity:.85;}
 .banner-clock{text-align:center;}
@@ -26,7 +26,7 @@ header img{width:100%;max-height:80px;object-fit:cover;object-position:left;disp
 .btn-leiste-dunkel:hover{background:#78350f;}
 
 /* ── Grid ── */
-.grid{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px;align-items:start;}
+.grid{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px;align-items:start;overflow-x:auto;max-width:100%;}
 .col-wrap{display:flex;flex-direction:column;gap:6px;}
 .col-header{display:flex;gap:6px;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--rot);flex-wrap:wrap;min-height:38px;}
 .col-btn{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
@@ -359,7 +359,7 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .termin-pflicht-dt{display:flex;flex-direction:column;gap:2px;}
 .termin-pflicht-dt .termin-input{padding:3px 6px;font-size:.68rem;}
 
-footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:.78rem;font-weight:600;margin-top:auto;}
+footer{text-align:center;padding:10px;background:var(--rot);color:white;font-size:.78rem;font-weight:600;margin-top:auto;width:100%;}
 .footer-link{color:rgba(255,255,255,.85);text-decoration:none;font-weight:700;}
 .footer-link:hover{color:white;text-decoration:underline;}
 
@@ -478,3 +478,18 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 
 /* Feature 3: vergangene Termine */
 .termin-frei-geleert{background:#f1f5f9 !important;border-color:#cbd5e1 !important;}
+
+/* ═══ Schmale Bildschirme (Handy) ═══
+   Die App ist für Tablets gebaut (var(--ROW), feste Spaltenbreiten usw.).
+   Auf einem Handy reicht die Breite dafür nicht – die Tabelle bekommt oben
+   bereits einen eigenen horizontalen Scrollbereich (.grid{overflow-x:auto}).
+   Hier wird zusätzlich die obere Kostenstellen-Anzeige im Banner sauber
+   zentriert, statt links "klebend" zu wirken, wenn die Spalte schmaler
+   wird als ihr Inhalt eigentlich bräuchte. */
+@media (max-width:700px){
+  .banner{grid-template-columns:1fr;gap:6px;justify-items:center;text-align:center;}
+  .banner>div{justify-self:center;}
+  .kst-banner-wrap{align-items:center;}
+  .kst-banner-zeile{justify-content:center;}
+  .banner-rechts{justify-content:center;flex-wrap:wrap;}
+}
