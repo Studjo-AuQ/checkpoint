@@ -77,16 +77,12 @@ function formatWann(id){
 }
 
 /* ═══ RENDER ═══ */
-/* Portrait konnte nicht geladen werden: erst Platzhalter-Muster versuchen,
-   erst wenn das auch fehlt (z. B. Ordner "symbole" nicht vorhanden) grauer Kreis wie bisher. */
+/* Nur noch ein Sicherheitsnetz für den (unwahrscheinlichen) Fall, dass der
+   gespeicherte Base64-Text beschädigt ist – portraitSrc() liefert sonst
+   immer ein gültiges Bild (echtes Foto oder eingebauter Platzhalter). */
 function fotoFehler(img){
-  if(img.dataset.platzhalter){
-    img.style.background='#e2e8f0';
-    img.style.opacity=0;
-    return;
-  }
-  img.dataset.platzhalter='1';
-  img.src='symbole/portrait.jpg';
+  img.style.background='#e2e8f0';
+  img.style.opacity=0;
 }
 
 function renderNamen(){
@@ -118,7 +114,7 @@ function renderNamen(){
       var badge=z.typ==='checkliste'?'<div class="aufg-badge'+(erl?' erledigt':'')+'" id="badge-'+z.aufgabeId+'">'+(erl?'&#10003;':'!')+'</div>':'';
       var clickFn=editModus?'selectIconInEditModus(\''+z.aufgabeId+'\','+p.id+',event)':'oeffneAufgabenInfoModal(\''+z.aufgabeId+'\',event)';
       icons+='<div class="aufg-icon-wrap" data-aufgabe-id="'+z.aufgabeId+'" data-typ="'+z.typ+'" onclick="'+clickFn+'">'
-            +'<img src="'+a.foto+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'+badge+'</div>';
+            +'<img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'" title="'+a.label+'" class="aufg-icon-img">'+badge+'</div>';
     });
 
     /* Vertretungs-Icons (orangefarbener Rahmen, V-Badge) – fest rechtsbündig, nicht sortierbar */
@@ -132,7 +128,7 @@ function renderNamen(){
       /* Im Edit-Modus: Remove-Button + Dauer-Hinweis anzeigen */
       var removeBtn=editModus?'<button class="aufg-vert-remove-btn" onclick="event.stopPropagation();entferneVertretung(\''+id+'\')" title="Vertretung '+(dauer==='weiteres'?'(bis auf weiteres) ':'')+'entfernen">&#10005;</button>':'';
       vertHtml+='<div class="aufg-icon-wrap aufg-vert" data-aufgabe-id="'+id+'" data-typ="checkliste" onclick="'+(editModus?'event.stopPropagation()':'oeffneAufgabenInfoModal(\''+id+'\',event)')+'" title="Vertretung: '+a.label+(editModus?' | Dauer: '+(dauer==='weiteres'?'bis auf weiteres':'nur heute'):'')+'">'+
-            '<img src="'+a.foto+'" alt="'+a.label+'" class="aufg-icon-img">'+badge+removeBtn+'</div>';
+            '<img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'" class="aufg-icon-img">'+badge+removeBtn+'</div>';
     });
 
     var notiz=ARBEITSNOTIZEN[p.id];
@@ -147,11 +143,11 @@ function renderNamen(){
     var _arbTitel=hatNotiz?_titelTeile.join(' \u2013 '):'Arbeitsinhalt eintragen';
     var _arbBadgeTxt=_hatStufe?String(notiz.stufe):'';
     var arbeitIconHtml='<div class="aufg-icon-wrap arbeit-icon-fixed'+_auslKl+'" onclick="oeffneArbeitModal('+p.id+',event)" title="'+_arbTitel+'">'
-      +'<img src="symbole/arbeit.jpg" alt="Arbeit" class="aufg-icon-img" onerror="this.style.background=\'#e2e8f0\'">'
+      +'<img src="'+symbolSrc('symbole/arbeit.jpg')+'" alt="Arbeit" class="aufg-icon-img" onerror="this.style.background=\'#e2e8f0\'">'
       +(_arbBadgeTxt?'<div class="aufg-badge arbeit-badge">'+_arbBadgeTxt+'</div>':'')
       +'</div>';
     html+='<div class="namen-row'+(abw?' abwesend':'')+'" data-person-id="'+p.id+'">'
-         +'<img src="'+fotoPfad(p.name)+'" alt="'+p.name+'" class="person-portrait" title="Nur meine Aufgaben" onerror="fotoFehler(this)" onclick="oeffneFokusModal('+p.id+',event)" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
+         +'<img src="'+portraitSrc(p.id)+'" alt="'+p.name+'" class="person-portrait" title="Nur meine Aufgaben" onerror="fotoFehler(this)" onclick="oeffneFokusModal('+p.id+',event)" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)">'
          +'<div class="person-name" onclick="event.stopPropagation();toggleAbwesend('+p.id+')" ondragover="rowDragOver(event,'+p.id+')" ondrop="rowDrop(event,'+p.id+')" ondragleave="rowDragLeave(event)" style="position:relative;">'+p.name+'<button class="profil-badge" onclick="event.stopPropagation();oeffneProfilModal('+p.id+',event)" title="Profil bearbeiten">&#128101;</button>'+'</div>'
          +arbeitIconHtml
          +'<div class="aufgaben-icons">'+icons+'</div>'

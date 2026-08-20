@@ -31,7 +31,7 @@ function renderCheckliste(){
     var persZeile='<div class="check-person-zeile">&#128100; '+persName+'</div>';
     html+='<div class="check-row '+rowKl+'" id="cr-'+id+'">'
          +'<button class="check-toggle '+togKl+'" onclick="toggleErledigt(\''+id+'\')" title="'+(erl?'R\u00fckg\u00e4ngig':a.label)+'">'+sym+'</button>'
-         +'<img src="'+a.foto+'" alt="'+a.label+'" class="check-symbol">'
+         +'<img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'" class="check-symbol">'
          +'<div class="check-label-wrap" onclick="oeffneCheckPersonPicker(\''+id+'\',event)" title="Person wechseln">'+wannZeile+'<div class="check-aufgabe-name">'+a.label+'</div>'+persZeile+warn+'</div>'
          +'<button class="check-wann-btn" onclick="oeffneWannModal(\''+id+'\')" title="Zeitangabe bearbeiten">&#9200;</button>'
          +'</div>';
@@ -55,7 +55,7 @@ function oeffneChecklisteModal(){
   ids.forEach(function(id){
     var a=AUFGABEN[id],aktiv=AKTIVE_CHECKS.indexOf(id)!==-1,fix=id==='checkpoint';
     html+='<button class="check-modal-item'+(aktiv?' gewaehlt':'')+(fix?' fixiert':'')+'" data-check-id="'+id+'" data-fixiert="'+fix+'" onclick="checkModalClick(this)">'
-         +'<img src="'+a.foto+'" alt="'+a.label+'"><span class="check-modal-label">'+a.label+(fix?' <span class="check-modal-hinweis">(immer aktiv)</span>':'')+'</span>'
+         +'<img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'"><span class="check-modal-label">'+a.label+(fix?' <span class="check-modal-hinweis">(immer aktiv)</span>':'')+'</span>'
          +'<div class="check-modal-cb">'+(aktiv?'&#10003;':'')+'</div></button>';
   });
   document.getElementById('check-modal-liste').innerHTML=html;
@@ -79,7 +79,7 @@ function versucheChecklisteSpeichern(){
   ohneTraeger.forEach(function(id){
     var a=AUFGABEN[id];
     warnHtml+='<div class="block-aufgabe-zeile">'
-             +'<img src="'+a.foto+'" alt="'+a.label+'" class="block-aufgabe-img">'
+             +'<img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'" class="block-aufgabe-img">'
              +'<span class="block-aufgabe-label">'+a.label+'</span>'
              +'<select class="block-person-select" data-aufgabe-id="'+id+'">'
              +'<option value="">&#8211; Person w&auml;hlen &#8211;</option>'

@@ -10,17 +10,17 @@ function oeffneProfilModal(personId,event){
   var p=MITARBEITENDE.find(function(m){return m.id===personId;});if(!p)return;
   var profil=PROFIL[personId]||{};
   var typen=['checkliste','allgemein'];
-  var dName=dateiNameFuerFoto(p.name);
+  var hatEigenesFoto=!!(PROFIL[personId]&&PROFIL[personId].foto);
   var html='<div class="modal-kopf"><h2>&#128101; Profil: '+p.name+'</h2>'
            +'<button class="modal-schliessen" onclick="schM(\'profil-modal\')">&#10005;</button></div>'
-           /* ═══ Foto-Upload (lokal, Festplatte – kein Server/Cloud) ═══ */
+           /* ═══ Foto-Upload (lokal im Browser gespeichert – kein Server/Cloud, kein Ordner) ═══ */
            +'<div style="display:flex;gap:12px;align-items:flex-start;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;">'
-           +'<img id="profil-foto-preview" src="fotos/'+dName+'" alt="Foto" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--hell);" onerror="this.style.display=\'none\';document.getElementById(\'profil-foto-platzhalter\').style.display=\'flex\';">'
-           +'<div id="profil-foto-platzhalter" style="display:none;width:80px;height:80px;border-radius:8px;background:var(--hell);color:var(--grau);align-items:center;justify-content:center;font-size:.65rem;text-align:center;flex-shrink:0;">Kein Foto</div>'
+           +'<img id="profil-foto-preview" src="'+portraitSrc(personId)+'" alt="Foto" onerror="fotoFehler(this)" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--hell);">'
            +'<div style="flex:1;min-width:0;">'
            +'<label class="btn-modal-secondary" style="display:inline-block;cursor:pointer;font-size:.8rem;">&#128247; Foto hochladen'
-           +'<input type="file" accept="image/*" style="display:none;" onchange="fotoAusgewaehlt(this,'+p.id+')"></label>'
-           +'<p id="profil-foto-hinweis" style="font-size:.7rem;color:var(--grau);margin-top:6px;line-height:1.4;">Wird automatisch auf 80×80px zugeschnitten und als Datei heruntergeladen (Dateiname: <b>'+dName+'</b>). Bitte danach einmalig in den Ordner <b>fotos</b> neben der App verschieben.</p>'
+           +'<input type="file" accept="image/*" style="display:none;" onchange="fotoAusgewaehlt(this,'+p.id+')"></label> '
+           +'<button id="profil-foto-entfernen-btn" class="btn-modal-secondary" style="font-size:.8rem;'+(hatEigenesFoto?'':'display:none;')+'" onclick="entferneProfilFoto('+p.id+')">&#128465; Foto entfernen</button>'
+           +'<p id="profil-foto-hinweis" style="font-size:.7rem;color:var(--grau);margin-top:6px;line-height:1.4;">Wird automatisch auf 80&times;80px zugeschnitten und sofort gespeichert &ndash; kein Verschieben in einen Ordner mehr n&ouml;tig.</p>'
            +'</div></div>'
            +'<p style="font-size:.78rem;color:var(--grau);margin-bottom:10px;">F\u00e4higkeitsbewertung f\u00fcr jede Aufgabe – erscheint farbig bei Zuweisung.</p>'
            +'<div id="profil-aufgaben-liste" style="display:flex;flex-direction:column;gap:5px;max-height:58vh;overflow-y:auto;">';
@@ -39,7 +39,7 @@ function oeffneProfilModal(personId,event){
     var wert=profil[id]||'';
     html+='<div class="profil-zeile" data-aufgabe-id="'+id+'">'
          +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
-         +'<img src="'+a.foto+'" style="width:28px;height:28px;border-radius:6px;object-fit:contain;background:#f1f5f9;flex-shrink:0;">'
+         +'<img src="'+symbolSrc(a.foto)+'" style="width:28px;height:28px;border-radius:6px;object-fit:contain;background:#f1f5f9;flex-shrink:0;">'
          +'<span style="font-size:.84rem;font-weight:800;line-height:1.2;">'+a.label+'</span>'
          +'</div>'
          +'<div class="profil-wahl-row">'
@@ -57,16 +57,16 @@ function oeffneProfilModal(personId,event){
   document.getElementById('profil-modal-body').innerHTML=html;
   document.getElementById('profil-modal').classList.add('sichtbar');
 }
-/* ═══ Foto-Upload: lokal zuschneiden (80×80) und als Datei herunterladen ═══
-   Läuft komplett offline im Browser (Canvas). Es werden keine Daten irgendwohin
-   gesendet – die fertige Datei landet im Downloads-Ordner des Tablets und muss
-   einmalig manuell in den Ordner "fotos" verschoben werden. */
+/* ═══ Foto-Upload: lokal zuschneiden (80×80) und SOFORT im Profil speichern ═══
+   Läuft komplett offline im Browser (Canvas). Das Foto wird als Base64-Text
+   direkt in localStorage abgelegt – keine Datei, kein Ordner "fotos" mehr
+   nötig. Das ist auch der Grund, warum Android-Tablets das Bild jetzt
+   zuverlässig anzeigen können. */
 function fotoAusgewaehlt(input,personId){
   var file=input.files&&input.files[0];
   if(!file)return;
   var p=MITARBEITENDE.find(function(m){return m.id===personId;});
   if(!p)return;
-  var dName=dateiNameFuerFoto(p.name);
   var reader=new FileReader();
   reader.onload=function(e){
     var img=new Image();
@@ -79,22 +79,35 @@ function fotoAusgewaehlt(input,personId){
       var ctx=canvas.getContext('2d');
       ctx.drawImage(img,sx,sy,gr,gr,0,0,80,80);
       var dataUrl=canvas.toDataURL('image/jpeg',0.88);
-      /* Sofort-Vorschau im Modal (nur für diese Sitzung) */
+      /* Direkt im Profil speichern (localStorage) */
+      if(!PROFIL[personId])PROFIL[personId]={};
+      PROFIL[personId].foto=dataUrl;
+      speichereProfil();
+      /* Vorschau im Modal aktualisieren */
       var prev=document.getElementById('profil-foto-preview');
-      if(prev){prev.src=dataUrl;prev.style.display='block';}
-      var ph=document.getElementById('profil-foto-platzhalter');
-      if(ph)ph.style.display='none';
-      /* Download der fertigen 80x80-Datei mit korrektem Dateinamen anstoßen */
-      var a=document.createElement('a');
-      a.href=dataUrl;a.download=dName;
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      if(prev)prev.src=dataUrl;
+      var entfBtn=document.getElementById('profil-foto-entfernen-btn');
+      if(entfBtn)entfBtn.style.display='inline-block';
       var hin=document.getElementById('profil-foto-hinweis');
-      if(hin)hin.innerHTML='&#9989; Als <b>'+dName+'</b> heruntergeladen. Bitte jetzt in den Ordner <b>fotos</b> neben der App verschieben – danach Seite einmal neu laden.';
+      if(hin)hin.innerHTML='&#9989; Foto gespeichert.';
+      /* Zeile im Dashboard sofort aktualisieren */
+      renderNamen();initSortable();
     };
     img.onerror=function(){alert('Diese Datei konnte nicht als Bild gelesen werden.');};
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
+}
+function entferneProfilFoto(personId){
+  if(PROFIL[personId])delete PROFIL[personId].foto;
+  speichereProfil();
+  var prev=document.getElementById('profil-foto-preview');
+  if(prev)prev.src=portraitSrc(personId);
+  var entfBtn=document.getElementById('profil-foto-entfernen-btn');
+  if(entfBtn)entfBtn.style.display='none';
+  var hin=document.getElementById('profil-foto-hinweis');
+  if(hin)hin.innerHTML='Foto entfernt \u2013 Platzhalter wird angezeigt.';
+  renderNamen();initSortable();
 }
 
 function profilWaehlen(btn){
@@ -185,7 +198,7 @@ function oeffneAufgabenInfoModal(id,event){
   if(editModus)return;
   var a=AUFGABEN[id];if(!a)return;
   _aufgabeInfoModalId=id;
-  document.getElementById('aufgabe-info-titel').innerHTML='<img src="'+a.foto+'" style="width:26px;height:26px;vertical-align:middle;border-radius:5px;margin-right:6px;object-fit:contain;background:#f1f5f9;">'+a.label;
+  document.getElementById('aufgabe-info-titel').innerHTML='<img src="'+symbolSrc(a.foto)+'" style="width:26px;height:26px;vertical-align:middle;border-radius:5px;margin-right:6px;object-fit:contain;background:#f1f5f9;">'+a.label;
   var pers=getZustaendigePerson(id);
   var wannTxt='';
   var _wz=ZEITEN[id]||{};
@@ -250,7 +263,7 @@ function baueFokusInhalt(personId){
   var arbeitText=notiz&&notiz.text?notiz.text.trim():'';
   if(arbeitText){
     html+='<div class="fokus-abschnitt">'
-        +'<h3 class="fokus-abschnitt-titel"><img src="symbole/arbeit.jpg" class="fokus-mini-icon" alt="">Arbeitsinhalte</h3>'
+        +'<h3 class="fokus-abschnitt-titel"><img src="'+symbolSrc('symbole/arbeit.jpg')+'" class="fokus-mini-icon" alt="">Arbeitsinhalte</h3>'
         +'<p class="fokus-text">'+escFokus(arbeitText)+'</p>'
         +'</div>';
     vorlesenTeile.push('Arbeitsinhalte: '+arbeitText+'.');
@@ -269,7 +282,7 @@ function baueFokusInhalt(personId){
       var beschreibung=(AUFGABEN_NOTIZEN[id]!==undefined?AUFGABEN_NOTIZEN[id]:(AUFGABEN_INFO[id]||''));
       var status=checklistenStatusHeute(id);
       html+='<div style="margin-bottom:14px;">'
-          +'<div style="display:flex;align-items:center;font-weight:800;font-size:.96rem;margin-bottom:4px;"><img src="'+a.foto+'" class="fokus-mini-icon" alt="">'+a.label+'</div>'
+          +'<div style="display:flex;align-items:center;font-weight:800;font-size:.96rem;margin-bottom:4px;"><img src="'+symbolSrc(a.foto)+'" class="fokus-mini-icon" alt="">'+a.label+'</div>'
           +(beschreibung?'<p class="fokus-text">'+escFokus(beschreibung)+'</p>':'')
           +'<span class="fokus-status '+status.klasse+'">'+status.text+'</span>'
           +'</div>';
@@ -286,7 +299,7 @@ function baueFokusInhalt(personId){
       var a=AUFGABEN[id];if(!a)return;
       var beschreibung=(AUFGABEN_NOTIZEN[id]!==undefined?AUFGABEN_NOTIZEN[id]:(AUFGABEN_INFO[id]||''));
       html+='<div style="margin-bottom:14px;">'
-          +'<div style="display:flex;align-items:center;font-weight:800;font-size:.96rem;margin-bottom:4px;"><img src="'+a.foto+'" class="fokus-mini-icon" alt="">'+a.label+'</div>'
+          +'<div style="display:flex;align-items:center;font-weight:800;font-size:.96rem;margin-bottom:4px;"><img src="'+symbolSrc(a.foto)+'" class="fokus-mini-icon" alt="">'+a.label+'</div>'
           +(beschreibung?'<p class="fokus-text">'+escFokus(beschreibung)+'</p>':'')
           +'</div>';
       vorlesenTeile.push(a.label+(beschreibung?': '+beschreibung:'')+'.');
@@ -615,30 +628,22 @@ function speichereNamenAusModal(){
     else{ordered.push({id:id,name:name});}
   });
   if(ordered.length===0)return;
-  /* Entfernte Personen: Zuständigkeiten und State bereinigen */
+  /* Entfernte Personen: Zuständigkeiten, State und Profil (inkl. Foto) bereinigen.
+     Das Foto liegt jetzt als Base64-Text im Profil – wird automatisch mitgelöscht,
+     kein manuelles Aufräumen eines Ordners mehr nötig. */
   var entferntIds=alleAltenIds.filter(function(id){return !ordered.find(function(p){return p.id===id;});});
-  /* Foto-Löschen-Erinnerung: Namen VOR dem Entfernen sichern, da Fotos als
-     eigene Dateien im Ordner "fotos" liegen und nicht automatisch von der
-     App gelöscht werden können. */
-  var entferntNamen=entferntIds.map(function(id){
-    var alt=MITARBEITENDE.find(function(p){return p.id===id;});
-    return alt?alt.name:null;
-  }).filter(Boolean);
   entferntIds.forEach(function(id){
     GRUPPE.zustaendigkeiten=GRUPPE.zustaendigkeiten.filter(function(z){return z.personId!==id;});
     var ai=STATE.abwesend.indexOf(id);if(ai!==-1)STATE.abwesend.splice(ai,1);
     Object.keys(STATE.vertretungen).forEach(function(aufgId){if(getVertPerson(aufgId)===id)delete STATE.vertretungen[aufgId];});
     delete ARBEITSNOTIZEN[id];
+    delete PROFIL[id];
   });
   MITARBEITENDE.splice(0,MITARBEITENDE.length);
   ordered.forEach(function(p){MITARBEITENDE.push(p);});
   localStorage.setItem(NAMEN_KEY,JSON.stringify(MITARBEITENDE.map(function(p){return{id:p.id,name:p.name};})));
-  if(entferntIds.length>0){speichereZuordnung();speichereState();speichereArbeitsnotizen();}
+  if(entferntIds.length>0){speichereZuordnung();speichereState();speichereArbeitsnotizen();speichereProfil();}
   schM('namen-modal');renderNamen();initSortable();renderCheckliste();
-  if(entferntNamen.length>0){
-    var dateien=entferntNamen.map(function(n){return dateiNameFuerFoto(n);});
-    alert('Hinweis: Falls vorhanden, bitte folgende Foto-Datei(en) manuell aus dem Ordner "fotos" l\u00f6schen:\n\n'+dateien.join('\n'));
-  }
 }
 
 /* Leitung */
@@ -677,13 +682,13 @@ function oeffneAufgabenModal(personId){
     var and=a.typ==='checkliste'?GRUPPE.zustaendigkeiten.find(function(z){return z.aufgabeId===id&&z.personId!==personId;}):null;
     var andP=and?MITARBEITENDE.find(function(p){return p.id===and.personId;}):null;
     return '<button class="aufg-chip '+kl+(gew?' gewaehlt':'')+(inaktiv?' inaktiv-chip':'')+'" data-aufgabe-id="'+id+'" onclick="chipToggle(this)">'
-          +'<img src="'+a.foto+'" alt="'+a.label+'"><span>'+a.label
+          +'<img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'"><span>'+a.label
           +(andP&&!gew?'<span class="aufg-chip-belegt">aktuell: '+andP.name+'</span>':'')
           +(inaktiv?'<span class="aufg-chip-warn">&#9888; Zuerst in Checkliste aktivieren</span>':'')
           +'</span><div class="aufg-chip-check">'+(gew?'&#10003;':'')+'</div></button>';
   }
   document.getElementById('aufgaben-modal-inhalt').innerHTML=
-    '<div class="aufg-modal-person"><img src="'+fotoPfad(person.name)+'" alt="'+person.name+'" onerror="this.style.background=\'#e2e8f0\';this.style.opacity=0;"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
+    '<div class="aufg-modal-person"><img src="'+portraitSrc(person.id)+'" alt="'+person.name+'" onerror="fotoFehler(this)"><div class="aufg-modal-person-name">'+person.name+'</div></div>'
    +'<div class="aufg-modal-cols">'
    +'<div><div class="aufg-col-titel gelb">&#128203; Checklisten-Aufgaben</div><div class="aufg-col-chips">'+sortierteCheckIds().map(function(id){return chip(id,'check-chip');}).join('')+'</div></div>'
    +'<div><div class="aufg-col-titel blau">&#9881; Allgemeine Zust&auml;ndigkeiten</div><div class="aufg-col-chips">'+sortierteZustIds().map(function(id){return chip(id,'zust-chip');}).join('')+'</div></div>'
@@ -725,7 +730,7 @@ function oeffneNeuzuweisungModal(){
   neuzuwQueue.forEach(function(id){
     var a=AUFGABEN[id];
     html+='<div class="neuzuw-block">'
-         +'<div class="neuzuw-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="neuzuw-label">'+a.label+'</span></div>'
+         +'<div class="neuzuw-kopf"><img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'"><span class="neuzuw-label">'+a.label+'</span></div>'
          +'<div class="neuzuw-person-liste">'
          +MITARBEITENDE.map(function(p){
            return '<label class="neuzuw-person-label"><input type="radio" name="neuzuw-'+id+'" value="'+p.id+'">'+p.name+'</label>';
@@ -769,7 +774,7 @@ function oeffneVertretungsModal(personId,checkZust,vorDauer){
     var avPerson=getVertPerson(z.aufgabeId);
     var avDauer=vorDauer||getVertDauer(z.aufgabeId);
     if(zi>0)html+='<div class="vert-trenn"></div>';
-    html+='<div class="vert-aufgabe-block"><div class="vert-aufgabe-kopf"><img src="'+a.foto+'" alt="'+a.label+'"><span class="vert-aufgabe-label">'+a.label+'</span></div>'
+    html+='<div class="vert-aufgabe-block"><div class="vert-aufgabe-kopf"><img src="'+symbolSrc(a.foto)+'" alt="'+a.label+'"><span class="vert-aufgabe-label">'+a.label+'</span></div>'
          /* Dauer-Auswahl */
          +'<div class="vert-dauer-wrap">'
          +'<label class="vert-dauer-label'+(avDauer==='1tag'?' gewaehlt':'')+'"><input type="radio" name="dauer-'+z.aufgabeId+'" value="1tag"'+(avDauer!=='weiteres'?' checked':'')+' onchange="vertDauerCh(this)"> Nur f\u00fcr 1 Tag</label>'
