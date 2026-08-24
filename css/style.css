@@ -5,9 +5,7 @@
    ══════════════════════════════════════════════════════ */
 :root{--rot:#b61f29;--gruen:#16a34a;--gelb:#ca8a04;--bg:#f0f2f5;--text:#0f2f37;--grau:#64748b;--hell:#e2e8f0;--ROW:80px;--check-bg:#fef9c3;--check-rand:#fde047;--zust-bg:#eff6ff;--zust-rand:#93c5fd;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;width:100%;overflow-x:hidden;}
-header{background:white;box-shadow:0 2px 10px rgba(0,0,0,.08);width:100%;}
-header img{width:100%;max-height:80px;object-fit:cover;object-position:left;display:block;}
+body{font-family:sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;width:100%;overflow-x:hidden;}
 
 /* ── Banner mit Uhr ── */
 .banner{background:var(--rot);color:white;padding:8px 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;width:100%;}
