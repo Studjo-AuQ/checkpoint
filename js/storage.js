@@ -569,15 +569,11 @@ var DATENSCHUTZ_INHALTE=[
     '<p>Der Programmcode des Gruppen\u00b7Checkpoints wird zur Entwicklung in einem GitHub-Repository verwaltet. Die Verteilung an die Gruppen erfolgt als ZIP-Datei \u00fcber GitHub Releases \u2013 die Anwendung wird von den Gruppen nicht online \u00fcber GitHub, sondern lokal auf dem eigenen Ger\u00e4t ausgef\u00fchrt.</p>'
     +'<p>Der Ordner <code>fotos/</code> mit den Portraitbildern ist bewusst nicht Teil des Repositorys und wird bei einem Update nicht \u00fcberschrieben oder mit hochgeladen. Es werden keine personenbezogenen Daten im Quellcode-Repository gespeichert.</p>'
   },
-  {titel:'7) Externe Schriftart (Google Fonts)',html:
-    '<p>F\u00fcr die Darstellung wird die Schriftart „Nunito Sans" eingebunden. Ist das Ger\u00e4t beim Start mit dem Internet verbunden, wird diese Schriftart von den Servern von Google Fonts nachgeladen; dabei wird die IP-Adresse des Ger\u00e4ts an Google \u00fcbermittelt.</p>'
-    +'<p>Im normalen, offline genutzten Betrieb (ohne Internetverbindung) findet dieser Abruf nicht statt; die App verwendet dann automatisch eine im Betriebssystem hinterlegte Ersatzschrift.</p>'
-  },
-  {titel:'8) Cookies und Tracking',html:
+  {titel:'7) Cookies und Tracking',html:
     '<div class="info-ok">\u2713 Es werden keine Cookies gesetzt.<br>\u2713 Es kommen keine Analyse- oder Tracking-Werkzeuge zum Einsatz.<br>\u2713 Es gibt keine Nutzerkonten oder Anmeldung.<br>\u2713 Die einzige verwendete Speichertechnik (localStorage) dient ausschlie\u00dflich der technisch notwendigen Funktion der App und verbleibt auf dem Ger\u00e4t.</div>'
     +'<p>Da keine nicht notwendigen Speichertechniken eingesetzt werden, ist gem\u00e4\u00df \u00a7 25 Abs. 2 Nr. 2 TTDSG keine Einwilligung erforderlich.</p>'
   },
-  {titel:'9) Ihre Rechte als betroffene Person',html:
+  {titel:'8) Ihre Rechte als betroffene Person',html:
     '<ul>'
     +'<li><strong>Auskunftsrecht</strong> (Art. 15 DSGVO)</li>'
     +'<li><strong>Berichtigungsrecht</strong> (Art. 16 DSGVO)</li>'
@@ -588,11 +584,11 @@ var DATENSCHUTZ_INHALTE=[
     +'</ul>'
     +'<p style="margin-top:10px">Da die Daten ausschlie\u00dflich lokal auf dem Ger\u00e4t der Gruppe gespeichert werden, richten sich Anfragen bitte direkt an den Verantwortlichen (siehe Kapitel 1), z.\u2009B. an Christoph Pasch oder die zust\u00e4ndige Gruppenleitung.</p>'
   },
-  {titel:'10) Beschwerderecht bei der Aufsichtsbehörde',html:
+  {titel:'9) Beschwerderecht bei der Aufsichtsbehörde',html:
     '<p>Sie haben das Recht, sich bei der zust\u00e4ndigen Datenschutz-Aufsichtsbeh\u00f6rde \u00fcber die Verarbeitung Ihrer personenbezogenen Daten zu beschweren. Zust\u00e4ndige Aufsichtsbeh\u00f6rde f\u00fcr das Evangelische Johanneswerk ist:</p>'
     +'<address>Landesbeauftragte f\u00fcr Datenschutz und Informationsfreiheit<br>Nordrhein-Westfalen (LfDI NRW)<br>Kavalleriestra\u00dfe 2\u20134<br>40213 D\u00fcsseldorf<br>Telefon: 0211 38424-0<br>E-Mail: <a href="mailto:poststelle@ldi.nrw.de">poststelle@ldi.nrw.de</a><br>Web: <a href="https://www.ldi.nrw.de" target="_blank" rel="noopener">www.ldi.nrw.de</a></address>'
   },
-  {titel:'11) Aktualität dieser Datenschutzerklärung',html:
+  {titel:'10) Aktualität dieser Datenschutzerklärung',html:
     '<p>Diese Datenschutzerkl\u00e4rung hat den Stand: August 2026.</p>'
     +'<p>Sie wird bei Bedarf aktualisiert, insbesondere bei technischen \u00c4nderungen der Anwendung. Die jeweils aktuelle Version ist in dieser App unter „Datenschutz" abrufbar.</p>'
   }
