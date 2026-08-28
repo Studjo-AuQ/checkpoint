@@ -297,6 +297,12 @@ function pctFarbe6(pct){
   if(pct>=50)return '#ea580c';
   return '#dc2626';
 }
+/* Ampel-Farbe für die Anwesenheit: 3 Stufen statt der 6-stufigen pctFarbe6 */
+function pctFarbeAmpel(pct){
+  if(pct<=60)return '#dc2626';
+  if(pct<=80)return '#ea580c';
+  return '#16a34a';
+}
 function istFalscherTag(id){
   return !!(ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id));
 }
@@ -323,23 +329,15 @@ function berechneFortschrittStats(){
 function renderAnwesenheit(){
   var s=berechneAnwesenheitStats();
   var el=document.getElementById('anwesenheit-anzeige');if(!el)return;
-  var farbe=pctFarbe6(s.pct);
-  var voll=Math.round(s.pct/100*8);
-  el.innerHTML=s.abs+'/'+s.gesamt+' anwesend&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
-    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
-    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
-    +'</span>&ensp;'+s.pct+'%';
+  var farbe=pctFarbeAmpel(s.pct);
+  el.innerHTML=s.abs+'/'+s.gesamt+' ('+s.pct+'%)';
   el.style.color=farbe;
 }
 function renderFortschritt(){
   var s=berechneFortschrittStats();
   var farbe=pctFarbe6(s.pct);
-  var voll=Math.round(s.pct/100*8);
   var el=document.getElementById('fortschritt-anzeige');if(!el)return;
-  el.innerHTML=s.abs+'/'+s.gesamt+'&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
-    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
-    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
-    +'</span>&ensp;'+s.pct+'%'+(s.entfallen>0?'&ensp;<span style="color:var(--grau);">−19×∅</span>'.replace('19',s.entfallen):'');
+  el.innerHTML=s.abs+'/'+s.gesamt+' ('+s.pct+'%)';
   el.style.color=farbe;
 }
 
