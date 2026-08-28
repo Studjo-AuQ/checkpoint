@@ -341,6 +341,13 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .hilfe-kapitel-body{padding:0 4px 14px 4px;}
 .hilfe-kapitel-body ul{margin:0;padding-left:18px;font-size:.82rem;line-height:1.55;color:var(--text);}
 .hilfe-kapitel-body li{margin-bottom:4px;}
+/* Übersicht-Modal: Statistikkarten */
+.uebersicht-karte{background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.uebersicht-karte:last-child{margin-bottom:0;}
+.uebersicht-karte-titel{font-size:.85rem;font-weight:900;color:var(--text);margin-bottom:8px;}
+.uebersicht-metrik{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.82rem;}
+.uebersicht-metrik-label{color:var(--grau);font-weight:700;}
+.uebersicht-metrik-wert{font-weight:900;font-family:monospace;white-space:nowrap;}
 .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
 .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
