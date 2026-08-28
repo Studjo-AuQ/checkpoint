@@ -364,9 +364,14 @@ function aggregiereStats(archivEintraege,liveHeuteEinbeziehen){
 }
 
 /* Liefert die vier Zeitraum-Statistiken für das Übersicht-Modal. "Heute"
-   fließt bei Tag/laufendem Monat/seit-Reset live mit ein; ein eventuell
-   schon archivierter heutiger Eintrag wird dafür herausgefiltert, damit
-   nichts doppelt gezählt wird. */
+   fließt bei Tag/laufendem Monat live mit ein; ein eventuell schon
+   archivierter heutiger Eintrag wird dafür herausgefiltert, damit nichts
+   doppelt gezählt wird.
+   "Seit letztem Reset" verhält sich wie ein Tageskilometerzähler: am Tag
+   des Zurücksetzens selbst zeigt er sofort "0"/"keine Daten" (der bereits
+   gelaufene Tagesanteil wird bewusst NICHT mitgezählt, da tagesgenaue,
+   aber keine uhrzeitgenaue Daten vorliegen) und läuft erst AB DEM
+   FOLGETAG wieder mit – daher datum>resetDatum (strikt), nicht >=. */
 function ermittleUebersichtStats(){
   var heuteDatum=heute();
   var h=ladeHistorie().filter(function(e){return e.datum!==heuteDatum;});
@@ -379,7 +384,7 @@ function ermittleUebersichtStats(){
     tag:aggregiereStats([],true),
     laufenderMonat:aggregiereStats(h.filter(function(e){return e.datum.slice(0,7)===jm;}),true),
     letzterMonat:aggregiereStats(h.filter(function(e){return e.datum.slice(0,7)===vm;}),false),
-    seitReset:aggregiereStats(h.filter(function(e){return !resetDatum||e.datum>=resetDatum;}),!resetDatum||heuteDatum>=resetDatum),
+    seitReset:aggregiereStats(h.filter(function(e){return !resetDatum||e.datum>resetDatum;}),!resetDatum||heuteDatum>resetDatum),
     resetDatum:resetDatum
   };
 }
