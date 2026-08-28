@@ -340,9 +340,13 @@ function statistikResetDatum(){
 }
 
 /* Summiert eine Liste Historie-Einträge zu einer Statistik auf; optional
-   wird der aktuelle (noch nicht archivierte) Live-Tagesstand mitgezählt. */
+   wird der aktuelle (noch nicht archivierte) Live-Tagesstand mitgezählt.
+   "tage" gibt die Anzahl eingerechneter Tage zurück – daraus lassen sich
+   im Übersicht-Modal Durchschnittswerte (Ø Personen/Aufgaben pro Tag)
+   berechnen und "keine Daten"-Fälle (tage===0) erkennen. */
 function aggregiereStats(archivEintraege,liveHeuteEinbeziehen){
   var anwAbs=0,anwGesamt=0,erlAbs=0,erlGesamt=0;
+  var tage=archivEintraege.length+(liveHeuteEinbeziehen?1:0);
   archivEintraege.forEach(function(e){
     anwAbs+=e.anwAbs;anwGesamt+=e.anwGesamt;erlAbs+=e.erlAbs;erlGesamt+=e.erlGesamt;
   });
@@ -351,8 +355,11 @@ function aggregiereStats(archivEintraege,liveHeuteEinbeziehen){
     anwAbs+=anw.abs;anwGesamt+=anw.gesamt;erlAbs+=fort.abs;erlGesamt+=fort.gesamt;
   }
   return {
-    anwAbs:anwAbs,anwGesamt:anwGesamt,anwPct:anwGesamt>0?Math.round(anwAbs/anwGesamt*100):100,
-    erlAbs:erlAbs,erlGesamt:erlGesamt,erlPct:erlGesamt>0?Math.round(erlAbs/erlGesamt*100):0
+    anwAbs:anwAbs,anwGesamt:anwGesamt,anwPct:anwGesamt>0?Math.round(anwAbs/anwGesamt*100):null,
+    erlAbs:erlAbs,erlGesamt:erlGesamt,erlPct:erlGesamt>0?Math.round(erlAbs/erlGesamt*100):null,
+    tage:tage,
+    anwSchnitt:tage>0?anwGesamt/tage:null,
+    erlSchnitt:tage>0?erlGesamt/tage:null
   };
 }
 

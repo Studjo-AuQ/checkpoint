@@ -459,28 +459,42 @@ function sprachText(s){
 }
 
 /* ═══ ÜBERSICHT-MODAL: statistische Auswertung ═══ */
-function uebersichtKarte(titel,s){
-  var farbeAnw=pctFarbe6(s.anwPct);
-  var farbeErl=pctFarbe6(s.erlPct);
-  return '<div class="uebersicht-karte">'
+/* Reines Zahlenformat (28.08.2026) für die Modal-Überschrift – NICHT
+   isoDatumSprache() verwenden, die ist für die Vorlesefunktion gedacht
+   und liefert ausgeschriebenen Text ("achtundzwanzigster August …"). */
+function isoDatumZahlen(iso){
+  if(!iso)return '';
+  var p=iso.split('-');
+  if(p.length!==3)return iso;
+  return p[2]+'.'+p[1]+'.'+p[0];
+}
+function formatDezimal1(n){
+  if(n===null||n===undefined||isNaN(n))return '–';
+  return n.toFixed(1).replace('.',',');
+}
+function uebersichtMetrikZeile(label,abs,gesamt,pct){
+  if(pct===null)return '<div class="uebersicht-metrik"><span class="uebersicht-metrik-label">'+label+'</span><span class="uebersicht-metrik-wert" style="color:var(--grau);">keine Daten</span></div>';
+  var farbe=pctFarbe6(pct);
+  return '<div class="uebersicht-metrik"><span class="uebersicht-metrik-label">'+label+'</span><span class="uebersicht-metrik-wert" style="color:'+farbe+';">'+abs+'/'+gesamt+' &ensp; '+pct+'%</span></div>';
+}
+function uebersichtKarte(titel,s,zeigeSchnitt){
+  var html='<div class="uebersicht-karte">'
     +'<div class="uebersicht-karte-titel">'+titel+'</div>'
-    +'<div class="uebersicht-metrik">'
-      +'<span class="uebersicht-metrik-label">&#128101; Anwesenheit</span>'
-      +'<span class="uebersicht-metrik-wert" style="color:'+farbeAnw+';">'+s.anwAbs+'/'+s.anwGesamt+' &ensp; '+s.anwPct+'%</span>'
-    +'</div>'
-    +'<div class="uebersicht-metrik">'
-      +'<span class="uebersicht-metrik-label">&#9989; Erledigte Aufgaben</span>'
-      +'<span class="uebersicht-metrik-wert" style="color:'+farbeErl+';">'+s.erlAbs+'/'+s.erlGesamt+' &ensp; '+s.erlPct+'%</span>'
-    +'</div>'
-  +'</div>';
+    +uebersichtMetrikZeile('&#128101; Anwesenheit',s.anwAbs,s.anwGesamt,s.anwPct)
+    +uebersichtMetrikZeile('&#9989; Erledigte Aufgaben',s.erlAbs,s.erlGesamt,s.erlPct);
+  if(zeigeSchnitt&&s.tage>0){
+    html+='<div class="uebersicht-schnitt">&#8960; im Schnitt '+formatDezimal1(s.anwSchnitt)+' Personen &ensp;|&ensp; '+formatDezimal1(s.erlSchnitt)+' Aufgaben &ensp;<span style="color:var(--grau);">('+s.tage+' Tag'+(s.tage===1?'':'e')+')</span></div>';
+  }
+  html+='</div>';
+  return html;
 }
 function renderUebersicht(){
   var st=ermittleUebersichtStats();
   var html=''
-    +uebersichtKarte('&#128197; Aktueller Tag',st.tag)
-    +uebersichtKarte('&#128198; Laufender Monat',st.laufenderMonat)
-    +uebersichtKarte('&#128197; Letzter Monat',st.letzterMonat)
-    +uebersichtKarte('&#128260; Seit letztem Reset'+(st.resetDatum?' (seit '+isoDatumSprache(st.resetDatum)+')':' (noch nie zurückgesetzt)'),st.seitReset);
+    +uebersichtKarte('&#128197; Aktueller Tag',st.tag,false)
+    +uebersichtKarte('&#128198; Laufender Monat',st.laufenderMonat,true)
+    +uebersichtKarte('&#128197; Letzter Monat',st.letzterMonat,true)
+    +uebersichtKarte('&#128260; Seit letztem Reset'+(st.resetDatum?' (seit '+isoDatumZahlen(st.resetDatum)+')':' (noch nie zurückgesetzt)'),st.seitReset,true);
   var body=document.getElementById('uebersicht-modal-body');
   if(body)body.innerHTML=html;
 }
