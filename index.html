@@ -136,6 +136,7 @@
   </div>
   <div class="banner-rechts" style="display:flex;gap:6px;align-items:center;">
     <button class="btn-banner" onclick="oeffneHilfeModal()" title="Hilfe / Anleitung">&#10067; Hilfe</button>
+    <button class="btn-banner" onclick="oeffneUebersichtModal()" title="Statistische Übersicht">&#128202; Übersicht</button>
     <button class="btn-banner" onclick="importierenKST()" title="Profil importieren (JSON)">&#8679;</button>
     <button class="btn-banner" onclick="exportierenKST()" title="Profil exportieren (JSON)">&#8681;</button>
     <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
@@ -279,6 +280,17 @@
     <div class="modal-kopf"><h2>&#10067; Hilfe &amp; Anleitung</h2><button class="modal-schliessen" onclick="schM('hilfe-modal')">&#10005;</button></div>
     <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
     <div id="hilfe-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ Übersicht-Modal (statistische Auswertung) ═══ -->
+<div class="modal-overlay" id="uebersicht-modal" onclick="modalAK(event,'uebersicht-modal')">
+  <div class="modal-box" style="width:min(480px,96vw)">
+    <div class="modal-kopf"><h2>&#128202; &Uuml;bersicht</h2><button class="modal-schliessen" onclick="schM('uebersicht-modal')">&#10005;</button></div>
+    <div id="uebersicht-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+    <div class="modal-btns" style="justify-content:flex-start;">
+      <button class="btn-modal-reset" onclick="statistikZuruecksetzen()">&#128260; Statistik "seit letztem Reset" zur&uuml;cksetzen</button>
+    </div>
   </div>
 </div>
 

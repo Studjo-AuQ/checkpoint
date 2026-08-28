@@ -349,6 +349,13 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .hilfe-kapitel-body{padding:0 4px 14px 4px;}
 .hilfe-kapitel-body ul{margin:0;padding-left:18px;font-size:.82rem;line-height:1.55;color:var(--text);}
 .hilfe-kapitel-body li{margin-bottom:4px;}
+/* Übersicht-Modal: Statistikkarten */
+.uebersicht-karte{background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.uebersicht-karte:last-child{margin-bottom:0;}
+.uebersicht-karte-titel{font-size:.85rem;font-weight:900;color:var(--text);margin-bottom:8px;}
+.uebersicht-metrik{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.82rem;}
+.uebersicht-metrik-label{color:var(--grau);font-weight:700;}
+.uebersicht-metrik-wert{font-weight:900;font-family:monospace;white-space:nowrap;}
 .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
 .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
@@ -631,6 +638,7 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
   </div>
   <div class="banner-rechts" style="display:flex;gap:6px;align-items:center;">
     <button class="btn-banner" onclick="oeffneHilfeModal()" title="Hilfe / Anleitung">&#10067; Hilfe</button>
+    <button class="btn-banner" onclick="oeffneUebersichtModal()" title="Statistische Übersicht">&#128202; Übersicht</button>
     <button class="btn-banner" onclick="importierenKST()" title="Profil importieren (JSON)">&#8679;</button>
     <button class="btn-banner" onclick="exportierenKST()" title="Profil exportieren (JSON)">&#8681;</button>
     <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
@@ -774,6 +782,17 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
     <div class="modal-kopf"><h2>&#10067; Hilfe &amp; Anleitung</h2><button class="modal-schliessen" onclick="schM('hilfe-modal')">&#10005;</button></div>
     <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
     <div id="hilfe-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ Übersicht-Modal (statistische Auswertung) ═══ -->
+<div class="modal-overlay" id="uebersicht-modal" onclick="modalAK(event,'uebersicht-modal')">
+  <div class="modal-box" style="width:min(480px,96vw)">
+    <div class="modal-kopf"><h2>&#128202; &Uuml;bersicht</h2><button class="modal-schliessen" onclick="schM('uebersicht-modal')">&#10005;</button></div>
+    <div id="uebersicht-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+    <div class="modal-btns" style="justify-content:flex-start;">
+      <button class="btn-modal-reset" onclick="statistikZuruecksetzen()">&#128260; Statistik "seit letztem Reset" zur&uuml;cksetzen</button>
+    </div>
   </div>
 </div>
 
@@ -1096,7 +1115,7 @@ var AKTIVE_KST = '';
 /* Alle Storage-Keys dynamisch mit KST-Prefix */
 var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
     LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='',
-    EXPORT_ERINNERUNG_KEY='';
+    EXPORT_ERINNERUNG_KEY='', HISTORIE_KEY='', STATREESET_KEY='';
 
 function setzeKSTKeys(kst) {
   AKTIVE_KST  = kst;
@@ -1110,6 +1129,8 @@ function setzeKSTKeys(kst) {
   ZEITEN_KEY  = kst + '-chk-zeiten-v1';
   PROFIL_KEY  = kst + '-chk-profil-v1';
   EXPORT_ERINNERUNG_KEY = kst + '-chk-export-erinnerung-v1';
+  HISTORIE_KEY = kst + '-chk-historie-v1';
+  STATREESET_KEY = kst + '-chk-statistik-reset-v1';
   setzeArbeitKey(kst);
   setzeAufgNotizKey(kst);
 }
@@ -1177,7 +1198,7 @@ function profilBgKl(personId,aufgabeId){var w=profilFarbe(personId,aufgabeId);re
 
 /* Feature 4: Export / Import der KST-Daten */
 function exportierenKST(){
-  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY];
+  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY,HISTORIE_KEY,STATREESET_KEY];
   var data={};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
   data['__kst']=AKTIVE_KST;
@@ -1239,6 +1260,7 @@ if(STATE.abwesendWeiteres.length){
 
 function tagesReset(m){
   if(m&&!confirm('Tages-Reset?'))return;
+  archiviereTagesstatistik();
   /* "Bis auf weiteres"-Vertretungen behalten, "Nur 1 Tag" löschen */
   var behalte={};
   Object.keys(STATE.vertretungen||{}).forEach(function(id){
@@ -1253,6 +1275,81 @@ function tagesReset(m){
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('abwesend');});
   renderNamen();renderCheckliste();
+}
+
+/* ═══ ÜBERSICHT / STATISTIK ═══
+   Tages-Historie pro Kostenstelle: ein Eintrag pro Tag mit den absoluten
+   Werten von Anwesenheit und erledigten Check-Aufgaben. Wird beim
+   "Neuer Tag"-Klick automatisch geschrieben (bevor der Tagesstand
+   gelöscht wird) UND zusätzlich als Sicherheitsnetz ab 18:00 Uhr, falls
+   "Neuer Tag" an dem Tag vergessen wurde (siehe Minuten-Timer app.js). */
+function ladeHistorie(){return ladeLS(HISTORIE_KEY)||[];}
+function speichereHistorie(h){if(HISTORIE_KEY)localStorage.setItem(HISTORIE_KEY,JSON.stringify(h));}
+
+/* Schreibt bzw. überschreibt den heutigen Eintrag – ein mehrfacher Aufruf
+   am selben Tag (Neuer-Tag-Klick UND 18-Uhr-Check) zählt dadurch nicht doppelt. */
+function archiviereTagesstatistik(){
+  if(!HISTORIE_KEY)return;
+  var anw=berechneAnwesenheitStats();
+  var fort=berechneFortschrittStats();
+  var heuteDatum=STATE.datum||heute();
+  var h=ladeHistorie().filter(function(e){return e.datum!==heuteDatum;});
+  h.push({datum:heuteDatum,anwAbs:anw.abs,anwGesamt:anw.gesamt,erlAbs:fort.abs,erlGesamt:fort.gesamt});
+  /* Historie nicht unbegrenzt wachsen lassen: 3 Jahre reichen für "letzter Monat"
+     und "seit Reset" bei weitem und halten die Datenmenge klein */
+  var grenze=new Date();grenze.setFullYear(grenze.getFullYear()-3);
+  var grenzeStr=grenze.toISOString().slice(0,10);
+  h=h.filter(function(e){return e.datum>=grenzeStr;});
+  speichereHistorie(h);
+}
+
+/* Manuelles Zurücksetzen des "seit letztem Reset"-Zeitraums (eigener
+   Button im Übersicht-Modal, unabhängig vom täglichen "Neuer Tag") */
+function statistikZuruecksetzen(){
+  if(!confirm('Statistik "seit letztem Reset" wirklich zurücksetzen?\nTages- und Monatswerte bleiben unberührt, nur der Zähler seit dem letzten Reset beginnt neu.'))return;
+  if(STATREESET_KEY)localStorage.setItem(STATREESET_KEY,heute());
+  if(typeof renderUebersicht==='function')renderUebersicht();
+}
+function statistikResetDatum(){
+  return (STATREESET_KEY&&localStorage.getItem(STATREESET_KEY))||null;
+}
+
+/* Summiert eine Liste Historie-Einträge zu einer Statistik auf; optional
+   wird der aktuelle (noch nicht archivierte) Live-Tagesstand mitgezählt. */
+function aggregiereStats(archivEintraege,liveHeuteEinbeziehen){
+  var anwAbs=0,anwGesamt=0,erlAbs=0,erlGesamt=0;
+  archivEintraege.forEach(function(e){
+    anwAbs+=e.anwAbs;anwGesamt+=e.anwGesamt;erlAbs+=e.erlAbs;erlGesamt+=e.erlGesamt;
+  });
+  if(liveHeuteEinbeziehen){
+    var anw=berechneAnwesenheitStats(),fort=berechneFortschrittStats();
+    anwAbs+=anw.abs;anwGesamt+=anw.gesamt;erlAbs+=fort.abs;erlGesamt+=fort.gesamt;
+  }
+  return {
+    anwAbs:anwAbs,anwGesamt:anwGesamt,anwPct:anwGesamt>0?Math.round(anwAbs/anwGesamt*100):100,
+    erlAbs:erlAbs,erlGesamt:erlGesamt,erlPct:erlGesamt>0?Math.round(erlAbs/erlGesamt*100):0
+  };
+}
+
+/* Liefert die vier Zeitraum-Statistiken für das Übersicht-Modal. "Heute"
+   fließt bei Tag/laufendem Monat/seit-Reset live mit ein; ein eventuell
+   schon archivierter heutiger Eintrag wird dafür herausgefiltert, damit
+   nichts doppelt gezählt wird. */
+function ermittleUebersichtStats(){
+  var heuteDatum=heute();
+  var h=ladeHistorie().filter(function(e){return e.datum!==heuteDatum;});
+  var jm=heuteDatum.slice(0,7); /* YYYY-MM laufender Monat */
+  var vormonatsDatum=new Date();vormonatsDatum.setDate(1);vormonatsDatum.setMonth(vormonatsDatum.getMonth()-1);
+  var vm=vormonatsDatum.toISOString().slice(0,7);
+  var resetDatum=statistikResetDatum();
+
+  return {
+    tag:aggregiereStats([],true),
+    laufenderMonat:aggregiereStats(h.filter(function(e){return e.datum.slice(0,7)===jm;}),true),
+    letzterMonat:aggregiereStats(h.filter(function(e){return e.datum.slice(0,7)===vm;}),false),
+    seitReset:aggregiereStats(h.filter(function(e){return !resetDatum||e.datum>=resetDatum;}),!resetDatum||heuteDatum>=resetDatum),
+    resetDatum:resetDatum
+  };
 }
 
 /* Hilfsfunktionen für neue Vertretungs-Struktur {person, dauer} */
@@ -1856,20 +1953,13 @@ function istFalscherTag(id){
   return !!(ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id));
 }
 /* Feature 4: Anwesenheits-Zählwerk */
-function renderAnwesenheit(){
+function berechneAnwesenheitStats(){
   var gesamt=MITARBEITENDE.length;
   var anwesend=gesamt-(STATE.abwesend||[]).length;
   var pct=gesamt>0?Math.round(anwesend/gesamt*100):100;
-  var el=document.getElementById('anwesenheit-anzeige');if(!el)return;
-  var farbe=pctFarbe6(pct);
-  var voll=Math.round(pct/100*8);
-  el.innerHTML=anwesend+'/'+gesamt+' anwesend&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
-    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
-    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
-    +'</span>&ensp;'+pct+'%';
-  el.style.color=farbe;
+  return {abs:anwesend,gesamt:gesamt,pct:pct};
 }
-function renderFortschritt(){
+function berechneFortschrittStats(){
   var ids=AKTIVE_CHECKS;
   /* Entfallene (rot umrandet) und ausstehende (noch kein Vertretungs-Entscheid)
      zählen nicht zur erledigbaren Gesamtmenge */
@@ -1880,13 +1970,28 @@ function renderFortschritt(){
   var erl=STATE.erledigt.filter(function(id){return effektiv.indexOf(id)!==-1;}).length;
   var entf=ids.filter(function(id){return entfaelltHeute(id)||vertretungAusstehend(id)||istFalscherTag(id);}).length;
   var pct=gesamt>0?Math.round(erl/gesamt*100):0;
-  var farbe=pctFarbe6(pct);
-  var voll=Math.round(pct/100*8);
-  var el=document.getElementById('fortschritt-anzeige');if(!el)return;
-  el.innerHTML=erl+'/'+gesamt+'&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
+  return {abs:erl,gesamt:gesamt,pct:pct,entfallen:entf};
+}
+function renderAnwesenheit(){
+  var s=berechneAnwesenheitStats();
+  var el=document.getElementById('anwesenheit-anzeige');if(!el)return;
+  var farbe=pctFarbe6(s.pct);
+  var voll=Math.round(s.pct/100*8);
+  el.innerHTML=s.abs+'/'+s.gesamt+' anwesend&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
     +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
     +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
-    +'</span>&ensp;'+pct+'%'+(entf>0?'&ensp;<span style="color:var(--grau);">−19×∅</span>'.replace('19',entf):'');
+    +'</span>&ensp;'+s.pct+'%';
+  el.style.color=farbe;
+}
+function renderFortschritt(){
+  var s=berechneFortschrittStats();
+  var farbe=pctFarbe6(s.pct);
+  var voll=Math.round(s.pct/100*8);
+  var el=document.getElementById('fortschritt-anzeige');if(!el)return;
+  el.innerHTML=s.abs+'/'+s.gesamt+'&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
+    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
+    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
+    +'</span>&ensp;'+s.pct+'%'+(s.entfallen>0?'&ensp;<span style="color:var(--grau);">−19×∅</span>'.replace('19',s.entfallen):'');
   el.style.color=farbe;
 }
 
@@ -2005,6 +2110,33 @@ function sprachText(s){
   s=s.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g,datumSprache);
   s=s.replace(/\b(\d{1,2}):(\d{2})\b/g,uhrzeitSprache);
   return s;
+}
+
+/* ═══ ÜBERSICHT-MODAL: statistische Auswertung ═══ */
+function uebersichtKarte(titel,s){
+  var farbeAnw=pctFarbe6(s.anwPct);
+  var farbeErl=pctFarbe6(s.erlPct);
+  return '<div class="uebersicht-karte">'
+    +'<div class="uebersicht-karte-titel">'+titel+'</div>'
+    +'<div class="uebersicht-metrik">'
+      +'<span class="uebersicht-metrik-label">&#128101; Anwesenheit</span>'
+      +'<span class="uebersicht-metrik-wert" style="color:'+farbeAnw+';">'+s.anwAbs+'/'+s.anwGesamt+' &ensp; '+s.anwPct+'%</span>'
+    +'</div>'
+    +'<div class="uebersicht-metrik">'
+      +'<span class="uebersicht-metrik-label">&#9989; Erledigte Aufgaben</span>'
+      +'<span class="uebersicht-metrik-wert" style="color:'+farbeErl+';">'+s.erlAbs+'/'+s.erlGesamt+' &ensp; '+s.erlPct+'%</span>'
+    +'</div>'
+  +'</div>';
+}
+function renderUebersicht(){
+  var st=ermittleUebersichtStats();
+  var html=''
+    +uebersichtKarte('&#128197; Aktueller Tag',st.tag)
+    +uebersichtKarte('&#128198; Laufender Monat',st.laufenderMonat)
+    +uebersichtKarte('&#128197; Letzter Monat',st.letzterMonat)
+    +uebersichtKarte('&#128260; Seit letztem Reset'+(st.resetDatum?' (seit '+isoDatumSprache(st.resetDatum)+')':' (noch nie zurückgesetzt)'),st.seitReset);
+  var body=document.getElementById('uebersicht-modal-body');
+  if(body)body.innerHTML=html;
 }
 
 
@@ -2526,6 +2658,12 @@ function toggleHilfeKapitel(i){
   var offen=body.style.display!=='none';
   body.style.display=offen?'none':'block';
   if(pfeil)pfeil.innerHTML=offen?'&#9656;':'&#9662;';
+}
+
+/* ═══ Übersicht-Modal (statistische Auswertung) ═══ */
+function oeffneUebersichtModal(){
+  renderUebersicht();
+  document.getElementById('uebersicht-modal').classList.add('sichtbar');
 }
 
 /* ═══ Impressum / Datenschutz (rote Fußzeile) ═══
@@ -3258,6 +3396,14 @@ function entferneVertretung(aufgabeId){
 setInterval(function(){
   var aktiv=document.getElementById('check-tabelle');
   if(aktiv)renderCheckliste();
+},60000);
+/* Statistik-Sicherheitsnetz: falls "Neuer Tag" an einem Tag vergessen
+   wird (oder das Gerät um 18 Uhr aus war), wird der Tagesstand trotzdem
+   spätestens ab 18:00 Uhr für die Übersicht archiviert. Läuft im selben
+   Minuten-Takt mit; mehrfaches Auslösen am selben Tag ist unschädlich,
+   da archiviereTagesstatistik() den heutigen Eintrag nur überschreibt. */
+setInterval(function(){
+  if(AKTIVE_KST&&new Date().getHours()>=18)archiviereTagesstatistik();
 },60000);
 ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();ladeAufgabenNotizen();
 
