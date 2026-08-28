@@ -379,6 +379,9 @@
   <div class="col-wrap">
     <div class="col-header" style="padding:0;overflow:hidden;">
       <div style="display:flex;align-items:stretch;height:100%;">
+        <div style="display:flex;align-items:center;flex-shrink:0;padding:0 10px 0 12px;">
+          <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
+        </div>
         <!-- Breite Portrait(80)+Name(148) = 228px -->
         <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:flex-start;padding-left:10px;border-radius:0;">&#128100; Namen</button>
         <!-- Zuständigkeiten (inkl. Arbeit-Icon ganz links) -->
@@ -389,10 +392,8 @@
   </div>
 
   <div class="col-wrap">
-    <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Zählwerk zentriert -->
-    <div class="col-header" style="justify-content:center;padding:0 8px;">
-      <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
-    </div>
+    <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Anzeige nach links (Namen-Spalte) verschoben -->
+    <div class="col-header" style="padding:0 8px;"></div>
     <div class="mitte">
       <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
       <div class="info-box">
@@ -409,7 +410,7 @@
   </div>
 
   <div class="col-wrap">
-    <div class="col-header" style="justify-content:space-between;flex-wrap:nowrap;">
+    <div class="col-header" style="justify-content:flex-start;flex-wrap:nowrap;">
       <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
       <span id="fortschritt-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
     </div>
