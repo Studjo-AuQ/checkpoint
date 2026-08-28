@@ -516,6 +516,12 @@ function toggleHilfeKapitel(i){
   if(pfeil)pfeil.innerHTML=offen?'&#9656;':'&#9662;';
 }
 
+/* ═══ Übersicht-Modal (statistische Auswertung) ═══ */
+function oeffneUebersichtModal(){
+  renderUebersicht();
+  document.getElementById('uebersicht-modal').classList.add('sichtbar');
+}
+
 /* ═══ Impressum / Datenschutz (rote Fußzeile) ═══
    Gleiches Akkordeon-Prinzip wie die Hilfe, aber mit fertigem HTML
    je Kapitel (Adressen, Hervorhebungen) statt einzelner Sätze. */

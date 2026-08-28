@@ -10,6 +10,14 @@ setInterval(function(){
   var aktiv=document.getElementById('check-tabelle');
   if(aktiv)renderCheckliste();
 },60000);
+/* Statistik-Sicherheitsnetz: falls "Neuer Tag" an einem Tag vergessen
+   wird (oder das Gerät um 18 Uhr aus war), wird der Tagesstand trotzdem
+   spätestens ab 18:00 Uhr für die Übersicht archiviert. Läuft im selben
+   Minuten-Takt mit; mehrfaches Auslösen am selben Tag ist unschädlich,
+   da archiviereTagesstatistik() den heutigen Eintrag nur überschreibt. */
+setInterval(function(){
+  if(AKTIVE_KST&&new Date().getHours()>=18)archiviereTagesstatistik();
+},60000);
 ladeZuordnung();ladeNamen();ladeAktiveChecks();ladeLeitung();ladeTermine();ladeWichtig();ladeZeiten();ladeArbeitsnotizen();ladeAufgabenNotizen();
 
 setInterval(updateClock,30000);

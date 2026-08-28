@@ -140,7 +140,7 @@ var AKTIVE_KST = '';
 /* Alle Storage-Keys dynamisch mit KST-Prefix */
 var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
     LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='',
-    EXPORT_ERINNERUNG_KEY='';
+    EXPORT_ERINNERUNG_KEY='', HISTORIE_KEY='', STATREESET_KEY='';
 
 function setzeKSTKeys(kst) {
   AKTIVE_KST  = kst;
@@ -154,6 +154,8 @@ function setzeKSTKeys(kst) {
   ZEITEN_KEY  = kst + '-chk-zeiten-v1';
   PROFIL_KEY  = kst + '-chk-profil-v1';
   EXPORT_ERINNERUNG_KEY = kst + '-chk-export-erinnerung-v1';
+  HISTORIE_KEY = kst + '-chk-historie-v1';
+  STATREESET_KEY = kst + '-chk-statistik-reset-v1';
   setzeArbeitKey(kst);
   setzeAufgNotizKey(kst);
 }
@@ -221,7 +223,7 @@ function profilBgKl(personId,aufgabeId){var w=profilFarbe(personId,aufgabeId);re
 
 /* Feature 4: Export / Import der KST-Daten */
 function exportierenKST(){
-  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY];
+  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY,HISTORIE_KEY,STATREESET_KEY];
   var data={};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
   data['__kst']=AKTIVE_KST;
@@ -283,6 +285,7 @@ if(STATE.abwesendWeiteres.length){
 
 function tagesReset(m){
   if(m&&!confirm('Tages-Reset?'))return;
+  archiviereTagesstatistik();
   /* "Bis auf weiteres"-Vertretungen behalten, "Nur 1 Tag" löschen */
   var behalte={};
   Object.keys(STATE.vertretungen||{}).forEach(function(id){
@@ -297,6 +300,81 @@ function tagesReset(m){
   speichereState();
   document.querySelectorAll('.namen-row').forEach(function(r){r.classList.remove('abwesend');});
   renderNamen();renderCheckliste();
+}
+
+/* ═══ ÜBERSICHT / STATISTIK ═══
+   Tages-Historie pro Kostenstelle: ein Eintrag pro Tag mit den absoluten
+   Werten von Anwesenheit und erledigten Check-Aufgaben. Wird beim
+   "Neuer Tag"-Klick automatisch geschrieben (bevor der Tagesstand
+   gelöscht wird) UND zusätzlich als Sicherheitsnetz ab 18:00 Uhr, falls
+   "Neuer Tag" an dem Tag vergessen wurde (siehe Minuten-Timer app.js). */
+function ladeHistorie(){return ladeLS(HISTORIE_KEY)||[];}
+function speichereHistorie(h){if(HISTORIE_KEY)localStorage.setItem(HISTORIE_KEY,JSON.stringify(h));}
+
+/* Schreibt bzw. überschreibt den heutigen Eintrag – ein mehrfacher Aufruf
+   am selben Tag (Neuer-Tag-Klick UND 18-Uhr-Check) zählt dadurch nicht doppelt. */
+function archiviereTagesstatistik(){
+  if(!HISTORIE_KEY)return;
+  var anw=berechneAnwesenheitStats();
+  var fort=berechneFortschrittStats();
+  var heuteDatum=STATE.datum||heute();
+  var h=ladeHistorie().filter(function(e){return e.datum!==heuteDatum;});
+  h.push({datum:heuteDatum,anwAbs:anw.abs,anwGesamt:anw.gesamt,erlAbs:fort.abs,erlGesamt:fort.gesamt});
+  /* Historie nicht unbegrenzt wachsen lassen: 3 Jahre reichen für "letzter Monat"
+     und "seit Reset" bei weitem und halten die Datenmenge klein */
+  var grenze=new Date();grenze.setFullYear(grenze.getFullYear()-3);
+  var grenzeStr=grenze.toISOString().slice(0,10);
+  h=h.filter(function(e){return e.datum>=grenzeStr;});
+  speichereHistorie(h);
+}
+
+/* Manuelles Zurücksetzen des "seit letztem Reset"-Zeitraums (eigener
+   Button im Übersicht-Modal, unabhängig vom täglichen "Neuer Tag") */
+function statistikZuruecksetzen(){
+  if(!confirm('Statistik "seit letztem Reset" wirklich zurücksetzen?\nTages- und Monatswerte bleiben unberührt, nur der Zähler seit dem letzten Reset beginnt neu.'))return;
+  if(STATREESET_KEY)localStorage.setItem(STATREESET_KEY,heute());
+  if(typeof renderUebersicht==='function')renderUebersicht();
+}
+function statistikResetDatum(){
+  return (STATREESET_KEY&&localStorage.getItem(STATREESET_KEY))||null;
+}
+
+/* Summiert eine Liste Historie-Einträge zu einer Statistik auf; optional
+   wird der aktuelle (noch nicht archivierte) Live-Tagesstand mitgezählt. */
+function aggregiereStats(archivEintraege,liveHeuteEinbeziehen){
+  var anwAbs=0,anwGesamt=0,erlAbs=0,erlGesamt=0;
+  archivEintraege.forEach(function(e){
+    anwAbs+=e.anwAbs;anwGesamt+=e.anwGesamt;erlAbs+=e.erlAbs;erlGesamt+=e.erlGesamt;
+  });
+  if(liveHeuteEinbeziehen){
+    var anw=berechneAnwesenheitStats(),fort=berechneFortschrittStats();
+    anwAbs+=anw.abs;anwGesamt+=anw.gesamt;erlAbs+=fort.abs;erlGesamt+=fort.gesamt;
+  }
+  return {
+    anwAbs:anwAbs,anwGesamt:anwGesamt,anwPct:anwGesamt>0?Math.round(anwAbs/anwGesamt*100):100,
+    erlAbs:erlAbs,erlGesamt:erlGesamt,erlPct:erlGesamt>0?Math.round(erlAbs/erlGesamt*100):0
+  };
+}
+
+/* Liefert die vier Zeitraum-Statistiken für das Übersicht-Modal. "Heute"
+   fließt bei Tag/laufendem Monat/seit-Reset live mit ein; ein eventuell
+   schon archivierter heutiger Eintrag wird dafür herausgefiltert, damit
+   nichts doppelt gezählt wird. */
+function ermittleUebersichtStats(){
+  var heuteDatum=heute();
+  var h=ladeHistorie().filter(function(e){return e.datum!==heuteDatum;});
+  var jm=heuteDatum.slice(0,7); /* YYYY-MM laufender Monat */
+  var vormonatsDatum=new Date();vormonatsDatum.setDate(1);vormonatsDatum.setMonth(vormonatsDatum.getMonth()-1);
+  var vm=vormonatsDatum.toISOString().slice(0,7);
+  var resetDatum=statistikResetDatum();
+
+  return {
+    tag:aggregiereStats([],true),
+    laufenderMonat:aggregiereStats(h.filter(function(e){return e.datum.slice(0,7)===jm;}),true),
+    letzterMonat:aggregiereStats(h.filter(function(e){return e.datum.slice(0,7)===vm;}),false),
+    seitReset:aggregiereStats(h.filter(function(e){return !resetDatum||e.datum>=resetDatum;}),!resetDatum||heuteDatum>=resetDatum),
+    resetDatum:resetDatum
+  };
 }
 
 /* Hilfsfunktionen für neue Vertretungs-Struktur {person, dauer} */

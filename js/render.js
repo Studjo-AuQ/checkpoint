@@ -301,20 +301,13 @@ function istFalscherTag(id){
   return !!(ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id));
 }
 /* Feature 4: Anwesenheits-Zählwerk */
-function renderAnwesenheit(){
+function berechneAnwesenheitStats(){
   var gesamt=MITARBEITENDE.length;
   var anwesend=gesamt-(STATE.abwesend||[]).length;
   var pct=gesamt>0?Math.round(anwesend/gesamt*100):100;
-  var el=document.getElementById('anwesenheit-anzeige');if(!el)return;
-  var farbe=pctFarbe6(pct);
-  var voll=Math.round(pct/100*8);
-  el.innerHTML=anwesend+'/'+gesamt+' anwesend&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
-    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
-    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
-    +'</span>&ensp;'+pct+'%';
-  el.style.color=farbe;
+  return {abs:anwesend,gesamt:gesamt,pct:pct};
 }
-function renderFortschritt(){
+function berechneFortschrittStats(){
   var ids=AKTIVE_CHECKS;
   /* Entfallene (rot umrandet) und ausstehende (noch kein Vertretungs-Entscheid)
      zählen nicht zur erledigbaren Gesamtmenge */
@@ -325,13 +318,28 @@ function renderFortschritt(){
   var erl=STATE.erledigt.filter(function(id){return effektiv.indexOf(id)!==-1;}).length;
   var entf=ids.filter(function(id){return entfaelltHeute(id)||vertretungAusstehend(id)||istFalscherTag(id);}).length;
   var pct=gesamt>0?Math.round(erl/gesamt*100):0;
-  var farbe=pctFarbe6(pct);
-  var voll=Math.round(pct/100*8);
-  var el=document.getElementById('fortschritt-anzeige');if(!el)return;
-  el.innerHTML=erl+'/'+gesamt+'&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
+  return {abs:erl,gesamt:gesamt,pct:pct,entfallen:entf};
+}
+function renderAnwesenheit(){
+  var s=berechneAnwesenheitStats();
+  var el=document.getElementById('anwesenheit-anzeige');if(!el)return;
+  var farbe=pctFarbe6(s.pct);
+  var voll=Math.round(s.pct/100*8);
+  el.innerHTML=s.abs+'/'+s.gesamt+' anwesend&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
     +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
     +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
-    +'</span>&ensp;'+pct+'%'+(entf>0?'&ensp;<span style="color:var(--grau);">−19×∅</span>'.replace('19',entf):'');
+    +'</span>&ensp;'+s.pct+'%';
+  el.style.color=farbe;
+}
+function renderFortschritt(){
+  var s=berechneFortschrittStats();
+  var farbe=pctFarbe6(s.pct);
+  var voll=Math.round(s.pct/100*8);
+  var el=document.getElementById('fortschritt-anzeige');if(!el)return;
+  el.innerHTML=s.abs+'/'+s.gesamt+'&ensp;<span style="font-size:.5rem;letter-spacing:0;">'
+    +'<span style="color:'+farbe+';">'+'█'.repeat(voll)+'</span>'
+    +'<span style="color:var(--hell);">'+'░'.repeat(8-voll)+'</span>'
+    +'</span>&ensp;'+s.pct+'%'+(s.entfallen>0?'&ensp;<span style="color:var(--grau);">−19×∅</span>'.replace('19',s.entfallen):'');
   el.style.color=farbe;
 }
 
@@ -450,5 +458,32 @@ function sprachText(s){
   s=s.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g,datumSprache);
   s=s.replace(/\b(\d{1,2}):(\d{2})\b/g,uhrzeitSprache);
   return s;
+}
+
+/* ═══ ÜBERSICHT-MODAL: statistische Auswertung ═══ */
+function uebersichtKarte(titel,s){
+  var farbeAnw=pctFarbe6(s.anwPct);
+  var farbeErl=pctFarbe6(s.erlPct);
+  return '<div class="uebersicht-karte">'
+    +'<div class="uebersicht-karte-titel">'+titel+'</div>'
+    +'<div class="uebersicht-metrik">'
+      +'<span class="uebersicht-metrik-label">&#128101; Anwesenheit</span>'
+      +'<span class="uebersicht-metrik-wert" style="color:'+farbeAnw+';">'+s.anwAbs+'/'+s.anwGesamt+' &ensp; '+s.anwPct+'%</span>'
+    +'</div>'
+    +'<div class="uebersicht-metrik">'
+      +'<span class="uebersicht-metrik-label">&#9989; Erledigte Aufgaben</span>'
+      +'<span class="uebersicht-metrik-wert" style="color:'+farbeErl+';">'+s.erlAbs+'/'+s.erlGesamt+' &ensp; '+s.erlPct+'%</span>'
+    +'</div>'
+  +'</div>';
+}
+function renderUebersicht(){
+  var st=ermittleUebersichtStats();
+  var html=''
+    +uebersichtKarte('&#128197; Aktueller Tag',st.tag)
+    +uebersichtKarte('&#128198; Laufender Monat',st.laufenderMonat)
+    +uebersichtKarte('&#128197; Letzter Monat',st.letzterMonat)
+    +uebersichtKarte('&#128260; Seit letztem Reset'+(st.resetDatum?' (seit '+isoDatumSprache(st.resetDatum)+')':' (noch nie zurückgesetzt)'),st.seitReset);
+  var body=document.getElementById('uebersicht-modal-body');
+  if(body)body.innerHTML=html;
 }
 
