@@ -377,15 +377,16 @@
 <!-- ═══ Grid ═══ -->
 <div class="grid">
   <div class="col-wrap">
-    <div class="col-header" style="flex-direction:column;align-items:stretch;gap:0;padding:3px 0 5px;overflow:hidden;">
-      <div style="padding-left:12px;">
-        <span id="anwesenheit-anzeige" style="font-size:.68rem;font-weight:900;font-family:monospace;white-space:nowrap;line-height:1.2;"></span>
-      </div>
-      <div style="display:flex;align-items:stretch;flex:1;">
-        <!-- Breite Portrait(80)+Name(148) = 228px -->
-        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:center;border-radius:0;">&#128100; Namen</button>
-        <!-- Zuständigkeiten (inkl. Arbeit-Icon ganz links) -->
-        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:center;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
+    <div class="col-header" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:stretch;height:100%;">
+        <div style="display:flex;align-items:center;flex-shrink:0;padding:0 10px 0 12px;">
+          <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
+        </div>
+        <!-- Breite Portrait(80)+Name(148) = 228px.
+             ZUM VERSCHIEBEN "Namen": Zahl bei margin-left ändern (z.B. -10px = 10px nach links, 10px = 10px nach rechts) -->
+        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:center;margin-left:0px;border-radius:0;">&#128100; Namen</button>
+        <!-- ZUM VERSCHIEBEN "Zuständigkeiten": Zahl bei margin-left ändern -->
+        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:center;margin-left:0px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
       </div>
     </div>
     <div class="namen-tabelle" id="namen-tabelle"></div>
@@ -412,6 +413,7 @@
   </div>
 
   <div class="col-wrap">
+    <!-- ZUM VERSCHIEBEN "Tages-Checkliste": Zahl bei padding-left ändern (höher = weiter rechts) -->
     <div class="col-header" style="justify-content:flex-start;flex-wrap:nowrap;padding-left:18px;">
       <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
       <span id="fortschritt-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
