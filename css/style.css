@@ -26,7 +26,7 @@ body{font-family:sans-serif;background:var(--bg);color:var(--text);min-height:10
 /* ── Grid ── */
 .grid{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px;align-items:start;overflow-x:auto;max-width:100%;}
 .col-wrap{display:flex;flex-direction:column;gap:6px;}
-.col-header{display:flex;gap:6px;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--rot);flex-wrap:wrap;min-height:38px;}
+.col-header{display:flex;gap:6px;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--rot);flex-wrap:wrap;min-height:48px;}
 .col-btn{display:flex;align-items:center;font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
 .col-btn:hover{background:rgba(182,31,41,.1);}
 .col-btn.aktiv{background:var(--rot);color:white;}
