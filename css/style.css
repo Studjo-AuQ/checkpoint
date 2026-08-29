@@ -127,6 +127,10 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 /* Check-Entfällt: roter Rahmen */
 .check-row.check-entfaellt{outline:3px solid var(--rot);outline-offset:-2px;background:#fff5f5;}
 .check-row.check-entfaellt .check-toggle{background:#475569;}
+/* Aufgabe heute nicht fällig (kein "entfällt"-Beschluss, sondern planmäßig
+   ein anderer Tag bzw. automatisch Sa/So ohne hinterlegte Tage): nur
+   verblasst/transparent darstellen, bleibt normal anklickbar. */
+.check-row.check-nicht-faellig{opacity:.45;}
 
 /* Wichtig */
 .wichtig-box{background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
