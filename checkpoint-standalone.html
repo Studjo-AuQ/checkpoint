@@ -35,7 +35,7 @@ body{font-family:sans-serif;background:var(--bg);color:var(--text);min-height:10
 .grid{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px;align-items:start;overflow-x:auto;max-width:100%;}
 .col-wrap{display:flex;flex-direction:column;gap:6px;}
 .col-header{display:flex;gap:6px;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--rot);flex-wrap:wrap;min-height:38px;}
-.col-btn{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
+.col-btn{display:flex;align-items:center;font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
 .col-btn:hover{background:rgba(182,31,41,.1);}
 .col-btn.aktiv{background:var(--rot);color:white;}
 .col-btn-sep{color:var(--hell);font-size:.7rem;}
@@ -136,9 +136,11 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 .check-row.check-entfaellt{outline:3px solid var(--rot);outline-offset:-2px;background:#fff5f5;}
 .check-row.check-entfaellt .check-toggle{background:#475569;}
 /* Aufgabe heute nicht fällig (kein "entfällt"-Beschluss, sondern planmäßig
-   ein anderer Tag bzw. automatisch Sa/So ohne hinterlegte Tage): nur
-   verblasst/transparent darstellen, bleibt normal anklickbar. */
+   ein anderer Tag bzw. automatisch Sa/So ohne hinterlegte Tage): Button
+   grau einfärben und die ganze Zeile verblasst/transparent darstellen,
+   bleibt normal anklickbar. */
 .check-row.check-nicht-faellig{opacity:.45;}
+.check-row.check-nicht-faellig .check-toggle{background:#64748b;}
 
 /* Wichtig */
 .wichtig-box{background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
