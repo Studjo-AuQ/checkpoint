@@ -140,7 +140,7 @@ var AKTIVE_KST = '';
 /* Alle Storage-Keys dynamisch mit KST-Prefix */
 var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
     LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='',
-    EXPORT_ERINNERUNG_KEY='', HISTORIE_KEY='', STATREESET_KEY='';
+    EXPORT_ERINNERUNG_KEY='', HISTORIE_KEY='', STATREESET_KEY='', MITTE_KEY='';
 
 function setzeKSTKeys(kst) {
   AKTIVE_KST  = kst;
@@ -156,6 +156,7 @@ function setzeKSTKeys(kst) {
   EXPORT_ERINNERUNG_KEY = kst + '-chk-export-erinnerung-v1';
   HISTORIE_KEY = kst + '-chk-historie-v1';
   STATREESET_KEY = kst + '-chk-statistik-reset-v1';
+  MITTE_KEY = kst + '-chk-mitte-sichtbar-v1';
   setzeArbeitKey(kst);
   setzeAufgNotizKey(kst);
 }
@@ -210,6 +211,7 @@ function wechsleKostenstelle(kst) {
   MITARBEITENDE_DEFAULT.forEach(function(p){ MITARBEITENDE.push({id:p.id, name:p.name}); });
   ladeNamen();
   renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
+  wendeMitteSichtbar(ladeMitteSichtbar());
 
   /* Feature: Freitags-Erinnerung "Bitte exportieren" (siehe unten) */
   pruefeExportErinnerung();
@@ -223,7 +225,7 @@ function profilBgKl(personId,aufgabeId){var w=profilFarbe(personId,aufgabeId);re
 
 /* Feature 4: Export / Import der KST-Daten */
 function exportierenKST(){
-  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY,HISTORIE_KEY,STATREESET_KEY];
+  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY,HISTORIE_KEY,STATREESET_KEY,MITTE_KEY];
   var data={};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
   data['__kst']=AKTIVE_KST;
@@ -387,6 +389,30 @@ function ermittleUebersichtStats(){
     seitReset:aggregiereStats(h.filter(function(e){return !resetDatum||e.datum>resetDatum;}),!resetDatum||heuteDatum>resetDatum),
     resetDatum:resetDatum
   };
+}
+
+/* ═══ Mittlere Spalte (Leitung/Termine/Wichtiges) ein-/ausblenden ═══
+   Zustand wird pro Kostenstelle dauerhaft gemerkt, damit er einen
+   Tablet-Neustart übersteht. */
+function ladeMitteSichtbar(){
+  if(!MITTE_KEY)return true;
+  var v=localStorage.getItem(MITTE_KEY);
+  return v===null?true:v==='1';
+}
+function wendeMitteSichtbar(sichtbar){
+  var el=document.getElementById('mitte-inhalt');
+  var btn=document.getElementById('btn-mitte-toggle');
+  if(el)el.classList.toggle('versteckt',!sichtbar);
+  if(btn){
+    btn.innerHTML='&#128065; '+(sichtbar?'Ausblenden':'Einblenden');
+    btn.title=(sichtbar?'Leitung, Termine und Wichtiges ausblenden':'Leitung, Termine und Wichtiges wieder einblenden');
+    btn.setAttribute('aria-pressed',String(!sichtbar));
+  }
+}
+function toggleMitteSichtbar(){
+  var neu=!ladeMitteSichtbar();
+  if(MITTE_KEY)localStorage.setItem(MITTE_KEY,neu?'1':'0');
+  wendeMitteSichtbar(neu);
 }
 
 /* Hilfsfunktionen für neue Vertretungs-Struktur {person, dauer} */
