@@ -133,6 +133,7 @@ document.addEventListener('click',function(e){
       var erl=STATE.erledigt.indexOf(id)!==-1;
       var pers=getZustaendigePerson(id);
       var enf=entfaelltHeute(id),aus=vertretungAusstehend(id);
+      var falscherTag=!enf&&!aus&&istFalscherTag(id);
       /* Wann-Info aus ZEITEN[id] (korrekte Quelle) */
       var wannTxt='';
       var _wz=ZEITEN[id]||{};
@@ -144,7 +145,7 @@ document.addEventListener('click',function(e){
         else if(_zeit)wannTxt=_zeit+', ';
       }
       var txt=a.label+', '+wannTxt+'zuständig: '+(pers?pers.name:'nicht zugewiesen')+'.';
-      txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':' Noch offen.';
+      txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':falscherTag?' Heute nicht fällig.':' Noch offen.';
       return txt;
     }
     /* Leitung-Zeile */

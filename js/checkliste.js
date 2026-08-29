@@ -16,9 +16,9 @@ function renderCheckliste(){
     var aus=!erl&&!enf&&vertretungAusstehend(id);
     var person=getZustaendigePerson(id);
     var abw=!erl&&!enf&&!aus&&person&&STATE.abwesend.indexOf(person.id)!==-1;
-    var falscherTag=!erl&&!enf&&!aus&&ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id);
+    var falscherTag=!erl&&!enf&&!aus&&istFalscherTag(id);
     var faellig=!erl&&!enf&&!aus&&!falscherTag&&istFaelligJetzt(id);
-    var rowKl=erl?'erledigt':(enf||falscherTag)?'check-entfaellt':aus?'check-faellig':faellig?'check-faellig':abw?'warnung':'';
+    var rowKl=erl?'erledigt':enf?'check-entfaellt':falscherTag?'check-nicht-faellig':aus?'check-faellig':faellig?'check-faellig':abw?'warnung':'';
     var togKl=erl?'':(faellig||aus)?'faellig':abw?'warnung':'';
     var sym=erl?'&#10003;':(faellig||aus)?'&#9888;':(enf||falscherTag)?'&#8722;':abw?'&#9888;':'&#10007;';
     var warn=faellig?'<div class="check-warnung" style="color:#b45309;">&#9888; Jetzt fällig!</div>':

@@ -243,10 +243,10 @@ function checklistenStatusHeute(id){
   if(entfaelltHeute(id))return {text:'Entf\u00e4llt heute',klasse:'fokus-status-entfaellt'};
   if(vertretungAusstehend(id))return {text:'Vertretung noch offen',klasse:'fokus-status-warnung'};
   var z=ZEITEN[id]||{};
-  var falscherTag=z.tage&&z.tage.length>0&&!heuteIstGeplantFuer(id);
+  var falscherTag=istFalscherTag(id);
   if(falscherTag){
-    var tage=z.tage.map(tagVollName).join(', ');
-    return {text:'Heute nicht dran (planm\u00e4\u00dfig: '+tage+')',klasse:'fokus-status-neutral'};
+    var hinweis=(z.tage&&z.tage.length)?'planm\u00e4\u00dfig: '+z.tage.map(tagVollName).join(', '):'planm\u00e4\u00dfig: werktags (Mo\u2013Fr)';
+    return {text:'Heute nicht dran ('+hinweis+')',klasse:'fokus-status-neutral'};
   }
   var zeitTxt=z.uhrzeit?' um '+z.uhrzeit+' Uhr':'';
   return {text:'Heute f\u00e4llig'+zeitTxt,klasse:'fokus-status-faellig'};

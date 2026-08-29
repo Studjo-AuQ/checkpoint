@@ -36,8 +36,12 @@ var _TAG_VOLL_MAP={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'F
 function tagVollName(t){return _TAG_VOLL_MAP[String(t).toLowerCase()]||t;}
 function heuteIstGeplantFuer(id){
   var _zt=ZEITEN[id]||{};
-  if(!_zt.tage||_zt.tage.length===0)return true;
   var wt=new Date().getDay();
+  if(!_zt.tage||_zt.tage.length===0){
+    /* Keine festen Tage hinterlegt: Standard ist "werktags" (Mo–Fr) –
+       Samstag (6) und Sonntag (0) automatisch als nicht fällig behandeln. */
+    return wt!==0&&wt!==6;
+  }
   /* Bug2: Kürzel case-insensitiv vergleichen (gespeichert z.B. als "Mi", nicht "mi") */
   return _zt.tage.some(function(t){return _TAGKUERZEL[String(t).toLowerCase()]===wt;});
 }
@@ -304,7 +308,7 @@ function pctFarbeAmpel(pct){
   return '#16a34a';
 }
 function istFalscherTag(id){
-  return !!(ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id));
+  return !heuteIstGeplantFuer(id);
 }
 /* Feature 4: Anwesenheits-Zählwerk */
 function berechneAnwesenheitStats(){
