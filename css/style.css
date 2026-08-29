@@ -89,6 +89,8 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 
 /* ── Mitte ── */
 .mitte{display:flex;flex-direction:column;gap:10px;}
+.mitte.versteckt{background:#fff;border-radius:10px;}
+.mitte.versteckt>*{visibility:hidden;}
 .info-box{background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .info-titel{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--grau);margin-bottom:8px;}
 .leitung-zeile{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;margin-bottom:4px;}
