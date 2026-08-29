@@ -135,6 +135,10 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 /* Check-Entfällt: roter Rahmen */
 .check-row.check-entfaellt{outline:3px solid var(--rot);outline-offset:-2px;background:#fff5f5;}
 .check-row.check-entfaellt .check-toggle{background:#475569;}
+/* Aufgabe heute nicht fällig (kein "entfällt"-Beschluss, sondern planmäßig
+   ein anderer Tag bzw. automatisch Sa/So ohne hinterlegte Tage): nur
+   verblasst/transparent darstellen, bleibt normal anklickbar. */
+.check-row.check-nicht-faellig{opacity:.45;}
 
 /* Wichtig */
 .wichtig-box{background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
@@ -888,9 +892,9 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
           <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
         </div>
         <!-- Breite Portrait(80)+Name(148) = 228px -->
-        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:flex-start;padding-left:10px;border-radius:0;">&#128100; Namen</button>
+        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:center;border-radius:0;">&#128100; Namen</button>
         <!-- Zuständigkeiten (inkl. Arbeit-Icon ganz links) -->
-        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:flex-start;padding-left:10px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
+        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:center;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
       </div>
     </div>
     <div class="namen-tabelle" id="namen-tabelle"></div>
@@ -917,7 +921,7 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
   </div>
 
   <div class="col-wrap">
-    <div class="col-header" style="justify-content:flex-start;flex-wrap:nowrap;">
+    <div class="col-header" style="justify-content:flex-start;flex-wrap:nowrap;padding-left:18px;">
       <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
       <span id="fortschritt-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
     </div>
@@ -1732,8 +1736,12 @@ var _TAG_VOLL_MAP={mo:'Montag',di:'Dienstag',mi:'Mittwoch',do:'Donnerstag',fr:'F
 function tagVollName(t){return _TAG_VOLL_MAP[String(t).toLowerCase()]||t;}
 function heuteIstGeplantFuer(id){
   var _zt=ZEITEN[id]||{};
-  if(!_zt.tage||_zt.tage.length===0)return true;
   var wt=new Date().getDay();
+  if(!_zt.tage||_zt.tage.length===0){
+    /* Keine festen Tage hinterlegt: Standard ist "werktags" (Mo–Fr) –
+       Samstag (6) und Sonntag (0) automatisch als nicht fällig behandeln. */
+    return wt!==0&&wt!==6;
+  }
   /* Bug2: Kürzel case-insensitiv vergleichen (gespeichert z.B. als "Mi", nicht "mi") */
   return _zt.tage.some(function(t){return _TAGKUERZEL[String(t).toLowerCase()]===wt;});
 }
@@ -2000,7 +2008,7 @@ function pctFarbeAmpel(pct){
   return '#16a34a';
 }
 function istFalscherTag(id){
-  return !!(ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id));
+  return !heuteIstGeplantFuer(id);
 }
 /* Feature 4: Anwesenheits-Zählwerk */
 function berechneAnwesenheitStats(){
@@ -2443,10 +2451,10 @@ function checklistenStatusHeute(id){
   if(entfaelltHeute(id))return {text:'Entf\u00e4llt heute',klasse:'fokus-status-entfaellt'};
   if(vertretungAusstehend(id))return {text:'Vertretung noch offen',klasse:'fokus-status-warnung'};
   var z=ZEITEN[id]||{};
-  var falscherTag=z.tage&&z.tage.length>0&&!heuteIstGeplantFuer(id);
+  var falscherTag=istFalscherTag(id);
   if(falscherTag){
-    var tage=z.tage.map(tagVollName).join(', ');
-    return {text:'Heute nicht dran (planm\u00e4\u00dfig: '+tage+')',klasse:'fokus-status-neutral'};
+    var hinweis=(z.tage&&z.tage.length)?'planm\u00e4\u00dfig: '+z.tage.map(tagVollName).join(', '):'planm\u00e4\u00dfig: werktags (Mo\u2013Fr)';
+    return {text:'Heute nicht dran ('+hinweis+')',klasse:'fokus-status-neutral'};
   }
   var zeitTxt=z.uhrzeit?' um '+z.uhrzeit+' Uhr':'';
   return {text:'Heute f\u00e4llig'+zeitTxt,klasse:'fokus-status-faellig'};
@@ -3160,9 +3168,9 @@ function renderCheckliste(){
     var aus=!erl&&!enf&&vertretungAusstehend(id);
     var person=getZustaendigePerson(id);
     var abw=!erl&&!enf&&!aus&&person&&STATE.abwesend.indexOf(person.id)!==-1;
-    var falscherTag=!erl&&!enf&&!aus&&ZEITEN[id]&&ZEITEN[id].tage&&ZEITEN[id].tage.length>0&&!heuteIstGeplantFuer(id);
+    var falscherTag=!erl&&!enf&&!aus&&istFalscherTag(id);
     var faellig=!erl&&!enf&&!aus&&!falscherTag&&istFaelligJetzt(id);
-    var rowKl=erl?'erledigt':(enf||falscherTag)?'check-entfaellt':aus?'check-faellig':faellig?'check-faellig':abw?'warnung':'';
+    var rowKl=erl?'erledigt':enf?'check-entfaellt':falscherTag?'check-nicht-faellig':aus?'check-faellig':faellig?'check-faellig':abw?'warnung':'';
     var togKl=erl?'':(faellig||aus)?'faellig':abw?'warnung':'';
     var sym=erl?'&#10003;':(faellig||aus)?'&#9888;':(enf||falscherTag)?'&#8722;':abw?'&#9888;':'&#10007;';
     var warn=faellig?'<div class="check-warnung" style="color:#b45309;">&#9888; Jetzt fällig!</div>':
@@ -3576,6 +3584,7 @@ document.addEventListener('click',function(e){
       var erl=STATE.erledigt.indexOf(id)!==-1;
       var pers=getZustaendigePerson(id);
       var enf=entfaelltHeute(id),aus=vertretungAusstehend(id);
+      var falscherTag=!enf&&!aus&&istFalscherTag(id);
       /* Wann-Info aus ZEITEN[id] (korrekte Quelle) */
       var wannTxt='';
       var _wz=ZEITEN[id]||{};
@@ -3587,7 +3596,7 @@ document.addEventListener('click',function(e){
         else if(_zeit)wannTxt=_zeit+', ';
       }
       var txt=a.label+', '+wannTxt+'zuständig: '+(pers?pers.name:'nicht zugewiesen')+'.';
-      txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':' Noch offen.';
+      txt+=erl?' Erledigt.':enf?' Entfällt heute.':aus?' Vertretung noch offen.':falscherTag?' Heute nicht fällig.':' Noch offen.';
       return txt;
     }
     /* Leitung-Zeile */
