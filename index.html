@@ -393,8 +393,10 @@
 
   <div class="col-wrap">
     <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Anzeige nach links (Namen-Spalte) verschoben -->
-    <div class="col-header" style="padding:0 8px;"></div>
-    <div class="mitte">
+    <div class="col-header" style="justify-content:center;padding:0 8px;">
+      <button class="col-btn" id="btn-mitte-toggle" onclick="toggleMitteSichtbar()" title="Leitung, Termine und Wichtiges ausblenden" aria-pressed="false">&#128065; Ausblenden</button>
+    </div>
+    <div class="mitte" id="mitte-inhalt">
       <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
       <div class="info-box">
         <div class="info-titel" onclick="oeffneLeitungModal()" title="Namen bearbeiten" style="cursor:pointer;">&#11088; Leitung der Gruppe &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9998;</span></div>

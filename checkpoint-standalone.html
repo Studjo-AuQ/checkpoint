@@ -97,6 +97,8 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 
 /* ── Mitte ── */
 .mitte{display:flex;flex-direction:column;gap:10px;}
+.mitte.versteckt{background:#fff;border-radius:10px;}
+.mitte.versteckt>*{visibility:hidden;}
 .info-box{background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .info-titel{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--grau);margin-bottom:8px;}
 .leitung-zeile{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;margin-bottom:4px;}
@@ -896,8 +898,10 @@ footer{text-align:center;padding:10px;background:var(--rot);color:white;font-siz
 
   <div class="col-wrap">
     <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Anzeige nach links (Namen-Spalte) verschoben -->
-    <div class="col-header" style="padding:0 8px;"></div>
-    <div class="mitte">
+    <div class="col-header" style="justify-content:center;padding:0 8px;">
+      <button class="col-btn" id="btn-mitte-toggle" onclick="toggleMitteSichtbar()" title="Leitung, Termine und Wichtiges ausblenden" aria-pressed="false">&#128065; Ausblenden</button>
+    </div>
+    <div class="mitte" id="mitte-inhalt">
       <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
       <div class="info-box">
         <div class="info-titel" onclick="oeffneLeitungModal()" title="Namen bearbeiten" style="cursor:pointer;">&#11088; Leitung der Gruppe &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9998;</span></div>
@@ -1117,7 +1121,7 @@ var AKTIVE_KST = '';
 /* Alle Storage-Keys dynamisch mit KST-Prefix */
 var STATE_KEY='', ASSIGN_KEY='', NAMEN_KEY='', CHECKS_KEY='',
     LEITUNG_KEY='', TERMINE_KEY='', WICHTIG_KEY='', ZEITEN_KEY='', PROFIL_KEY='',
-    EXPORT_ERINNERUNG_KEY='', HISTORIE_KEY='', STATREESET_KEY='';
+    EXPORT_ERINNERUNG_KEY='', HISTORIE_KEY='', STATREESET_KEY='', MITTE_KEY='';
 
 function setzeKSTKeys(kst) {
   AKTIVE_KST  = kst;
@@ -1133,6 +1137,7 @@ function setzeKSTKeys(kst) {
   EXPORT_ERINNERUNG_KEY = kst + '-chk-export-erinnerung-v1';
   HISTORIE_KEY = kst + '-chk-historie-v1';
   STATREESET_KEY = kst + '-chk-statistik-reset-v1';
+  MITTE_KEY = kst + '-chk-mitte-sichtbar-v1';
   setzeArbeitKey(kst);
   setzeAufgNotizKey(kst);
 }
@@ -1187,6 +1192,7 @@ function wechsleKostenstelle(kst) {
   MITARBEITENDE_DEFAULT.forEach(function(p){ MITARBEITENDE.push({id:p.id, name:p.name}); });
   ladeNamen();
   renderNamen(); renderLeitung(); renderTermine(); renderWichtig(); renderCheckliste(); initSortable();
+  wendeMitteSichtbar(ladeMitteSichtbar());
 
   /* Feature: Freitags-Erinnerung "Bitte exportieren" (siehe unten) */
   pruefeExportErinnerung();
@@ -1200,7 +1206,7 @@ function profilBgKl(personId,aufgabeId){var w=profilFarbe(personId,aufgabeId);re
 
 /* Feature 4: Export / Import der KST-Daten */
 function exportierenKST(){
-  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY,HISTORIE_KEY,STATREESET_KEY];
+  var keys=[STATE_KEY,ASSIGN_KEY,NAMEN_KEY,CHECKS_KEY,LEITUNG_KEY,TERMINE_KEY,WICHTIG_KEY,ZEITEN_KEY,ARBEIT_KEY,PROFIL_KEY,HISTORIE_KEY,STATREESET_KEY,MITTE_KEY];
   var data={};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
   data['__kst']=AKTIVE_KST;
@@ -1364,6 +1370,30 @@ function ermittleUebersichtStats(){
     seitReset:aggregiereStats(h.filter(function(e){return !resetDatum||e.datum>resetDatum;}),!resetDatum||heuteDatum>resetDatum),
     resetDatum:resetDatum
   };
+}
+
+/* ═══ Mittlere Spalte (Leitung/Termine/Wichtiges) ein-/ausblenden ═══
+   Zustand wird pro Kostenstelle dauerhaft gemerkt, damit er einen
+   Tablet-Neustart übersteht. */
+function ladeMitteSichtbar(){
+  if(!MITTE_KEY)return true;
+  var v=localStorage.getItem(MITTE_KEY);
+  return v===null?true:v==='1';
+}
+function wendeMitteSichtbar(sichtbar){
+  var el=document.getElementById('mitte-inhalt');
+  var btn=document.getElementById('btn-mitte-toggle');
+  if(el)el.classList.toggle('versteckt',!sichtbar);
+  if(btn){
+    btn.innerHTML='&#128065; '+(sichtbar?'Ausblenden':'Einblenden');
+    btn.title=(sichtbar?'Leitung, Termine und Wichtiges ausblenden':'Leitung, Termine und Wichtiges wieder einblenden');
+    btn.setAttribute('aria-pressed',String(!sichtbar));
+  }
+}
+function toggleMitteSichtbar(){
+  var neu=!ladeMitteSichtbar();
+  if(MITTE_KEY)localStorage.setItem(MITTE_KEY,neu?'1':'0');
+  wendeMitteSichtbar(neu);
 }
 
 /* Hilfsfunktionen für neue Vertretungs-Struktur {person, dauer} */
