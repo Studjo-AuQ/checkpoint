@@ -5,9 +5,7 @@
    ══════════════════════════════════════════════════════ */
 :root{--rot:#b61f29;--gruen:#16a34a;--gelb:#ca8a04;--bg:#f0f2f5;--text:#0f2f37;--grau:#64748b;--hell:#e2e8f0;--ROW:80px;--check-bg:#fef9c3;--check-rand:#fde047;--zust-bg:#eff6ff;--zust-rand:#93c5fd;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;width:100%;overflow-x:hidden;}
-header{background:white;box-shadow:0 2px 10px rgba(0,0,0,.08);width:100%;}
-header img{width:100%;max-height:80px;object-fit:cover;object-position:left;display:block;}
+body{font-family:sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;width:100%;overflow-x:hidden;}
 
 /* ── Banner mit Uhr ── */
 .banner{background:var(--rot);color:white;padding:8px 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;width:100%;}
@@ -29,7 +27,7 @@ header img{width:100%;max-height:80px;object-fit:cover;object-position:left;disp
 .grid{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px;align-items:start;overflow-x:auto;max-width:100%;}
 .col-wrap{display:flex;flex-direction:column;gap:6px;}
 .col-header{display:flex;gap:6px;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--rot);flex-wrap:wrap;min-height:38px;}
-.col-btn{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
+.col-btn{display:flex;align-items:center;font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rot);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:background .15s;}
 .col-btn:hover{background:rgba(182,31,41,.1);}
 .col-btn.aktiv{background:var(--rot);color:white;}
 .col-btn-sep{color:var(--hell);font-size:.7rem;}
@@ -91,6 +89,8 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 
 /* ── Mitte ── */
 .mitte{display:flex;flex-direction:column;gap:10px;}
+.mitte.versteckt{background:#fff;border-radius:10px;}
+.mitte.versteckt>*{visibility:hidden;}
 .info-box{background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .info-titel{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--grau);margin-bottom:8px;}
 .leitung-zeile{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;margin-bottom:4px;}
@@ -127,6 +127,12 @@ html.kontrast{filter:grayscale(100%) contrast(1.75) brightness(1.08);}
 /* Check-Entfällt: roter Rahmen */
 .check-row.check-entfaellt{outline:3px solid var(--rot);outline-offset:-2px;background:#fff5f5;}
 .check-row.check-entfaellt .check-toggle{background:#475569;}
+/* Aufgabe heute nicht fällig (kein "entfällt"-Beschluss, sondern planmäßig
+   ein anderer Tag bzw. automatisch Sa/So ohne hinterlegte Tage): Button
+   grau einfärben und die ganze Zeile verblasst/transparent darstellen,
+   bleibt normal anklickbar. */
+.check-row.check-nicht-faellig{opacity:.45;}
+.check-row.check-nicht-faellig .check-toggle{background:#64748b;}
 
 /* Wichtig */
 .wichtig-box{background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
@@ -343,6 +349,14 @@ body.edit-modus .aufgaben-icons{flex:1;}
 .hilfe-kapitel-body{padding:0 4px 14px 4px;}
 .hilfe-kapitel-body ul{margin:0;padding-left:18px;font-size:.82rem;line-height:1.55;color:var(--text);}
 .hilfe-kapitel-body li{margin-bottom:4px;}
+/* Übersicht-Modal: Statistikkarten */
+.uebersicht-karte{background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.uebersicht-karte:last-child{margin-bottom:0;}
+.uebersicht-karte-titel{font-size:.85rem;font-weight:900;color:var(--text);margin-bottom:8px;}
+.uebersicht-metrik{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.82rem;}
+.uebersicht-metrik-label{color:var(--grau);font-weight:700;}
+.uebersicht-metrik-wert{font-weight:900;font-family:monospace;white-space:nowrap;}
+.uebersicht-schnitt{margin-top:6px;padding-top:6px;border-top:1px dashed var(--hell);font-size:.74rem;color:var(--text);}
 .kst-wechseln-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:white;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:background .2s;}
 .kst-wechseln-btn:hover{background:rgba(255,255,255,.3);}
 
