@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gruppen&middot;Checkpoint &ndash; Studjo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script>
     /* ═══ Notbremse: verständliche Fehlermeldung statt leerer weißer Seite ═══
@@ -42,8 +41,6 @@
     <pre id="fehler-details" style="background:#f0f2f5;border-radius:8px;padding:10px 12px;font-size:.78rem;white-space:pre-wrap;word-break:break-word;color:#64748b;margin:0;"></pre>
   </div>
 </div>
-
-<header><img src="header.jpg" alt="Studjo" onerror="this.style.display='none'"></header>
 
 
 <!-- KST Login Overlay -->
@@ -139,6 +136,7 @@
   </div>
   <div class="banner-rechts" style="display:flex;gap:6px;align-items:center;">
     <button class="btn-banner" onclick="oeffneHilfeModal()" title="Hilfe / Anleitung">&#10067; Hilfe</button>
+    <button class="btn-banner" onclick="oeffneUebersichtModal()" title="Statistische Übersicht">&#128202; Übersicht</button>
     <button class="btn-banner" onclick="importierenKST()" title="Profil importieren (JSON)">&#8679;</button>
     <button class="btn-banner" onclick="exportierenKST()" title="Profil exportieren (JSON)">&#8681;</button>
     <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
@@ -285,6 +283,17 @@
   </div>
 </div>
 
+<!-- ═══ Übersicht-Modal (statistische Auswertung) ═══ -->
+<div class="modal-overlay" id="uebersicht-modal" onclick="modalAK(event,'uebersicht-modal')">
+  <div class="modal-box" style="width:min(480px,96vw)">
+    <div class="modal-kopf"><h2>&#128202; &Uuml;bersicht</h2><button class="modal-schliessen" onclick="schM('uebersicht-modal')">&#10005;</button></div>
+    <div id="uebersicht-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+    <div class="modal-btns" style="justify-content:flex-start;">
+      <button class="btn-modal-reset" onclick="statistikZuruecksetzen()">&#128260; Statistik "seit letztem Reset" zur&uuml;cksetzen</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ Impressum-Modal ═══ -->
 <div class="modal-overlay" id="impressum-modal" onclick="modalAK(event,'impressum-modal')">
   <div class="modal-box" style="width:min(560px,96vw)">
@@ -370,21 +379,25 @@
   <div class="col-wrap">
     <div class="col-header" style="padding:0;overflow:hidden;">
       <div style="display:flex;align-items:stretch;height:100%;">
-        <!-- Breite Portrait(80)+Name(148) = 228px -->
-        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:flex-start;padding-left:10px;border-radius:0;">&#128100; Namen</button>
-        <!-- Zuständigkeiten (inkl. Arbeit-Icon ganz links) -->
-        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:flex-start;padding-left:10px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
+        <div style="display:flex;align-items:center;flex-shrink:0;padding:0 10px 0 12px;">
+          <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
+        </div>
+        <!-- Breite Portrait(80)+Name(148) = 228px.
+             ZUM VERSCHIEBEN "Namen": Zahl bei margin-left ändern (z.B. -10px = 10px nach links, 10px = 10px nach rechts) -->
+        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:center;margin-left:0px;border-radius:0;">&#128100; Namen</button>
+        <!-- ZUM VERSCHIEBEN "Zuständigkeiten": Zahl bei margin-left ändern -->
+        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:center;margin-left:0px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
       </div>
     </div>
     <div class="namen-tabelle" id="namen-tabelle"></div>
   </div>
 
   <div class="col-wrap">
-    <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Zählwerk zentriert -->
+    <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Anzeige nach links (Namen-Spalte) verschoben -->
     <div class="col-header" style="justify-content:center;padding:0 8px;">
-      <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
+      <button class="col-btn" id="btn-mitte-toggle" onclick="toggleMitteSichtbar()" title="Leitung, Termine und Wichtiges ausblenden" aria-pressed="false">&#128065; Ausblenden</button>
     </div>
-    <div class="mitte">
+    <div class="mitte" id="mitte-inhalt">
       <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
       <div class="info-box">
         <div class="info-titel" onclick="oeffneLeitungModal()" title="Namen bearbeiten" style="cursor:pointer;">&#11088; Leitung der Gruppe &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9998;</span></div>
@@ -400,7 +413,8 @@
   </div>
 
   <div class="col-wrap">
-    <div class="col-header" style="justify-content:space-between;flex-wrap:nowrap;">
+    <!-- ZUM VERSCHIEBEN "Tages-Checkliste": Zahl bei padding-left ändern (höher = weiter rechts) -->
+    <div class="col-header" style="justify-content:flex-start;flex-wrap:nowrap;padding-left:18px;">
       <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
       <span id="fortschritt-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
     </div>
