@@ -1,564 +1,467 @@
 <!DOCTYPE html>
+<!-- Gruppen·Checkpoint – Version: 2026-08-19 -->
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studjo Terminal</title>
-<link rel="stylesheet" href="style-index.css">
-
-<style>
-
-/* ══ TICKER ══ */
-.ticker-container {
-  width: 100%;
-  overflow: hidden;
-  background: #ffffff;
-  padding: 8px 0;
-  margin-bottom: 16px;
-  border-bottom: 2px solid #f0f0f0;
-  box-sizing: border-box;
-}
-.ticker-text {
-  display: inline-block;
-  white-space: nowrap;
-  animation: ticker-scroll 40s linear infinite;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #b61f29;
-  padding-left: 100%;
-}
-.ticker-text:hover {
-  animation-play-state: paused;
-}
-@keyframes ticker-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
-}
-
-
-/* ══ ZEITKACHEL ══ */
-.zk-widget {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
-  overflow: hidden;
-  width: 100%;
-  margin-bottom: 24px;
-  box-sizing: border-box;
-}
-
-/* Header */
-.zk-header {
-  background: #b61f29;
-  color: #ffffff;
-  padding: 8px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: nowrap;
-  box-sizing: border-box;
-}
-.zk-uhr {
-  font-size: 1.6rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.zk-datum {
-  font-size: 1.6rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: .01em;
-  text-align: right;
-  white-space: nowrap;
-}
-
-/* Auf schmalen Bildschirmen kleiner */
-@media (max-width: 600px) {
-  .zk-uhr,
-  .zk-datum {
-    font-size: 1.1rem;
-  }
-  .zk-header {
-    padding: 8px 14px;
-  }
-}
-
-/* ── Status-Bereich: 2 Zeilen untereinander (IMMER) ── */
-.zk-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px 14px 12px;
-}
-
-/* ── Status-Karte: kompakte einzeilige Darstellung ── */
-.zk-card {
-  border-radius: 12px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;      /* Icon + Text vertikal zentriert */
-  gap: 12px;
-  transition: background .3s, color .3s;
-}
-.zk-card-icon {
-  font-size: 1.6rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.zk-card-label {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  opacity: .65;
-  margin-bottom: 1px;
-}
-.zk-card-status {
-  font-size: 0.95rem;
-  font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: 1px;
-}
-.zk-card-countdown {
-  font-size: 1.0rem;
-  font-weight: 800;
-  line-height: 1.1;
-}
-.zk-card-detail {
-  font-size: 0.72rem;
-  font-weight: 600;
-  opacity: .75;
-  margin-top: 1px;
-  line-height: 1.3;
-}
-
-
-/* Farbvarianten */
-.zk-gruen  { background: #dcfce7; color: #15803d; }
-.zk-orange { background: #fff3e0; color: #b45309; }
-.zk-blau   { background: #dbeafe; color: #1e40af; }
-.zk-grau   { background: #f1f5f9; color: #475569; }
-.zk-lila   { background: #f3e8ff; color: #7e22ce; }
-.zk-rot    { background: #fee2e2; color: #b61f29; }
-
-
-/* ══ NAVIGATIONS-KACHELN ══ */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
-  margin-top: 8px;
-  margin-bottom: 24px;
-  box-sizing: border-box;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  border-radius: 18px;
-  padding: 22px 14px 18px;
-  text-decoration: none;
-  color: #1a1a1a;
-  font-weight: 700;
-  text-align: center;
-  transition: transform .2s, box-shadow .2s;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  min-height: 210px;
-  box-sizing: border-box;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
-.card-img {
-  width: 100%;
-  max-width: 140px;
-  height: 130px;
-  object-fit: contain;
-  border-radius: 10px;
-  margin-bottom: 14px;
-}
-.card h2 {
-  font-size: 1.05rem;
-  line-height: 1.3;
-  margin: 0;
-}
-
-/* Farben */
-.card-color-1  { background: #fce4ec; }
-.card-color-2  { background: #e8f5e9; }
-.card-color-3  { background: #fff9c4; }
-.card-color-4  { background: #fbe9e7; }
-.card-color-5  { background: #f3e5f5; }
-.card-color-6  { background: #e0f2f1; }
-.card-color-7  { background: #e3f2fd; }
-.card-color-8  { background: #ede7f6; }
-.card-color-9  { background: #fff3e0; }
-.card-color-10 { background: #e1f5fe; }
-.card-color-11 { background: #f9fbe7; }
-.card-color-12 { background: #efebe9; }
-.card-color-13 { background: #fce4ec; }
-.card-color-14 { background: #e0f7fa; }
-.card-color-15 { background: #f1f8e9; }
-.card-color-16 { background: #fff8e1; }
-  
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gruppen&middot;Checkpoint &ndash; Studjo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    /* ═══ Notbremse: verständliche Fehlermeldung statt leerer weißer Seite ═══
+       Muss VOR allen anderen Skripten stehen, damit auch ein Fehler beim
+       Laden von storage.js/render.js/... abgefangen wird. */
+    window.onerror = function(nachricht, datei, zeile){
+      var el = document.getElementById('fehler-overlay');
+      if(!el) return false; /* Overlay noch nicht im DOM (sehr früher Fehler) */
+      var kurzName = (datei || '').split('/').pop();
+      document.getElementById('fehler-details').textContent =
+        (kurzName ? 'Datei: ' + kurzName + (zeile ? ', Zeile ' + zeile : '') + '\n' : '')
+        + 'Meldung: ' + nachricht;
+      el.style.display = 'flex';
+      return false; /* Fehler zusätzlich normal in der Konsole anzeigen */
+    };
+  </script>
 </head>
 <body>
 
-<header>
-  <div style="position: fixed; top: 0; right: 0; width: 200px; height: 200px;
-              overflow: hidden; z-index: 9999; pointer-events: none;">
-    <div style="position: absolute; top: 55px; right: -65px; width: 260px;
-                background-color: #B61F29; color: #FFFFFF; font-size: 12px;
-                font-weight: 700; letter-spacing: 0.05em; padding: 8px 0;
-                text-align: center; transform: rotate(45deg);">TESTUMGEBUNG</div>
+<!-- ═══ Notbremse: wird nur bei einem echten Programmfehler sichtbar ═══ -->
+<div id="fehler-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,47,55,.92);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:16px;padding:26px 30px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);">
+    <div style="font-size:1.3rem;font-weight:900;color:#b61f29;margin-bottom:10px;">&#9888;&#65039; Es ist ein Fehler aufgetreten</div>
+    <p style="font-size:.92rem;line-height:1.6;color:#0f2f37;margin:0 0 12px;">
+      Der Gruppen&middot;Checkpoint konnte nicht richtig geladen werden. Das passiert meist,
+      wenn zuletzt von Hand etwas an einer der Programmdateien (z.&nbsp;B. <code>storage.js</code>)
+      geändert wurde und dabei z.&nbsp;B. ein Komma oder eine Klammer fehlt.
+    </p>
+    <p style="font-size:.92rem;line-height:1.6;color:#0f2f37;margin:0 0 12px;">
+      <b>Was tun?</b> Öffne die zuletzt geänderte Datei mit dem Code-Prüfungs-Werkzeug
+      (<code>code-pruefung.html</code>) oder setze die vorherige, funktionierende
+      Version der Datei wieder ein.
+    </p>
+    <pre id="fehler-details" style="background:#f0f2f5;border-radius:8px;padding:10px 12px;font-size:.78rem;white-space:pre-wrap;word-break:break-word;color:#64748b;margin:0;"></pre>
   </div>
-  <div class="logo-container">
-    <img src="header.jpg" alt="Studjo Logo">
-  </div>
-</header>
+</div>
 
-<main id="scrollable-content">
-
-  <h1>Willkommen am Studjo | Terminal</h1>
-
-  <!-- ══ TICKER ══ -->
-  <div class="ticker-container">
-    <div class="ticker-text">
-+++ NEU: Motto der Woche (Kachel unten) +++
-      +++ Siehe die Tages-Losung in Kachel unten +++      
-                          </div>
-  </div>
+<header><img src="header.jpg" alt="Studjo" onerror="this.style.display='none'"></header>
 
 
-  <!-- ══ ZEITKACHEL ══ -->
-  <div class="zk-widget" role="region" aria-label="Tageszeit und Arbeitszeit">
-
-    <div class="zk-header">
-      <div id="zk-uhr"   class="zk-uhr">…</div>
-      <div id="zk-datum" class="zk-datum">…</div>
+<!-- KST Login Overlay -->
+<div id="kst-login-overlay" style="display:none">
+  <div class="kst-login-box">
+    <div style="font-size:2.5rem;margin-bottom:8px">&#128203;</div>
+    <div class="kst-login-titel">Gruppen&middot;Checkpoint</div>
+    <div class="kst-login-sub">Bitte 5-stellige Kostenstelle eingeben:</div>
+    <div class="kst-input-wrap">
+      <input id="kst-input" class="kst-number-input" type="text" inputmode="numeric"
+             maxlength="5" placeholder="00000" autocomplete="off"
+             onkeydown="if(event.key==='Enter')kstBestaetigen()">
+      <button class="kst-ok-btn" onclick="kstBestaetigen()">&#10003;</button>
     </div>
-
-    <div class="zk-body">
-
-      <div class="zk-body">
-
-  <!-- Zeile 1: JETZT -->
-  <div class="zk-card" id="zk-arbeit" aria-live="polite">
-    <div class="zk-card-icon" id="zk-a-icon">⏳</div>
-    <div>
-      <div class="zk-card-label">Jetzt …</div>
-      <div class="zk-card-status"    id="zk-a-status">…</div>
-      <div class="zk-card-countdown" id="zk-a-countdown"></div>
-      <div class="zk-card-detail"    id="zk-a-detail">…</div>
-    </div>
-  </div>
-
-  <!-- Zeile 2: BALD -->
-  <div class="zk-card" id="zk-pause" aria-live="polite">
-    <div class="zk-card-icon" id="zk-p-icon">☕</div>
-    <div>
-      <div class="zk-card-label">Bald …</div>
-      <div class="zk-card-status"    id="zk-p-status">…</div>
-      <div class="zk-card-countdown" id="zk-p-countdown"></div>
-      <div class="zk-card-detail"    id="zk-p-detail">…</div>
+    <div class="kst-fehler" id="kst-fehler"></div>
+    <div class="kst-hinweis">
+      Jede Kostenstelle hat einen eigenen Datenspeicher auf diesem Ger&auml;t.<br>
+      Mehrere Gruppen k&ouml;nnen nacheinander aufgerufen werden.
     </div>
   </div>
 </div>
+
+<!-- ═══ Aufgaben-Info Modal (editierbar + vorlesbar, ersetzt das alte 4-Sekunden-Popup) ═══ -->
+<div class="modal-overlay" id="aufgabe-info-modal" onclick="modalAK(event,'aufgabe-info-modal')">
+  <div class="modal-box" style="width:min(460px,96vw)">
+    <div class="modal-kopf">
+      <h2 id="aufgabe-info-titel" style="display:flex;align-items:center;">Aufgabe</h2>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="vorlesenAufgabeInfoModal()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <img src="symbole/zuhoeren.jpg" alt="Vorlesen" style="width:20px;height:20px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128066;'">
+        </button>
+        <button class="modal-schliessen" onclick="schM('aufgabe-info-modal')">&#10005;</button>
+      </div>
+    </div>
+    <p id="aufgabe-info-zustaendig" style="font-size:.82rem;color:var(--grau);margin-bottom:14px;"></p>
+    <textarea id="aufgabe-info-textarea" rows="5"
+      style="width:100%;padding:10px;border:2px solid var(--hell);border-radius:10px;font-family:inherit;font-size:.88rem;resize:vertical;"
+      placeholder="Beschreibung / Hinweise zur Aufgabe …"></textarea>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="setzeAufgabeInfoStandard()">&#8617; Standardtext</button>
+      <button class="btn-modal-secondary" onclick="schM('aufgabe-info-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereAufgabeInfoNotiz()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Fokus-Modal: "Meine Aufgaben" (persönliche Übersicht, per Klick auf Portrait) ═══ -->
+<div class="fokus-overlay" id="fokus-modal" onclick="fokusModalAK(event)">
+  <div class="fokus-box">
+    <div class="fokus-kopf">
+      <h2>&#128100; <span id="fokus-name"></span></h2>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="vorlesenFokusModal()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <img src="symbole/zuhoeren.jpg" alt="Vorlesen" style="width:22px;height:22px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128066;'">
+        </button>
+        <button class="modal-schliessen" onclick="schliesseFokusModal()">&#10005;</button>
+      </div>
+    </div>
+    <p class="fokus-unter">Nur meine Aufgaben &ndash; ohne Termine, Leitung und weitere Angaben.</p>
+    <div id="fokus-inhalt"></div>
+  </div>
+</div>
+
+<!-- Check-Person-Picker Popup (Feature 4 neu) -->
+<div id="check-person-picker" style="display:none;position:fixed;z-index:7500;background:white;border-radius:14px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,.22);width:220px;border:2px solid var(--hell);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <span style="font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--grau);">Person wechseln</span>
+    <button onclick="schliesseCheckPicker()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--grau);line-height:1;">&#10005;</button>
+  </div>
+  <div id="check-person-picker-inhalt"></div>
+</div>
+
+<!-- Banner mit Uhr -->
+<div class="banner">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="kst-banner-wrap">
+      <div class="kst-banner-zeile">
+        <span class="kst-nr-badge" id="kst-anzeige-nr">&#8212;</span>
+        <button class="kst-wechseln-btn" onclick="zeigeKstEingabe()">&#8646; wechseln</button>
+      </div>
+      <h1 id="banner-name" style="font-size:1rem;font-weight:800;color:white;">Gruppen&middot;Checkpoint</h1>
+      <div style="font-size:0.78rem;opacity:.85;color:white;" id="banner-kw"></div>
+    </div>
+    <div class="banner-phase" id="banner-phase">
+      <div class="banner-phase-titel">Aktuell</div>
+      <div class="banner-phase-icon" id="banner-phase-icon">&#8211;</div>
+      <div class="banner-phase-text" id="banner-phase-text">&nbsp;</div>
+    </div>
+  </div>
+  <div class="banner-clock">
+    <div class="clock-time" id="clock-time">00:00</div>
+    <div class="clock-date" id="clock-date">&nbsp;</div>
+  </div>
+  <div class="banner-rechts" style="display:flex;gap:6px;align-items:center;">
+    <button class="btn-banner" onclick="oeffneHilfeModal()" title="Hilfe / Anleitung">&#10067; Hilfe</button>
+    <button class="btn-banner" onclick="importierenKST()" title="Profil importieren (JSON)">&#8679;</button>
+    <button class="btn-banner" onclick="exportierenKST()" title="Profil exportieren (JSON)">&#8681;</button>
+    <button class="btn-banner" onclick="tagesReset(true)">&#8635; Neuer Tag</button>
+  </div>
+</div>
+
+<div class="edit-leiste" id="edit-leiste">
+  <span style="flex:1">&#9998; <strong>Zust&auml;ndigkeiten:</strong> Symbol ziehen (Maus/Touch) &middot; oder Symbol antippen → Person antippen</span>
+  <button class="btn-leiste-dunkel" onclick="resetZuordnung()">&#8617; Zur&uuml;cksetzen</button>
+</div>
+
+<!-- ═══ Modals ═══ -->
+<!-- Namen -->
+<div class="modal-overlay" id="namen-modal" onclick="modalAK(event,'namen-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#128100; Namen bearbeiten</h2><button class="modal-schliessen" onclick="schM('namen-modal')">&#10005;</button></div>
+    <div class="namen-modal-controls">
+      <button class="btn-alpha-sort" onclick="sortNamenAlpha()">A&#8211;Z sortieren</button>
+      <span style="font-size:.72rem;color:var(--grau)">&#8660; verschiebbar &middot; &#10005; l&ouml;schen</span>
+    </div>
+    <div class="namen-sort-liste" id="namen-felder"></div>
+    <button class="namen-add-btn" onclick="fuegeNamenHinzu()">&#43; Person hinzuf&uuml;gen</button>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schM('namen-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereNamenAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leitung -->
+<div class="modal-overlay" id="leitung-modal" onclick="modalAK(event,'leitung-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#11088; Leitung bearbeiten</h2><button class="modal-schliessen" onclick="schM('leitung-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;">Namen eintragen und markieren, wer aktuell leitet. Bleibt nach &bdquo;Neuer Tag&ldquo; erhalten.</p>
+    <div id="leitung-modal-inhalt"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schM('leitung-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereLeitungAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aufgaben zuweisen -->
+<div class="modal-overlay" id="aufgaben-modal" onclick="modalAK(event,'aufgaben-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#128203; Aufgaben zuweisen</h2><button class="modal-schliessen" onclick="schM('aufgaben-modal')">&#10005;</button></div>
+    <div id="aufgaben-modal-inhalt"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schM('aufgaben-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereAufgabenAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Neuzuweisung (Feature 1) -->
+<div class="modal-overlay" id="neuzuw-modal" onclick="modalAK(event,'neuzuw-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#9888; Aufgabe neu zuweisen</h2><button class="modal-schliessen" onclick="schM('neuzuw-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">Diese Pflichtaufgabe ist noch aktiv. Bitte w&auml;hlen:</p>
+    <div id="neuzuw-inhalt"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schM('neuzuw-modal')">Sp&auml;ter entscheiden</button>
+      <button class="btn-modal-primary" onclick="speichereNeuzuweisungAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkliste anpassen -->
+<div class="modal-overlay" id="checkliste-modal" onclick="modalAK(event,'checkliste-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#9989; Tages-Checkliste anpassen</h2><button class="modal-schliessen" onclick="schM('checkliste-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:12px;">Aufgaben antippen zum Ein-/Ausblenden. <strong>Kontrolle Checkpoint</strong> ist immer aktiv.</p>
+    <div class="check-modal-liste" id="check-modal-liste"></div>
+    <div id="check-block-warn-container"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="resetAktiveChecks()">&#8617; Alle aktivieren</button>
+      <button class="btn-modal-secondary" onclick="schM('checkliste-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="versucheChecklisteSpeichern()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vertretung (Abwesenheit) -->
+<div class="modal-overlay" id="vertretung-modal" onclick="modalAK(event,'vertretung-modal')">
+  <div class="modal-box">
+    <div class="modal-kopf"><h2>&#9888; Aufgaben vertreten</h2><button class="modal-schliessen" onclick="schM('vertretung-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="vert-beschreibung"></p>
+    <div id="vert-inhalt"></div>
+    <div class="modal-btns">
+      <button class="btn-modal-secondary" onclick="schM('vertretung-modal')">Sp&auml;ter entscheiden</button>
+      <button class="btn-modal-primary" onclick="speichereVertretungAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wann-Modal (Feature 7) -->
+<div class="modal-overlay" id="wann-modal" onclick="modalAK(event,'wann-modal')">
+  <div class="modal-box" style="width:min(420px,96vw)">
+    <div class="modal-kopf"><h2>&#9200; Zeitangabe bearbeiten</h2><button class="modal-schliessen" onclick="schM('wann-modal')">&#10005;</button></div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="wann-modal-titel"></p>
+    <div class="wann-tage-grid" id="wann-tage"></div>
+    <div class="wann-uhrzeit-wrap">
+      <label style="font-size:.78rem;font-weight:800;">Uhrzeit:</label>
+      <input type="time" class="wann-uhrzeit-input" id="wann-uhrzeit">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="loescheWann()">&#8617; Zeitangabe l&ouml;schen</button>
+      <button class="btn-modal-secondary" onclick="schM('wann-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereWannAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Termin Datum/Uhrzeit Modal (Bug1) ═══ -->
+<div class="modal-overlay" id="termin-dt-modal" onclick="modalAK(event,'termin-dt-modal')">
+  <div class="modal-box" style="width:min(360px,94vw)">
+    <div class="modal-kopf"><h2>&#128197; Termin einstellen</h2><button class="modal-schliessen" onclick="schM('termin-dt-modal')">&#10005;</button></div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:.78rem;font-weight:800;display:block;margin-bottom:5px;">Datum:</label>
+      <input type="date" id="termin-dt-datum" class="wann-uhrzeit-input" style="width:100%;">
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;margin-bottom:12px;cursor:pointer;">
+      <input type="checkbox" id="termin-dt-hatzeit" onchange="toggleTerminDtUhrzeit()" style="width:18px;height:18px;">
+      Uhrzeit angeben <span style="color:var(--grau);font-weight:500;">(sonst ganzt&auml;gig)</span>
+    </label>
+    <div class="wann-uhrzeit-wrap" id="termin-dt-uhrzeit-wrap" style="display:none;">
+      <label style="font-size:.78rem;font-weight:800;">Uhrzeit:</label>
+      <input type="time" id="termin-dt-uhrzeit" class="wann-uhrzeit-input">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="loescheTerminDt()">&#8617; L&ouml;schen</button>
+      <button class="btn-modal-secondary" onclick="schM('termin-dt-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereTerminDtAusModal()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Hilfe-Modal (Anleitung) ═══ -->
+<div class="modal-overlay" id="hilfe-modal" onclick="modalAK(event,'hilfe-modal')">
+  <div class="modal-box" style="width:min(560px,96vw)">
+    <div class="modal-kopf"><h2>&#10067; Hilfe &amp; Anleitung</h2><button class="modal-schliessen" onclick="schM('hilfe-modal')">&#10005;</button></div>
+    <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
+    <div id="hilfe-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ Impressum-Modal ═══ -->
+<div class="modal-overlay" id="impressum-modal" onclick="modalAK(event,'impressum-modal')">
+  <div class="modal-box" style="width:min(560px,96vw)">
+    <div class="modal-kopf"><h2>&#128196; Impressum</h2><button class="modal-schliessen" onclick="schM('impressum-modal')">&#10005;</button></div>
+    <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
+    <div id="impressum-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ Datenschutz-Modal ═══ -->
+<div class="modal-overlay" id="datenschutz-modal" onclick="modalAK(event,'datenschutz-modal')">
+  <div class="modal-box" style="width:min(560px,96vw)">
+    <div class="modal-kopf"><h2>&#128274; Datenschutz</h2><button class="modal-schliessen" onclick="schM('datenschutz-modal')">&#10005;</button></div>
+    <p style="font-size:.78rem;color:var(--grau);margin-bottom:8px;">Auf ein Kapitel tippen, um es auf- oder zuzuklappen.</p>
+    <div id="datenschutz-modal-body" style="max-height:64vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ Freitags-Erinnerung: Export-Modal ═══ -->
+<div class="modal-overlay" id="export-erinnerung-modal">
+  <div class="modal-box" style="width:min(420px,94vw);text-align:center;">
+    <div class="modal-kopf" style="justify-content:center;"><h2>&#128190; Heute ist Freitag</h2></div>
+    <p style="font-size:1rem;line-height:1.6;margin:6px 0 18px;">
+      Bitte denk daran, die Daten dieser Gruppe zu <b>exportieren</b> (sichern).<br>
+      So gehen keine Eingaben verloren, falls der Browser-Speicher einmal gel&ouml;scht wird.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-modal-primary" style="background:var(--gruen);" onclick="exportierenKST();schliesseExportErinnerung(true);">&#128190; Jetzt exportieren</button>
+      <button class="btn-modal-secondary" onclick="schliesseExportErinnerung(true);">Heute nicht mehr erinnern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Arbeit-Notiz Modal ═══ -->
+<div class="modal-overlay" id="arbeit-modal" onclick="modalAK(event,'arbeit-modal')">
+  <div class="modal-box" style="width:min(460px,96vw)">
+    <div class="modal-kopf">
+      <h2>&#128188; Arbeitsinhalt</h2>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="vorlesenArbeitModal()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <img src="symbole/zuhoeren.jpg" alt="Vorlesen" style="width:20px;height:20px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128066;'">
+        </button>
+        <button class="modal-schliessen" onclick="schM('arbeit-modal')">&#10005;</button>
+      </div>
+    </div>
+    <p style="font-size:.82rem;color:var(--grau);margin-bottom:14px;" id="arbeit-modal-name"></p>
+    <div class="vert-dauer-wrap" style="margin-bottom:12px;">
+      <label class="vert-dauer-label" id="arbeit-stufe-0-label"><input type="radio" name="arbeit-stufe" value="0" onchange="arbeitStufeCh(this)"> 0 (fo)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-1-label"><input type="radio" name="arbeit-stufe" value="1" onchange="arbeitStufeCh(this)"> 1 (tto)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-2-label"><input type="radio" name="arbeit-stufe" value="2" onchange="arbeitStufeCh(this)"> 2 (apo)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-3-label"><input type="radio" name="arbeit-stufe" value="3" onchange="arbeitStufeCh(this)"> 3 (bfo)</label>
+      <label class="vert-dauer-label" id="arbeit-stufe-4-label"><input type="radio" name="arbeit-stufe" value="4" onchange="arbeitStufeCh(this)"> 4 (bbo)</label>
+    </div>
+    <!-- Auslastungs-Auswahl – gleiche Struktur wie Dauer-Radios oben -->
+    <input type="hidden" id="arbeit-auslastung-val" value="">
+    <div class="vert-dauer-wrap" style="margin-bottom:12px;">
+      <label class="vert-dauer-label" id="auslast-gut-label">
+        <input type="radio" name="arbeit-auslastung" value="gut" onchange="auslastCh(this)">
+        &#10003; Gut ausgelastet
+      </label>
+      <label class="vert-dauer-label" id="auslast-bald-label">
+        <input type="radio" name="arbeit-auslastung" value="bald" onchange="auslastCh(this)">
+        &#9888; Läuft bald aus
+      </label>
+      <label class="vert-dauer-label" id="auslast-keine-label">
+        <input type="radio" name="arbeit-auslastung" value="keine" onchange="auslastCh(this)">
+        &#10007; Keine Arbeit
+      </label>
+    </div>
+    <textarea id="arbeit-textarea" rows="5"
+      style="width:100%;padding:10px;border:2px solid var(--hell);border-radius:10px;font-family:inherit;font-size:.88rem;resize:vertical;"
+      placeholder="Arbeitsinhalt für diese Person eintragen …"></textarea>
+    <div class="modal-btns">
+      <button class="btn-modal-reset" onclick="loescheArbeitNotiz()">&#8617; Löschen</button>
+      <button class="btn-modal-secondary" onclick="schM('arbeit-modal')">Abbrechen</button>
+      <button class="btn-modal-primary" onclick="speichereArbeitNotiz()">&#128190; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Grid ═══ -->
+<div class="grid">
+  <div class="col-wrap">
+    <div class="col-header" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:stretch;height:100%;">
+        <!-- Breite Portrait(80)+Name(148) = 228px -->
+        <button class="col-btn" onclick="oeffneNamenModal()" style="width:228px;flex-shrink:0;justify-content:flex-start;padding-left:10px;border-radius:0;">&#128100; Namen</button>
+        <!-- Zuständigkeiten (inkl. Arbeit-Icon ganz links) -->
+        <button class="col-btn" id="btn-edit" onclick="toggleEditModus()" style="flex:1;justify-content:flex-start;padding-left:10px;border-radius:0;">&#9998; Zust&auml;ndigkeiten</button>
+      </div>
+    </div>
+    <div class="namen-tabelle" id="namen-tabelle"></div>
+  </div>
+
+  <div class="col-wrap">
+    <!-- Feature 1+2+4: Leitung- und Termine-Tab entfernt; Anwesenheits-Zählwerk zentriert -->
+    <div class="col-header" style="justify-content:center;padding:0 8px;">
+      <span id="anwesenheit-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;"></span>
+    </div>
+    <div class="mitte">
+      <!-- Feature 1: Klick auf Überschrift öffnet Leitung-Modal -->
+      <div class="info-box">
+        <div class="info-titel" onclick="oeffneLeitungModal()" title="Namen bearbeiten" style="cursor:pointer;">&#11088; Leitung der Gruppe &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9998;</span></div>
+        <div id="leitung-anzeige"></div>
+      </div>
+      <!-- Feature 2: Klick auf "Nächster Termin" öffnet Popup -->
+      <div class="termine-box">
+        <div class="info-titel" onclick="oeffneNaechstenTermin(event)" title="Nächsten Termin anzeigen" style="cursor:pointer;">&#128197; N&auml;chster Termin &nbsp;<span style="font-size:.7rem;opacity:.6;">&#9650;</span></div>
+        <div id="termine-anzeige"></div>
+      </div>
+      <div class="wichtig-box"><div class="info-titel">&#9888;&#65039; Diese Woche wichtig</div><div id="wichtig-anzeige"></div></div>
     </div>
   </div>
 
-  <script>
-  (function () {
+  <div class="col-wrap">
+    <div class="col-header" style="justify-content:space-between;flex-wrap:nowrap;">
+      <button class="col-btn" onclick="oeffneChecklisteModal()">&#9989; Tages-Checkliste</button>
+      <span id="fortschritt-anzeige" style="font-size:.75rem;font-weight:900;font-family:monospace;white-space:nowrap;padding:0 4px;"></span>
+    </div>
+    <div class="check-tabelle" id="check-tabelle"></div>
+  </div>
+</div>
 
-    const CFG = {
-      WORK_START:  8 * 60,
-      WORK_END_N:  15 * 60 + 15,
-      WORK_END_K:  14 * 60 + 45,
-      BREAK1_S:    10 * 60,
-      BREAK1_E:    10 * 60 + 20,
-      BREAK2_S:    12 * 60,
-      BREAK2_E:    13 * 60,
-    };
-
-    const WOCHENTAGE = ['Sonntag','Montag','Dienstag','Mittwoch',
-                        'Donnerstag','Freitag','Samstag'];
-    const MONATE     = ['Januar','Februar','März','April','Mai','Juni',
-                        'Juli','August','September','Oktober','November','Dezember'];
-
-    function pad(n) { return String(n).padStart(2, '0'); }
-
-    function minText(m) {
-      if (m <= 0) return '0 Min.';
-      const h = Math.floor(m / 60), r = m % 60;
-      if (h === 0) return r + ' Min.';
-      if (r === 0) return h + ' Std.';
-      return h + ' Std. ' + r + ' Min.';
-    }
-
-    function minutenBisNaechsteMo8(jetzt) {
-      const tag    = jetzt.getDay();
-      const daysTo = tag === 0 ? 1 : tag === 6 ? 2 : 1;
-      const z      = new Date(jetzt);
-      z.setDate(jetzt.getDate() + daysTo);
-      z.setHours(8, 0, 0, 0);
-      return Math.max(0, Math.floor((z - jetzt) / 60000));
-    }
-
-    function minutenBisNaechsteArbeit(jetzt, tag) {
-      const daysTo = tag === 5 ? 3 : 1;
-      const z      = new Date(jetzt);
-      z.setDate(jetzt.getDate() + daysTo);
-      z.setHours(8, 0, 0, 0);
-      return Math.max(0, Math.floor((z - jetzt) / 60000));
-    }
-
-    function ersterDienstagDerMonats(d) {
-      return d.getDay() === 2 && d.getDate() <= 7;
-    }
-
-    function setArbeit(css, icon, status, countdown, detail) {
-      document.getElementById('zk-arbeit').className        = 'zk-card ' + css;
-      document.getElementById('zk-a-icon').textContent      = icon;
-      document.getElementById('zk-a-status').textContent    = status;
-      document.getElementById('zk-a-countdown').textContent = countdown;
-      document.getElementById('zk-a-detail').textContent    = detail;
-    }
-
-    function setPause(css, icon, status, countdown, detail) {
-      document.getElementById('zk-pause').className         = 'zk-card ' + css;
-      document.getElementById('zk-p-icon').textContent      = icon;
-      document.getElementById('zk-p-status').textContent    = status;
-      document.getElementById('zk-p-countdown').textContent = countdown;
-      document.getElementById('zk-p-detail').textContent    = detail;
-    }
-
-    function update() {
-      const jetzt = new Date();
-      const tag   = jetzt.getDay();
-      const std   = jetzt.getHours();
-      const min   = jetzt.getMinutes();
-      const tm    = std * 60 + min;
-
-      document.getElementById('zk-uhr').textContent =
-        pad(std) + ':' + pad(min);
-      document.getElementById('zk-datum').textContent =
-        WOCHENTAGE[tag] + ', ' + jetzt.getDate() + '. ' +
-        MONATE[jetzt.getMonth()] + ' ' + jetzt.getFullYear();
-
-      const kurzTag  = tag === 5 || ersterDienstagDerMonats(jetzt);
-      const WORK_END = kurzTag ? CFG.WORK_END_K : CFG.WORK_END_N;
-      const feierStr = kurzTag ? '14:45' : '15:15';
-      const istArbeitstag = tag >= 1 && tag <= 5;
-
-      /* WOCHENENDE */
-      if (!istArbeitstag) {
-        const min2 = minutenBisNaechsteMo8(jetzt);
-        setArbeit('zk-grau','🏠','Wochenende','noch ' + minText(min2),
-          'Montag 8:00 Uhr → Arbeitsbeginn');
-        setPause('zk-grau','🌙','Ruhetag','–','Keine Arbeitszeiten heute');
-        return;
-      }
-
-      /* VOR DER ARBEIT */
-      if (tm < CFG.WORK_START) {
-        const min2 = CFG.WORK_START - tm;
-        setArbeit('zk-blau','🌅','Vor der Arbeit','noch ' + minText(min2),
-          'Arbeit beginnt um 8:00 Uhr');
-        setPause('zk-grau','☕','Noch keine Pause','–',
-          'Erste Pause um 10:00 Uhr');
-        return;
-      }
-
-      /* FREIZEIT */
-      if (tm >= WORK_END) {
-        const min2      = minutenBisNaechsteArbeit(jetzt, tag);
-        const naechster = tag === 5 ? 'Montag' : 'Morgen';
-        setArbeit('zk-rot','🏠','Freizeit',
-          'seit ' + feierStr + ' Uhr','Guten Feierabend! 🎉');
-        setPause('zk-gruen','🌅','Nächste Arbeitszeit',
-          'in ' + minText(min2), naechster + ' um 8:00 Uhr');
-        return;
-      }
-
-      /* PAUSE 1 */
-      if (tm >= CFG.BREAK1_S && tm < CFG.BREAK1_E) {
-        const min2 = CFG.BREAK1_E - tm;
-        setArbeit('zk-orange','☕','Pause läuft',
-          'noch ' + minText(min2),'Ende um 10:20 Uhr');
-        setPause('zk-gruen','✅','Arbeitszeit',
-          'ab 10:20 Uhr','Weiterarbeit in ' + minText(min2));
-        return;
-      }
-
-      /* MITTAGSPAUSE */
-      if (tm >= CFG.BREAK2_S && tm < CFG.BREAK2_E) {
-        const min2 = CFG.BREAK2_E - tm;
-        setArbeit('zk-orange','🍽️','Pause läuft',
-          'noch ' + minText(min2),'Ende um 13:00 Uhr');
-        setPause('zk-gruen','✅','Arbeitszeit',
-          'ab 13:00 Uhr','Weiterarbeit in ' + minText(min2));
-        return;
-      }
-
-      /* NORMALE ARBEITSZEIT */
-      const minBisFeier = WORK_END - tm;
-
-      if (tm < CFG.BREAK1_S) {
-        const min2 = CFG.BREAK1_S - tm;
-        setArbeit('zk-gruen','✅','Arbeitszeit',
-          'noch ' + minText(minBisFeier),'Feierabend um ' + feierStr + ' Uhr');
-        setPause('zk-orange','☕','Nächste Pause um 10:00',
-          'in ' + minText(min2),'Dauer: 20 Min. (bis 10:20 Uhr)');
-        return;
-      }
-
-      if (tm < CFG.BREAK2_S) {
-        const min2 = CFG.BREAK2_S - tm;
-        setArbeit('zk-gruen','✅','Arbeitszeit',
-          'noch ' + minText(minBisFeier),'Feierabend um ' + feierStr + ' Uhr');
-        setPause('zk-orange','🍽️','Mittagspause um 12:00',
-          'in ' + minText(min2),'Dauer: 1 Std. (bis 13:00 Uhr)');
-        return;
-      }
-
-      /* LETZTE ARBEITSPHASE */
-      setArbeit('zk-gruen','✅','Arbeitszeit',
-        'noch ' + minText(minBisFeier),'Feierabend um ' + feierStr + ' Uhr');
-      setPause('zk-rot','🏠','Freizeit',
-        'in ' + minText(minBisFeier),'ab ' + feierStr + ' Uhr');
-    }
-
-    update();
-    setInterval(update, 1000);
-
-  })();
-  </script>
-
-
-  <!-- ══ NAVIGATIONS-KACHELN ══ -->
-  <div class="card-grid">
-
-    <a href="nachrichten.html" class="card card-color-9">
-      <img src="Neues.jpg" alt="" class="card-img">
-      <h2>Neuigkeiten bei Studjo</h2>
-    </a>
-
-    <a href="termine.html" class="card card-color-10">
-      <img src="termine.jpg" alt="" class="card-img">
-      <h2>Termine</h2>
-    </a>
-
-    <a href="speiseplan.html" class="card card-color-3">
-      <img src="Essen.jpg" alt="" class="card-img">
-      <h2>Speiseplan</h2>
-    </a>
-
-    <a href="aba.html" class="card card-color-16">
-      <img src="Aba.jpg" alt="" class="card-img">
-      <h2>Arbeitsbegleitende Angebote</h2>
-    </a>
-
-    <a href="werkstattordnung.html" class="card card-color-1">
-      <img src="Regeln.jpg" alt="" class="card-img">
-      <h2>Werkstattordnung und Regeln</h2>
-    </a>
-
-    <a href="verhaltenbeikonflikten.html" class="card card-color-4">
-      <img src="Gewalt.jpg" alt="" class="card-img">
-      <h2>Gewaltschutz</h2>
-    </a>
-
-    <a href="arbeitssicherheit.html" class="card card-color-10">
-      <img src="Arbeitssicherheit.jpg" alt="" class="card-img">
-      <h2>Arbeitssicherheit</h2>
-    </a>
-
-    <a href="wrfb.html" class="card card-color-6">
-      <img src="Werkstattrat.jpg" alt="" class="card-img">
-      <h2>Werkstattrat und Frauenbeauftragte</h2>
-    </a>
-
-    <a href="infofilme.html" class="card card-color-7">
-      <img src="Filme.jpg" alt="" class="card-img">
-      <h2>Info-Filme</h2>
-    </a>
-
-    <a href="nachrichten-allgemein.html" class="card card-color-2">
-      <img src="news.jpg" alt="" class="card-img">
-      <h2>Allgemeine Nachrichten</h2>
-    </a>
-
-    <a href="wetter.html" class="card card-color-9">
-      <img src="wetter.jpg" alt="" class="card-img">
-      <h2>Wetter</h2>
-    </a>
-
-    <a href="opnv.html" class="card card-color-8">
-      <img src="OPNV.jpg" alt="" class="card-img">
-      <h2>Adressen und Fahrpläne</h2>
-    </a>
-
-    <a href="losung.html" class="card card-color-14">
-      <img src="losung.jpg" alt="" class="card-img">
-      <h2>Losung für heute</h2>
-    </a>
-
-    <a href="wochenmotto.html" class="card card-color-11">
-  <img src="wochenmotto.jpg" alt="" class="card-img">
-  <h2>Wochenmotto</h2>
-</a>
-
-    <a href="faq.html" class="card card-color-3">
-      <img src="faq.jpg" alt="" class="card-img">
-      <h2>Häufige Fragen</h2>
-    </a>
-
-  </div><!-- Ende .card-grid -->
-
-</main>
-
-<!-- ══ FOOTER ══ -->
-<footer style="
-  text-align: center;
-  padding: 10px 16px;
-  background: #b61f29;
-  color: #ffffff;
-  font-size: 0.85rem;
-  line-height: 1.6;
-">
-  © 2026 <strong>Studjo | Arbeit und Qualifizierung</strong>
-   ·  Evangelisches Johanneswerk gGmbH
-  <br>
-  <a href="index.html"
-     style="color:rgba(255,255,255,.85);text-decoration:none;margin:0 6px">
-    Startseite
-  </a>
-   | 
-  <a href="uebersicht.html"
-     style="color:rgba(255,255,255,.85);text-decoration:none;margin:0 6px">
-    Übersicht
-  </a>
-   | 
-  <a href="impressum.html"
-     style="color:rgba(255,255,255,.85);text-decoration:none;margin:0 6px">
-    Impressum
-  </a>
-   | 
-  <a href="datenschutz.html"
-     style="color:rgba(255,255,255,.85);text-decoration:none;margin:0 6px">
-    Datenschutz
-  </a>
+<footer>
+  &copy; <span id="jahr"></span> <b>Studjo | Arbeit und Qualifizierung</b> | Gruppen&middot;Checkpoint
+  &nbsp;&middot;&nbsp;
+  <a href="#" class="footer-link" onclick="oeffneImpressumModal();return false;">Impressum</a>
+  &nbsp;|&nbsp;
+  <a href="#" class="footer-link" onclick="oeffneDatenschutzModal();return false;">Datenschutz</a>
 </footer>
-<link rel="stylesheet" href="a11y.css">
- <script src="a11y.js"></script>
+
+<!-- ── Personen-Profil Modal ── -->
+<div class="modal-overlay" id="profil-modal" onclick="if(event.target===this)schM('profil-modal')">
+  <div class="modal-box" style="max-width:500px;">
+    <div id="profil-modal-body"></div>
+  </div>
+</div>
+
+<!-- ── Abwesenheits-Modal (Feature 2) ── -->
+<div class="modal-overlay" id="abwesend-modal" onclick="if(event.target===this)schM('abwesend-modal')">
+  <div class="modal-box" style="max-width:360px;">
+    <div id="abwesend-modal-body"></div>
+  </div>
+</div>
+
+<!-- ── Termin-Popup (Feature 4) ── -->
+<div id="termin-naechster-popup" style="display:none;position:fixed;z-index:7600;background:white;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);width:286px;border:2px solid var(--hell);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <strong style="font-size:.88rem;">&#128197; N&auml;chster Termin</strong>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button onclick="vorlesenTerminPopup()" title="Vorlesen" style="background:var(--rot);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+        <img src="symbole/zuhoeren.jpg" alt="Vorlesen" style="width:20px;height:20px;border-radius:50%;object-fit:contain;" onerror="this.parentElement.textContent='&#128065;'">
+      </button>
+      <button onclick="schliesseTerminPopup()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--grau);line-height:1;">&#10005;</button>
+    </div>
+  </div>
+  <div id="termin-popup-inhalt"></div>
+</div>
+
+<!-- ── a11y-Leiste (muss VOR app.js stehen, damit DOM-Elemente bekannt sind) ── -->
+<div class="a11y-bar" id="a11y-bar" role="toolbar" aria-label="Barrierefreiheit">
+  <button class="a11y-btn" id="a11y-groesser" title="Schrift größer" aria-label="Schrift vergrößern">A+</button>
+  <button class="a11y-btn" id="a11y-kleiner"  title="Schrift kleiner" aria-label="Schrift verkleinern">A−</button>
+  <button class="a11y-btn" id="a11y-kontrast" title="Kontrast umschalten" aria-label="Kontrast">◑</button>
+  <button class="a11y-btn" id="a11y-vorlesen" title="Vorlesen – Bereich anklicken" aria-label="Vorlesen">
+    <img src="symbole/zuhoeren.jpg" alt="Vorlesen" onerror="this.style.display='none';this.parentElement.textContent='👂'">
+  </button>
+</div>
+<button id="btn-a11y-help" title="Bedienungshilfen" aria-label="Bedienungshilfen öffnen" aria-expanded="false">H</button>
+<div class="a11y-toast" id="a11y-toast"></div>
+
+<script src="js/sortable.min.js"></script>
+<!-- Ladereihenfolge ist wichtig: storage → render → modal → checkliste → app (zuletzt) -->
+<script src="js/storage.js"></script>
+<script src="js/render.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/checkliste.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
